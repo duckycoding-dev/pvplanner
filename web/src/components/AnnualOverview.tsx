@@ -1,6 +1,7 @@
 import { Bar, BarChart, CartesianGrid, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import type { Viz } from "../types.ts";
 import { fmt, pct } from "../lib/format.ts";
+import { useLegendToggle } from "../lib/useLegendToggle.ts";
 
 function KpiCard({ label, senza, con, highlight }: { label: string; senza: string; con: string; highlight?: string }) {
   return (
@@ -20,6 +21,7 @@ function KpiCard({ label, senza, con, highlight }: { label: string; senza: strin
 }
 
 export function AnnualOverview({ viz }: { viz: Viz }) {
+  const { onClick, isHidden } = useLegendToggle();
   const p = viz.annual.production;
   const nb = viz.annual.noBattery;
   const wb = viz.annual.withBattery;
@@ -72,9 +74,9 @@ export function AnnualOverview({ viz }: { viz: Viz }) {
             <XAxis dataKey="metric" />
             <YAxis label={{ value: "kWh", angle: -90, position: "insideLeft" }} />
             <Tooltip formatter={(v: number) => `${fmt(v)} kWh`} />
-            <Legend />
-            <Bar dataKey="senza" name="senza batteria" fill="#94a3b8" />
-            <Bar dataKey="con" name="con batteria" fill="#3b82f6" />
+            <Legend onClick={onClick} wrapperStyle={{ cursor: "pointer" }} />
+            <Bar dataKey="senza" name="senza batteria" fill="#94a3b8" hide={isHidden("senza")} />
+            <Bar dataKey="con" name="con batteria" fill="#3b82f6" hide={isHidden("con")} />
           </BarChart>
         </ResponsiveContainer>
       </section>

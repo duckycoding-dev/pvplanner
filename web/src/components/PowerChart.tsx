@@ -12,6 +12,7 @@ import {
 } from "recharts";
 import type { DayPoint } from "../lib/sliceDay.ts";
 import type { Scenario } from "../types.ts";
+import { useLegendToggle } from "../lib/useLegendToggle.ts";
 
 interface Props {
   data: DayPoint[];
@@ -20,6 +21,7 @@ interface Props {
 }
 
 export function PowerChart({ data, scenario, acCapKw }: Props) {
+  const { onClick, isHidden } = useLegendToggle();
   const showWb = scenario === "con" || scenario === "entrambi";
   const showNb = scenario === "senza" || scenario === "entrambi";
 
@@ -30,7 +32,7 @@ export function PowerChart({ data, scenario, acCapKw }: Props) {
         <XAxis dataKey="hour" tickFormatter={(h: number) => String(h)} />
         <YAxis label={{ value: "kW", angle: -90, position: "insideLeft" }} />
         <Tooltip formatter={(v: number) => v.toFixed(2)} labelFormatter={(h) => `ore ${h}`} />
-        <Legend />
+        <Legend onClick={onClick} wrapperStyle={{ cursor: "pointer" }} />
 
         {/* Coverage: PV (+battery) to load — gap under the load line is grid import */}
         {showWb && (
@@ -42,6 +44,7 @@ export function PowerChart({ data, scenario, acCapKw }: Props) {
             stroke="#3b82f6"
             fillOpacity={0.45}
             isAnimationActive={false}
+            hide={isHidden("wbSelf")}
           />
         )}
         {showNb &&
@@ -54,6 +57,7 @@ export function PowerChart({ data, scenario, acCapKw }: Props) {
               strokeDasharray="4 2"
               dot={false}
               isAnimationActive={false}
+              hide={isHidden("nbSelf")}
             />
           ) : (
             <Area
@@ -64,6 +68,7 @@ export function PowerChart({ data, scenario, acCapKw }: Props) {
               stroke="#3b82f6"
               fillOpacity={0.45}
               isAnimationActive={false}
+              hide={isHidden("nbSelf")}
             />
           ))}
 
@@ -75,6 +80,7 @@ export function PowerChart({ data, scenario, acCapKw }: Props) {
           strokeWidth={2}
           dot={false}
           isAnimationActive={false}
+          hide={isHidden("prodPractical")}
         />
         <Line
           type="monotone"
@@ -84,6 +90,7 @@ export function PowerChart({ data, scenario, acCapKw }: Props) {
           strokeDasharray="5 3"
           dot={false}
           isAnimationActive={false}
+          hide={isHidden("prodTheoretical")}
         />
         <Line
           type="monotone"
@@ -93,6 +100,7 @@ export function PowerChart({ data, scenario, acCapKw }: Props) {
           strokeWidth={2}
           dot={false}
           isAnimationActive={false}
+          hide={isHidden("load")}
         />
         <ReferenceLine
           y={acCapKw}
