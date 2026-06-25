@@ -38,3 +38,15 @@ riassunto, stato, legenda simboli/unità, documenti collegati).
 - [`02-modello-produzione.md`](02-modello-produzione.md) — combine falde + clipping
 - [`03-simulazione-batteria.md`](03-simulazione-batteria.md) — bilancio orario + dispatch + confronto
 - _(prossimi)_ `04-economia.md`, `05-consumi.md`
+
+## Esecuzione
+
+```sh
+bun run download   # (opzionale) valida/riscarica i dati PVGIS
+bun run analysis   # calcola tutto → scrive output/*.{json,csv} e web/viz.json
+bun run web        # dashboard su http://localhost:5180  (richiede prima `analysis`)
+bun test           # suite di test
+```
+
+Dashboard (SPA Bun+React+Recharts): 3 viste — panoramica annuale, mensile, giorno-per-giorno —
+che leggono `web/viz.json`. Spec di design: `docs/specs/2026-06-25-visualizzazione-dashboard-design.md`.

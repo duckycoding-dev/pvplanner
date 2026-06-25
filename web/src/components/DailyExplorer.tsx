@@ -1,0 +1,102 @@
+import { type ChangeEvent, useMemo, useState } from "react";
+import type { Scenario, Viz } from "../types.ts";
+import { type DayPoint, dayCount, sliceDay } from "../lib/sliceDay.ts";
+import { quickPickDays } from "../lib/quickPickDays.ts";
+import { dayIndexToDateInput, fmt, formatDayLabel } from "../lib/format.ts";
+import { PowerChart } from "./PowerChart.tsx";
+import { BatteryChart } from "./BatteryChart.tsx";
+
+const SCENARIOS: { key: Scenario; label: string }[] = [
+  { key: "con", label: "con batteria" },
+  { key: "senza", label: "senza batteria" },
+  { key: "entrambi", label: "entrambi" },
+];
+
+const DAY_MS = 86_400_000;
+
+export function DailyExplorer({ viz }: { viz: Viz }) {
+  const h = viz.hourly;
+  const total = dayCount(h);
+  const picks = useMemo(() => quickPickDays(h), [h]);
+  const [dayIndex, setDayIndex] = useState<number>(picks.maxClipping);
+  const [scenario, setScenario] = useState<Scenario>("con");
+
+  const pts = useMemo(() => sliceDay(h, dayIndex), [h, dayIndex]);
+  const firstTs = h.timestampsUtc[0] ?? 0;
+  const ts = h.timestampsUtc[dayIndex * 24] ?? firstTs;
+  const lastTs = h.timestampsUtc[(total - 1) * 24] ?? firstTs;
+
+  const onDate = (e: ChangeEvent<HTMLInputElement>) => {
+    const ms = Date.parse(`${e.target.value}T00:00:00Z`);
+    if (!Number.isNaN(ms)) {
+      const idx = Math.round((ms - firstTs) / DAY_MS);
+      if (idx >= 0 && idx < total) setDayIndex(idx);
+    }
+  };
+
+  const sum = (f: (p: DayPoint) => number): number => pts.reduce((s, p) => s + f(p), 0);
+  const prod = sum((p) => p.prodPractical);
+  const cons = sum((p) => p.load);
+  const clip = sum((p) => p.clipping);
+  const isNb = scenario === "senza";
+  const self = isNb ? sum((p) => p.nbSelf) : sum((p) => p.wbSelf);
+  const imp = isNb ? sum((p) => p.nbImport) : sum((p) => p.wbImport);
+  const exp = isNb ? sum((p) => p.nbExport) : sum((p) => p.wbExport);
+  const cycles = sum((p) => p.discharge) / (viz.meta.batteryUsableKwh || 1);
+
+  return (
+    <div>
+      <div className="day-toolbar">
+        <div className="day-nav">
+          <button onClick={() => setDayIndex(Math.max(0, dayIndex - 1))}>‹</button>
+          <input
+            type="date"
+            value={dayIndexToDateInput(ts)}
+            min={dayIndexToDateInput(firstTs)}
+            max={dayIndexToDateInput(lastTs)}
+            onChange={onDate}
+          />
+          <button onClick={() => setDayIndex(Math.min(total - 1, dayIndex + 1))}>›</button>
+          <strong className="day-label">{formatDayLabel(ts)}</strong>
+        </div>
+        <div className="picks">
+          <button onClick={() => setDayIndex(picks.maxClipping)}>max clipping</button>
+          <button onClick={() => setDayIndex(picks.maxProduction)}>max produzione</button>
+          <button onClick={() => setDayIndex(picks.minProduction)}>min produzione</button>
+        </div>
+        <div className="scenario">
+          {SCENARIOS.map((s) => (
+            <button key={s.key} className={scenario === s.key ? "active" : ""} onClick={() => setScenario(s.key)}>
+              {s.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div className="day-summary">
+        <span>produzione <b>{fmt(prod, 1)}</b></span>
+        <span>consumo <b>{fmt(cons, 1)}</b></span>
+        <span>autoconsumo <b>{fmt(self, 1)}</b></span>
+        <span>import <b>{fmt(imp, 1)}</b></span>
+        <span>export <b>{fmt(exp, 1)}</b></span>
+        <span>clipping <b>{fmt(clip, 1)}</b></span>
+        {!isNb && <span>cicli <b>{cycles.toFixed(2)}</b></span>}
+        <span className="unit">kWh</span>
+      </div>
+
+      <div className="chart-card">
+        <h3>Potenza oraria (kW)</h3>
+        <PowerChart data={pts} scenario={scenario} acCapKw={viz.meta.acCapKw} />
+      </div>
+
+      {!isNb ? (
+        <div className="chart-card">
+          <h3>Stato di carica batteria (kWh)</h3>
+          <BatteryChart data={pts} usableKwh={viz.meta.batteryUsableKwh} />
+        </div>
+      ) : (
+        <p className="note">Scenario «senza batteria»: nessun accumulo.</p>
+      )}
+    </div>
+  );
+}

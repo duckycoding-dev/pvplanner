@@ -1,4 +1,5 @@
 node_modules/
 output/
+web/viz.json
 *.log
 .DS_Store

@@ -4,6 +4,7 @@ import { analyzeProduction } from "../src/app/analyzeProduction.ts";
 import { analyzeSimulation } from "../src/app/analyzeSimulation.ts";
 import { writeProductionOutputs } from "../src/export/writeProductionOutputs.ts";
 import { writeSimulationOutputs } from "../src/export/writeSimulationOutputs.ts";
+import { writeVizJson } from "../src/export/writeVizJson.ts";
 
 const cfg = await loadConfig();
 const analysis = await analyzeProduction(cfg);
@@ -43,6 +44,7 @@ console.log(`\n  Battery effect: +${cmp.delta.selfSufficiencyPoints.toFixed(1)} 
   `−${cmp.delta.importReductionKwh.toFixed(0)} kWh imported/yr (SoC converged in ${cmp.withBattery.convergencePasses} pass).`);
 
 const writtenSim = await writeSimulationOutputs(sim, analysis);
+const vizPath = await writeVizJson(analysis, sim);
 
 console.log("\nWrote:");
-for (const p of [...written, ...writtenSim]) console.log(`  ${p}`);
+for (const p of [...written, ...writtenSim, vizPath]) console.log(`  ${p}`);
