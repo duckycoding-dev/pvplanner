@@ -1,7 +1,9 @@
 #!/usr/bin/env bun
 import { loadConfig } from "../src/config/loadConfig.ts";
 import { analyzeProduction } from "../src/app/analyzeProduction.ts";
+import { analyzeSimulation } from "../src/app/analyzeSimulation.ts";
 import { writeProductionOutputs } from "../src/export/writeProductionOutputs.ts";
+import { writeSimulationOutputs } from "../src/export/writeSimulationOutputs.ts";
 
 const cfg = await loadConfig();
 const analysis = await analyzeProduction(cfg);
@@ -23,5 +25,24 @@ console.log(`  Peak combined        : ${a.peakKw.toFixed(2)} kW`);
 console.log("");
 
 const written = await writeProductionOutputs(analysis);
-console.log("Wrote:");
-for (const p of written) console.log(`  ${p}`);
+
+// --- Battery simulation (consumption + with/without comparison) ---
+const sim = await analyzeSimulation(cfg, analysis);
+const cmp = sim.comparison;
+const wo = cmp.withoutBattery.metrics;
+const wb = cmp.withBattery.metrics;
+
+console.log(`\nBattery simulation — load: ${sim.consumption.annualKwh.toFixed(0)} kWh (${sim.consumption.source})\n`);
+console.log("  metric                  no-battery   with-battery");
+console.log(`  self-consumption rate   ${(wo.selfConsumptionRate * 100).toFixed(1).padStart(8)}%   ${(wb.selfConsumptionRate * 100).toFixed(1).padStart(9)}%`);
+console.log(`  self-sufficiency        ${(wo.selfSufficiency * 100).toFixed(1).padStart(8)}%   ${(wb.selfSufficiency * 100).toFixed(1).padStart(9)}%`);
+console.log(`  import from grid (kWh)   ${wo.importKwh.toFixed(0).padStart(8)}    ${wb.importKwh.toFixed(0).padStart(8)}`);
+console.log(`  export to grid (kWh)     ${wo.exportKwh.toFixed(0).padStart(8)}    ${wb.exportKwh.toFixed(0).padStart(8)}`);
+console.log(`  battery cycles/yr        ${"-".padStart(8)}    ${(wb.battery?.equivalentCycles ?? 0).toFixed(0).padStart(8)}`);
+console.log(`\n  Battery effect: +${cmp.delta.selfSufficiencyPoints.toFixed(1)} pts self-sufficiency, ` +
+  `−${cmp.delta.importReductionKwh.toFixed(0)} kWh imported/yr (SoC converged in ${cmp.withBattery.convergencePasses} pass).`);
+
+const writtenSim = await writeSimulationOutputs(sim, analysis);
+
+console.log("\nWrote:");
+for (const p of [...written, ...writtenSim]) console.log(`  ${p}`);

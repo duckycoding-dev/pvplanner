@@ -35,5 +35,6 @@ riassunto, stato, legenda simboli/unità, documenti collegati).
 ## Indice documenti
 
 - [`01-downloader-pvgis.md`](01-downloader-pvgis.md) — come si scaricano e validano i dati PVGIS
-- _(prossimi)_ `02-modello-produzione.md`, `03-simulazione-batteria.md`, `04-economia.md`,
-  `05-consumi.md`
+- [`02-modello-produzione.md`](02-modello-produzione.md) — combine falde + clipping
+- [`03-simulazione-batteria.md`](03-simulazione-batteria.md) — bilancio orario + dispatch + confronto
+- _(prossimi)_ `04-economia.md`, `05-consumi.md`

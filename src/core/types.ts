@@ -8,6 +8,7 @@ export interface HourlySeries {
   timestampsUtc: readonly number[]; // epoch ms (minute :10 dropped)
   months: readonly number[]; // 1..12 per row (from UTC timestamp)
   productionKwh: readonly number[]; // P / 1000
+  t2m: readonly number[]; // ambient temperature [°C] (for synthetic load shaping)
   reconstructedCount: number; // rows with Int === 1
 }
 
@@ -62,5 +63,82 @@ export interface ProductionResult {
   acCapKw: number;
   falde: FaldaProduction[];
   combined: CombinedProduction;
+  notes: string[];
+}
+
+// ---------------------------------------------------------------------------
+// Consumption + battery simulation (Step 3)
+// ---------------------------------------------------------------------------
+
+export interface ConsumptionSeries {
+  loadKwh: readonly number[];
+  months: readonly number[];
+  annualKwh: number;
+  source: string;
+  notes: string[];
+}
+
+export interface BatteryConfig {
+  usableKwh: number;
+  chargeEff: number; // √(roundTrip)
+  dischargeEff: number; // √(roundTrip)
+  pMaxKw: number; // charge/discharge power cap (= kWh/h)
+  initialSoCFraction: number; // 0..1
+  socConvergence: boolean;
+}
+
+export interface ScenarioHourly {
+  productionKwh: number[]; // practical production (after clipping)
+  loadKwh: number[];
+  selfConsumedKwh: number[]; // direct + battery-to-load
+  importKwh: number[];
+  exportKwh: number[];
+  chargeKwh: number[]; // 0 for no-battery
+  dischargeKwh: number[]; // 0 for no-battery
+  socKwh: number[]; // 0 for no-battery
+}
+
+export interface AnnualMetrics {
+  productionKwh: number;
+  consumptionKwh: number;
+  selfConsumedKwh: number;
+  selfConsumptionRate: number; // selfConsumed / production
+  selfSufficiency: number; // selfConsumed / consumption
+  importKwh: number;
+  exportKwh: number;
+  battery?: {
+    throughputKwh: number; // Σ discharge
+    equivalentCycles: number; // throughput / usable
+    roundTripLossKwh: number; // Σ charge − Σ discharge
+    usableKwh: number;
+  };
+}
+
+export interface MonthlyScenario {
+  month: number;
+  selfConsumedKwh: number;
+  importKwh: number;
+  exportKwh: number;
+  dischargeKwh: number;
+}
+
+export interface ScenarioResult {
+  scenario: "no-battery" | "with-battery";
+  metrics: AnnualMetrics;
+  monthly: MonthlyScenario[];
+  hourly: ScenarioHourly;
+  convergencePasses?: number;
+}
+
+export interface ComparisonResult {
+  withoutBattery: ScenarioResult;
+  withBattery: ScenarioResult;
+  delta: {
+    selfConsumedKwh: number;
+    selfConsumptionRatePoints: number; // percentage points
+    selfSufficiencyPoints: number; // percentage points
+    importReductionKwh: number;
+    exportReductionKwh: number;
+  };
   notes: string[];
 }

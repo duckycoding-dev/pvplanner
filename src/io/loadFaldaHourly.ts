@@ -7,6 +7,7 @@ import { readJson } from "./readJson.ts";
 interface RawHourlyRow {
   time?: unknown;
   P?: unknown;
+  T2m?: unknown;
   Int?: unknown;
 }
 interface RawHourlyFile {
@@ -26,6 +27,7 @@ export async function loadFaldaHourly(falda: ResolvedFalda): Promise<HourlySerie
   const timestampsUtc = new Array<number>(rows.length);
   const months = new Array<number>(rows.length);
   const productionKwh = new Array<number>(rows.length);
+  const t2m = new Array<number>(rows.length);
   let reconstructedCount = 0;
   let negatives = 0;
 
@@ -41,6 +43,7 @@ export async function loadFaldaHourly(falda: ResolvedFalda): Promise<HourlySerie
       negatives++;
     }
     productionKwh[i] = kwh;
+    t2m[i] = typeof r.T2m === "number" ? r.T2m : 0;
     if (r.Int === 1) reconstructedCount++;
   }
 
@@ -53,6 +56,7 @@ export async function loadFaldaHourly(falda: ResolvedFalda): Promise<HourlySerie
     timestampsUtc,
     months,
     productionKwh,
+    t2m,
     reconstructedCount,
   };
 }
