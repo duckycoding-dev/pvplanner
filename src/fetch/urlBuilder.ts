@@ -72,7 +72,7 @@ export function monthlyParams(cfg: ResolvedConfig): QueryParams {
     endyear: year,
     selectrad: "1",
     angle: numParam(first.tilt),
-    aspect: "0",
+    // NB: MRcalc has no `aspect` param — the selected-inclination plane is South only.
     d2g: "1",
     avtemp: "1",
   };

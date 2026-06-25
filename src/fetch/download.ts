@@ -51,7 +51,7 @@ export function buildJobs(cfg: ResolvedConfig): DownloadJob[] {
     tool: PVGIS_TOOLS.monthly,
     label: "generic monthly (az 0 reference)",
     url: buildUrl(base, PVGIS_TOOLS.monthly, monthlyParams(cfg)),
-    outPath: fromRoot("data", "generic", `${cfg.pvgis.single_year}_monthly.json`),
+    outPath: fromRoot("data", "generic", "monthly.json"),
   });
 
   return jobs;

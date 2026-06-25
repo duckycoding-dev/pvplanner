@@ -29,7 +29,7 @@ libere** (uso non commerciale). Codice in `src/fetch/`, avvio da `scripts/downlo
 | `data/falde/<az>/hourly.json` | `seriescalc` | 8760 valori orari di `P` (W) + componenti radiazione, T2m, vento (anno singolo) |
 | `data/falde/<az>/power.json` | `PVcalc` | medie mensili `E_m` + totali `E_y` (range DB 2005-2023) |
 | `data/falde/<az>/daily_01..12.json` | `DRcalc` | profilo giornaliero medio per mese (solo radiazione), ora locale |
-| `data/generic/<anno>_monthly.json` | `MRcalc` | radiazione mensile piano Sud (aspect 0) di riferimento |
+| `data/generic/monthly.json` | `MRcalc` | radiazione mensile piano Sud di riferimento (solo inclinazione: MRcalc non ha `aspect`) |
 
 Conteggio file = `n_falde × 14 + 1`.
 
@@ -64,8 +64,9 @@ Comuni: `lat, lon, raddatabase, usehorizon, outputformat=json, browser=0`.
   — **senza** `startyear/endyear` (→ range completo DB 2005-2023), senza `pvcalculation/components`
 - **DRcalc** (`daily`): `+ month=<1..12>, angle, aspect, global=1, showtemperatures=1, localtime=1`
   — **senza** `peakpower` (solo radiazione)
-- **MRcalc** (`monthly` generic): `+ startyear=endyear=<anno>, selectrad=1, angle=<tilt>, aspect=0,
-  d2g=1, avtemp=1`
+- **MRcalc** (`monthly` generic): `+ startyear=endyear=<anno>, selectrad=1, angle=<tilt>, d2g=1,
+  avtemp=1` — **MRcalc non accetta `aspect`**: il piano a inclinazione selezionata è solo Sud
+  (il file riporta `azimuth 0` implicito).
 
 ## Derivazione `peakpower`
 

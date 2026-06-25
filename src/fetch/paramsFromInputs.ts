@@ -88,7 +88,7 @@ export function monthlyParamsFromFile(file: unknown): QueryParams {
   return {
     ...commonFromInputs(inputs),
     angle: numParam(num(inputs, ["plane", "fixed_inclined", "slope", "value"])),
-    aspect: numParam(num(inputs, ["plane", "fixed_inclined", "azimuth", "value"])),
+    // MRcalc has no `aspect` param (South only); the file records azimuth 0 implicitly.
     startyear: numParam(num(inputs, ["meteo_data", "year_min"])),
     endyear: numParam(num(inputs, ["meteo_data", "year_max"])),
   };

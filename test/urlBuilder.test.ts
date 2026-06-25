@@ -46,7 +46,7 @@ test("daily params round-trip (12 months × both falde)", async () => {
 
 test("monthly generic params round-trip", async () => {
   const cfg = await loadConfig();
-  const file = await readJson(fromRoot("data", "generic", "2023_monthly.json"));
+  const file = await readJson(fromRoot("data", "generic", "monthly.json"));
   expectSubset(monthlyParams(cfg), monthlyParamsFromFile(file));
 });
 
@@ -83,7 +83,7 @@ test("daily/power/monthly carry their tool-specific flags", async () => {
 
   const mo = monthlyParams(cfg);
   expect(mo.selectrad).toBe("1");
-  expect(mo.aspect).toBe("0");
+  expect(mo.aspect).toBeUndefined(); // MRcalc has no aspect param (South only)
   expect(mo.d2g).toBe("1");
   expect(mo.avtemp).toBe("1");
 });
