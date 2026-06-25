@@ -5,6 +5,7 @@ import { quickPickDays } from "../lib/quickPickDays.ts";
 import { dayIndexToDateInput, fmt, formatDayLabel } from "../lib/format.ts";
 import { PowerChart } from "./PowerChart.tsx";
 import { BatteryChart } from "./BatteryChart.tsx";
+import { InfoTip } from "./InfoTip.tsx";
 
 const SCENARIOS: { key: Scenario; label: string }[] = [
   { key: "con", label: "con batteria" },
@@ -74,24 +75,38 @@ export function DailyExplorer({ viz }: { viz: Viz }) {
       </div>
 
       <div className="day-summary">
-        <span>produzione <b>{fmt(prod, 1)}</b></span>
-        <span>consumo <b>{fmt(cons, 1)}</b></span>
-        <span>autoconsumo <b>{fmt(self, 1)}</b></span>
-        <span>import <b>{fmt(imp, 1)}</b></span>
-        <span>export <b>{fmt(exp, 1)}</b></span>
-        <span>clipping <b>{fmt(clip, 1)}</b></span>
-        {!isNb && <span>cicli <b>{cycles.toFixed(2)}</b></span>}
+        <span>produzione<InfoTip k="produzione" /> <b>{fmt(prod, 1)}</b></span>
+        <span>consumo<InfoTip k="consumo" /> <b>{fmt(cons, 1)}</b></span>
+        <span>autoconsumo<InfoTip k="autoconsumo" /> <b>{fmt(self, 1)}</b></span>
+        <span>import<InfoTip k="import" /> <b>{fmt(imp, 1)}</b></span>
+        <span>export<InfoTip k="export" /> <b>{fmt(exp, 1)}</b></span>
+        <span>clipping<InfoTip k="clipping" /> <b>{fmt(clip, 1)}</b></span>
+        {!isNb && (
+          <span>
+            cicli<InfoTip k="cicli" /> <b>{cycles.toFixed(2)}</b>
+          </span>
+        )}
         <span className="unit">kWh</span>
       </div>
 
       <div className="chart-card">
-        <h3>Potenza oraria (kW)</h3>
+        <div className="section-head">
+          <h3>
+            Potenza oraria (kW)
+            <InfoTip k="coperto" />
+          </h3>
+        </div>
         <PowerChart data={pts} scenario={scenario} acCapKw={viz.meta.acCapKw} />
       </div>
 
       {!isNb ? (
         <div className="chart-card">
-          <h3>Stato di carica batteria (kWh)</h3>
+          <div className="section-head">
+            <h3>
+              Stato di carica batteria (kWh)
+              <InfoTip k="soc" />
+            </h3>
+          </div>
           <BatteryChart data={pts} usableKwh={viz.meta.batteryUsableKwh} />
         </div>
       ) : (

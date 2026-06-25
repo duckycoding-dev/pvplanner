@@ -4,6 +4,7 @@ import type { Tab, Viz } from "./types.ts";
 import { AnnualOverview } from "./components/AnnualOverview.tsx";
 import { MonthlyView } from "./components/MonthlyView.tsx";
 import { DailyExplorer } from "./components/DailyExplorer.tsx";
+import { Glossary } from "./components/Glossary.tsx";
 
 const viz = vizRaw as unknown as Viz;
 
@@ -11,6 +12,7 @@ const TABS: { key: Tab; label: string }[] = [
   { key: "annuale", label: "Panoramica annuale" },
   { key: "mensile", label: "Mensile" },
   { key: "giorno", label: "Giorno per giorno" },
+  { key: "glossario", label: "Glossario" },
 ];
 
 export function App() {
@@ -43,6 +45,7 @@ export function App() {
         {tab === "annuale" && <AnnualOverview viz={viz} />}
         {tab === "mensile" && <MonthlyView viz={viz} />}
         {tab === "giorno" && <DailyExplorer viz={viz} />}
+        {tab === "glossario" && <Glossary />}
       </main>
 
       <footer>{viz.meta.consumptionNote}</footer>

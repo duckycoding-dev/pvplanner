@@ -69,4 +69,4 @@ export interface Viz {
 }
 
 export type Scenario = "con" | "senza" | "entrambi";
-export type Tab = "annuale" | "mensile" | "giorno";
+export type Tab = "annuale" | "mensile" | "giorno" | "glossario";

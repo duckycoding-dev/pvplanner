@@ -58,5 +58,23 @@ header .sub { margin: 0; color: var(--muted); font-size: 13px; }
 .day-summary b { color: var(--text); }
 .day-summary .unit { margin-left: auto; }
 
+.info { cursor: help; color: var(--muted); font-size: 12px; margin-left: 5px; user-select: none; }
+.info:hover { color: var(--accent); }
+
+.section-head { display: flex; align-items: center; gap: 6px; justify-content: space-between; margin-bottom: 10px; }
+.section-head h3 { margin: 0; font-size: 15px; }
+.seg { display: inline-flex; gap: 4px; }
+.seg button { border: 1px solid var(--border); background: var(--card); border-radius: 7px; padding: 4px 10px;
+  cursor: pointer; font-size: 12px; color: var(--text); }
+.seg button.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+
+.glossary { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 4px 18px 14px; }
+.glossary .gloss-item { border-bottom: 1px solid var(--border); padding: 12px 0; }
+.glossary .gloss-item:last-child { border-bottom: none; }
+.glossary h4 { margin: 0 0 4px; font-size: 14px; }
+.glossary p { margin: 0 0 6px; }
+.glossary code { background: var(--bg); border: 1px solid var(--border); border-radius: 5px; padding: 2px 7px;
+  font-size: 12px; color: #334155; }
+
 .note { color: var(--muted); }
 footer { margin-top: 24px; color: var(--muted); font-size: 12px; border-top: 1px solid var(--border); padding-top: 12px; }

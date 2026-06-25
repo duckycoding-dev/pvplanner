@@ -2,11 +2,27 @@ import { Bar, BarChart, CartesianGrid, Legend, ResponsiveContainer, Tooltip, XAx
 import type { Viz } from "../types.ts";
 import { fmt, pct } from "../lib/format.ts";
 import { useLegendToggle } from "../lib/useLegendToggle.ts";
+import { InfoTip } from "./InfoTip.tsx";
 
-function KpiCard({ label, senza, con, highlight }: { label: string; senza: string; con: string; highlight?: string }) {
+function KpiCard({
+  label,
+  senza,
+  con,
+  highlight,
+  info,
+}: {
+  label: string;
+  senza: string;
+  con: string;
+  highlight?: string;
+  info?: string;
+}) {
   return (
     <div className="card kpi">
-      <h3>{label}</h3>
+      <h3>
+        {label}
+        {info !== undefined && <InfoTip k={info} />}
+      </h3>
       <div className="row">
         <span className="k">senza</span>
         <span>{senza}</span>
@@ -37,33 +53,55 @@ export function AnnualOverview({ viz }: { viz: Viz }) {
     <div>
       <section className="cards">
         <div className="card">
-          <h3>Produzione {viz.meta.year}</h3>
+          <h3>
+            Produzione {viz.meta.year}
+            <InfoTip k="produzione" />
+          </h3>
           <p className="big">{fmt(p.practicalKwh)} kWh</p>
           <p className="muted">
             teorica {fmt(p.theoreticalKwh)} · clipping {fmt(p.clippingLossKwh)} ({pct(p.clippingPct / 100)}),{" "}
-            {p.clippedHours} h · picco {p.peakKw.toFixed(1)} kW
+            {p.clippedHours} h<InfoTip k="clipping" /> · picco {p.peakKw.toFixed(1)} kW<InfoTip k="picco" />
           </p>
-          <p className="muted">media 2005–2023: {fmt(p.multiyearKwh)} kWh</p>
+          <p className="muted">
+            media 2005–2023: {fmt(p.multiyearKwh)} kWh<InfoTip k="multiyear" />
+          </p>
         </div>
       </section>
 
       <section className="cards">
-        <KpiCard label="Tasso autoconsumo" senza={pct(nb.selfConsumptionRate)} con={pct(wb.selfConsumptionRate)} />
+        <KpiCard
+          label="Tasso autoconsumo"
+          info="tassoAutoconsumo"
+          senza={pct(nb.selfConsumptionRate)}
+          con={pct(wb.selfConsumptionRate)}
+        />
         <KpiCard
           label="Autosufficienza"
+          info="autosufficienza"
           senza={pct(nb.selfSufficiency)}
           con={pct(wb.selfSufficiency)}
           highlight={`+${d.selfSufficiencyPoints.toFixed(1)} punti`}
         />
         <KpiCard
           label="Import da rete"
+          info="import"
           senza={`${fmt(nb.importKwh)} kWh`}
           con={`${fmt(wb.importKwh)} kWh`}
           highlight={`−${fmt(d.importReductionKwh)} kWh`}
         />
-        <KpiCard label="Export in rete" senza={`${fmt(nb.exportKwh)} kWh`} con={`${fmt(wb.exportKwh)} kWh`} />
-        <KpiCard label="Cicli batteria/anno" senza="—" con={fmt(wb.battery.equivalentCycles)} />
-        <KpiCard label="Perdita round-trip" senza="—" con={`${fmt(wb.battery.roundTripLossKwh)} kWh`} />
+        <KpiCard
+          label="Export in rete"
+          info="export"
+          senza={`${fmt(nb.exportKwh)} kWh`}
+          con={`${fmt(wb.exportKwh)} kWh`}
+        />
+        <KpiCard label="Cicli batteria/anno" info="cicli" senza="—" con={fmt(wb.battery.equivalentCycles)} />
+        <KpiCard
+          label="Perdita round-trip"
+          info="roundTripLoss"
+          senza="—"
+          con={`${fmt(wb.battery.roundTripLossKwh)} kWh`}
+        />
       </section>
 
       <section className="chart-card">
