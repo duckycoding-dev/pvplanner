@@ -44,7 +44,7 @@ riassunto, stato, legenda simboli/unità, documenti collegati).
 ```sh
 bun run download   # (opzionale) valida/riscarica i dati PVGIS
 bun run analysis   # calcola tutto → scrive output/*.{json,csv} e web/viz.json
-bun run web        # dashboard su http://localhost:5180  (richiede prima `analysis`)
+bun run web        # dashboard su http://localhost:3000  (richiede prima `analysis`)
 bun test           # suite di test
 ```
 
