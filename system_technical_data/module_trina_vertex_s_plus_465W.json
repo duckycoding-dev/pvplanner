@@ -1,0 +1,60 @@
+{
+  "_source": "trina-solar-vertex-s-tsm-xxx-neg9r-28-modulo-fotovoltaico-monocristallino.pdf",
+  "_model_selected": "Trina Solar Vertex S+ TSM-NEG9R.28 — 465 W",
+  "_notes": "Solo la variante 465 Wp (la scheda copre 440-470 Wp). Modulo bifacciale a doppio vetro N-type i-TOPCon.",
+  "model": "TSM-NEG9R.28",
+  "series": "Vertex S+",
+  "peak_power_wp": 465,
+  "technology": "N-type i-TOPCon Ultra, dual glass monocrystalline",
+  "electrical_data_stc": {
+    "_conditions": "Irradiance 1000 W/m2, cell temp 25 C, AM1.5",
+    "pmax_w": 465,
+    "vmpp_v": 45.8,
+    "impp_a": 10.16,
+    "voc_v": 54.2,
+    "isc_a": 10.85,
+    "module_efficiency_percent": 23.3,
+    "measuring_tolerance_percent": 3,
+    "power_selection_w": "0~+5"
+  },
+  "electrical_data_noct": {
+    "_conditions": "Irradiance 800 W/m2, ambient temp 20 C, wind 1 m/s",
+    "pmax_w": 355,
+    "vmpp_v": 42.8,
+    "impp_a": 8.28,
+    "voc_v": 51.4,
+    "isc_a": 8.74
+  },
+  "temperature_ratings": {
+    "noct_c": 43,
+    "noct_tolerance_c": 2,
+    "temp_coeff_pmax_per_c_percent": -0.29,
+    "temp_coeff_voc_per_c_percent": -0.24,
+    "temp_coeff_isc_per_c_percent": 0.04
+  },
+  "application_conditions": {
+    "operating_temperature_c": [-40, 70],
+    "max_system_voltage_v_dc": 1500,
+    "max_series_fuse_rating_a": 25
+  },
+  "mechanical_data": {
+    "cells": 144,
+    "cell_type": "N-type i-TOPCon monocrystalline",
+    "dimensions_lxwxh_mm": [1762, 1134, 30],
+    "weight_kg": 21.0,
+    "front_glass": "1.6 mm AR-coated heat-strengthened glass",
+    "back_glass": "1.6 mm heat-strengthened glass",
+    "frame": "30 mm anodized aluminium alloy, black",
+    "junction_box": "IP68",
+    "cable_mm2": 4.0,
+    "connector": "TS4 Plus / TS4 / MC4 EVO2"
+  },
+  "warranty": {
+    "product_warranty_years": 15,
+    "power_guarantee_years": 30,
+    "first_year_degradation_percent": 1.0,
+    "annual_degradation_percent": 0.4,
+    "guaranteed_power_at_30y_percent": 87.4,
+    "_note": "La pagina marketing cita 'fino a 25 anni' di garanzia prodotto; il box Performance Warranty riporta 15 anni prodotto / 30 anni potenza."
+  }
+}

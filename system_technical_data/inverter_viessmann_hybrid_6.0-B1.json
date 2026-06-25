@@ -1,0 +1,67 @@
+{
+  "_source": "Scheda tecnica Viessmann Hybrid Inverter -B1.pdf",
+  "_model_selected": "Viessmann Hybrid Inverter 6.0-B1",
+  "_notes": "Solo la taglia 6.0-B1 (le altre taglie 3.6/5.0 sono escluse). Inverter ibrido monofase senza trasformatore.",
+  "model": "Viessmann Hybrid Inverter 6.0-B1",
+  "article_code": "7986146",
+  "phase": "single-phase",
+  "type": "hybrid",
+  "input_dc": {
+    "max_power_kw": 9,
+    "max_voltage_v": 580,
+    "nominal_voltage_v": 380,
+    "activation_voltage_v": 85,
+    "mpp_voltage_range_v": [100, 550],
+    "max_current_per_mpp_a": 16,
+    "dc_current_per_mpp_a": 21.2,
+    "mppt_trackers": 2,
+    "strings_per_tracker": 1
+  },
+  "output_ac_grid": {
+    "nominal_power_kw": 6,
+    "max_apparent_power_kva": 6.6,
+    "nominal_voltage_v": 230,
+    "frequency_hz": "50-60",
+    "max_output_current_a": 28.7,
+    "power_factor": "1 (+/- 0.8)",
+    "thdi_percent": "<3"
+  },
+  "output_ac_backup": {
+    "max_apparent_power_kva": 6,
+    "peak_apparent_power_kva": 7.2,
+    "peak_duration_s": 60,
+    "nominal_voltage_v": 230,
+    "frequency_hz": "50-60",
+    "max_output_current_a": 26.1,
+    "thdv_percent": "<3"
+  },
+  "battery_input": {
+    "compatible_types": "Li-Ion",
+    "voltage_range_v": [85, 460],
+    "max_charge_discharge_current_a": 25,
+    "max_charge_discharge_power_kw": 6
+  },
+  "efficiency": {
+    "max_percent": 97.6,
+    "european_percent": 97
+  },
+  "general": {
+    "surge_protection": "Type 2 DC / Type 3 AC",
+    "operating_temperature_c": [-25, 60],
+    "cooling": "natural convection",
+    "noise_db": "<35",
+    "user_interface": "LED & APP",
+    "communication_interfaces": ["RS485", "CAN", "Wi-Fi", "LAN (optional)"],
+    "weight_kg": 17,
+    "dimensions_lxhxd_mm": [354, 433, 147],
+    "ingress_protection": "IP65",
+    "topology": "transformerless"
+  },
+  "warranty": {
+    "product_years": 5,
+    "extendable_to_years": 10
+  },
+  "included_accessories": {
+    "energy_meter": "Viessmann EM 1000 (single-phase, with toroid)"
+  }
+}

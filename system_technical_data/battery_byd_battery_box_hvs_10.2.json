@@ -1,0 +1,33 @@
+{
+  "_source": "BYD-Battery-Box-Premium_Datasheet_HVS-HVM_IT.pdf",
+  "_model_selected": "BYD Battery-Box Premium HVS 10.2",
+  "_notes": "Solo il modello HVS 10.2 (la scheda copre tutta la gamma HVS/HVM). Specifiche comuni HVS/HVM incluse in 'common'.",
+  "model": "Battery-Box Premium HVS 10.2",
+  "module": {
+    "name": "HVS module",
+    "energy_per_module_kwh": 2.56,
+    "voltage_per_module_v": 102.4,
+    "weight_per_module_kg": 38,
+    "module_count": 4
+  },
+  "usable_energy_kwh": 10.24,
+  "_usable_energy_note": "DC usable energy. Condizioni: 100% DOD, carica 0.2C e scarica @ +25 C. Puo variare con la marca di inverter.",
+  "max_output_current_a": 25,
+  "peak_output_current_a": 50,
+  "peak_output_duration_s": 3,
+  "nominal_voltage_v": 409,
+  "operating_voltage_v": [320, 460],
+  "dimensions_hxwxd_mm": [1178, 585, 298],
+  "weight_kg": 167,
+  "common": {
+    "temperature_range_c": [-10, 50],
+    "cell_technology": "LFP (lithium iron phosphate, cobalt-free)",
+    "communication": ["CAN", "RS485"],
+    "ingress_protection": "IP55",
+    "round_trip_efficiency_percent": ">=96",
+    "certifications": ["VDE2510-50", "IEC62619", "CEC", "CE", "UN38.3"],
+    "applications": ["ON Grid", "ON Grid + Backup", "OFF Grid"],
+    "warranty_years": 10,
+    "charge_current_derating_note": "Da -10 C a 0 C la corrente di carica diminuisce."
+  }
+}
