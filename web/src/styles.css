@@ -58,8 +58,47 @@ header .sub { margin: 0; color: var(--muted); font-size: 13px; }
 .day-summary b { color: var(--text); }
 .day-summary .unit { margin-left: auto; }
 
-.info { cursor: help; color: var(--muted); font-size: 12px; margin-left: 5px; user-select: none; }
-.info:hover { color: var(--accent); }
+.info {
+  position: relative;
+  display: inline-flex;
+  cursor: help;
+  color: var(--muted);
+  font-size: 12px;
+  margin-left: 8px;
+  user-select: none;
+  outline: none;
+}
+.info:hover, .info:focus { color: var(--accent); }
+.info-bubble {
+  display: none;
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% + 8px);
+  transform: translateX(-50%);
+  width: 260px;
+  max-width: 70vw;
+  background: #1f2933;
+  color: #fff;
+  padding: 9px 11px;
+  border-radius: 8px;
+  font-size: 12px;
+  line-height: 1.45;
+  text-align: left;
+  z-index: 100;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.25);
+  white-space: normal;
+  cursor: default;
+}
+.info:hover .info-bubble, .info:focus .info-bubble { display: block; }
+.info-bubble strong { display: block; margin-bottom: 4px; }
+.info-bubble code {
+  display: block;
+  margin-top: 7px;
+  background: rgba(255, 255, 255, 0.14);
+  padding: 3px 7px;
+  border-radius: 5px;
+  font-size: 11px;
+}
 
 .section-head { display: flex; align-items: center; gap: 6px; justify-content: space-between; margin-bottom: 10px; }
 .section-head h3 { margin: 0; font-size: 15px; }

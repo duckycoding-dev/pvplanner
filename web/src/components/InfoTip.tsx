@@ -1,13 +1,17 @@
 import { GLOSSARY } from "../lib/glossary.ts";
 
-/** Small unobtrusive ⓘ that shows a glossary description on hover (native title). */
+/** Small ⓘ that reveals a styled tooltip on hover/focus (immediate, not the slow native title). */
 export function InfoTip({ k }: { k: string }) {
   const entry = GLOSSARY[k];
   if (entry === undefined) return null;
-  const text = entry.formula ? `${entry.desc}\n\n${entry.formula}` : entry.desc;
   return (
-    <span className="info" title={text} role="img" aria-label={`spiegazione: ${entry.term}`}>
+    <span className="info" tabIndex={0}>
       ⓘ
+      <span className="info-bubble" role="tooltip">
+        <strong>{entry.term}</strong>
+        <span>{entry.desc}</span>
+        {entry.formula !== undefined && <code>{entry.formula}</code>}
+      </span>
     </span>
   );
 }
