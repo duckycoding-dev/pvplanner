@@ -76,7 +76,7 @@ export function CompareDayChart({
           <CartesianGrid strokeDasharray="3 3" />
           <XAxis dataKey="hour" />
           <YAxis label={{ value: "kWh", angle: -90, position: "insideLeft" }} />
-          <Tooltip formatter={(v: number) => v.toFixed(2)} labelFormatter={(h) => `ore ${h}`} />
+          <Tooltip formatter={(v) => Number(v).toFixed(2)} labelFormatter={(h) => `ore ${h}`} />
           <Legend onClick={onClick} wrapperStyle={{ cursor: "pointer" }} />
 
           <Line type="monotone" dataKey="load" name="consumo" stroke="#dc2626" strokeWidth={2} dot={false} isAnimationActive={false} hide={isHidden("load")} />

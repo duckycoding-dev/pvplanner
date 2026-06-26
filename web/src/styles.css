@@ -117,3 +117,36 @@ header .sub { margin: 0; color: var(--muted); font-size: 13px; }
 
 .note { color: var(--muted); }
 footer { margin-top: 24px; color: var(--muted); font-size: 12px; border-top: 1px solid var(--border); padding-top: 12px; }
+
+/* --- system comparison: config page + import modal --- */
+.config-page { display: grid; gap: 16px; }
+.sys-block { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; }
+.sys-block h3 { margin: 0 0 10px; font-size: 15px; }
+.falda-row { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; padding: 8px 0; border-bottom: 1px solid var(--border); }
+.falda-row:last-of-type { border-bottom: none; }
+.falda-row .falda-id { min-width: 120px; font-weight: 600; }
+.falda-row .kwp { margin-left: auto; color: var(--muted); }
+.falda-row label, .field label { display: inline-flex; flex-direction: column; gap: 3px; font-size: 12px; color: var(--muted); }
+.field { display: flex; flex-direction: column; gap: 4px; margin: 10px 0; max-width: 360px; }
+.field > label { font-size: 13px; color: var(--muted); }
+.config-page input { border: 1px solid var(--border); border-radius: 7px; padding: 6px 8px; font-size: 13px; width: 130px; }
+.field > input { width: 100%; }
+.config-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+.config-actions button { border: 1px solid var(--border); background: var(--card); border-radius: 7px; padding: 7px 12px; cursor: pointer; font-size: 13px; color: var(--text); }
+.config-actions button:hover { border-color: var(--accent); color: var(--accent); }
+
+.modal-overlay { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.4); display: flex; align-items: center; justify-content: center; z-index: 200; }
+.modal { background: var(--card); border-radius: 12px; padding: 18px 20px; width: 420px; max-width: 90vw; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25); }
+.modal h3 { margin: 0 0 12px; }
+.dropzone { border: 2px dashed var(--border); border-radius: 10px; padding: 26px 16px; text-align: center; color: var(--muted); }
+.dropzone.drag { border-color: var(--accent); background: rgba(59, 130, 246, 0.06); color: var(--accent); }
+.file-pick { color: var(--accent); cursor: pointer; text-decoration: underline; }
+.err { color: #dc2626; font-size: 13px; margin: 10px 0 0; }
+
+/* --- comparison KPI table (Confronto page) --- */
+.kpi-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+.kpi-table th, .kpi-table td { text-align: right; padding: 7px 10px; border-bottom: 1px solid var(--border); }
+.kpi-table th:first-child, .kpi-table td:first-child { text-align: left; }
+.kpi-table thead th { color: var(--muted); font-weight: 600; }
+.kpi-table td.pos { color: #16a34a; }
+.kpi-table td.neg { color: #dc2626; }

@@ -1,22 +1,48 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import vizRaw from "../viz.json";
 import type { Tab, Viz } from "./types.ts";
 import { AnnualOverview } from "./components/AnnualOverview.tsx";
 import { MonthlyView } from "./components/MonthlyView.tsx";
 import { DailyExplorer } from "./components/DailyExplorer.tsx";
 import { Glossary } from "./components/Glossary.tsx";
+import { ConfigPage } from "./components/ConfigPage.tsx";
+import { type SystemConfigB, cloneFromBaseline, validateAgainstBaseline } from "./lib/systemConfig.ts";
 
 const viz = vizRaw as unknown as Viz;
+const STORAGE_KEY = "systemB";
 
 const TABS: { key: Tab; label: string }[] = [
   { key: "annuale", label: "Panoramica annuale" },
   { key: "mensile", label: "Mensile" },
   { key: "giorno", label: "Giorno per giorno" },
+  { key: "config", label: "Configurazione" },
   { key: "glossario", label: "Glossario" },
 ];
 
+function loadSystemB(): SystemConfigB {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw !== null) {
+      const cfg = JSON.parse(raw) as SystemConfigB;
+      if (validateAgainstBaseline(cfg, viz) === null) return cfg;
+    }
+  } catch {
+    /* ignore corrupt storage */
+  }
+  return cloneFromBaseline(viz);
+}
+
 export function App() {
   const [tab, setTab] = useState<Tab>("giorno");
+  const [systemB, setSystemB] = useState<SystemConfigB>(loadSystemB);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(systemB));
+    } catch {
+      /* ignore */
+    }
+  }, [systemB]);
 
   const faldeLabel = viz.meta.falde
     .map((f) => `${f.id} ${f.azimuth > 0 ? "+" : ""}${f.azimuth}° ${f.peakKwp} kWp`)
@@ -45,6 +71,7 @@ export function App() {
         {tab === "annuale" && <AnnualOverview viz={viz} />}
         {tab === "mensile" && <MonthlyView viz={viz} />}
         {tab === "giorno" && <DailyExplorer viz={viz} />}
+        {tab === "config" && <ConfigPage viz={viz} systemB={systemB} setSystemB={setSystemB} />}
         {tab === "glossario" && <Glossary />}
       </main>
 
