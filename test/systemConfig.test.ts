@@ -15,6 +15,8 @@ function makeViz(): Viz {
     meta: {
       acCapKw: 6,
       batteryUsableKwh: 10.24,
+      batteryTotalKwh: 10.24,
+      batteryUsablePct: 100,
       batteryRoundTrip: 0.9,
       falde: [
         { id: "est", azimuth: -45, peakKwp: 5.115, panelCount: 11, wp: 465 },
@@ -24,12 +26,20 @@ function makeViz(): Viz {
   } as unknown as Viz;
 }
 
-test("cloneFromBaseline treats the usable figure as total at 100% (B == baseline)", () => {
+test("cloneFromBaseline takes total + usable% from viz.meta (not a hardcoded 100)", () => {
   const cfg = cloneFromBaseline(makeViz());
   expect(cfg.batteryTotalKwh).toBeCloseTo(10.24, 2);
   expect(cfg.batteryUsablePct).toBe(100);
   expect(batteryUsableKwh(cfg)).toBeCloseTo(10.24, 2);
   expect(totalPeakKwp(cfg)).toBeCloseTo(10.23, 2);
+
+  // a different documented usable% flows through (proves no hardcoded default)
+  const viz80 = makeViz();
+  viz80.meta.batteryUsablePct = 80;
+  viz80.meta.batteryTotalKwh = 12.8;
+  const c80 = cloneFromBaseline(viz80);
+  expect(c80.batteryUsablePct).toBe(80);
+  expect(batteryUsableKwh(c80)).toBeCloseTo(10.24, 2);
 });
 
 test("batteryUsableKwh = total × usable%", () => {

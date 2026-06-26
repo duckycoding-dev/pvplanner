@@ -47,6 +47,8 @@ export interface Viz {
     hoursInYear: number;
     acCapKw: number;
     batteryUsableKwh: number;
+    batteryTotalKwh: number;
+    batteryUsablePct: number;
     batteryPortKw: number;
     batteryRoundTrip: number;
     consumptionAnnualKwh: number;

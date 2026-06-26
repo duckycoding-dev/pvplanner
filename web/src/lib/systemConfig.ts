@@ -35,9 +35,8 @@ export function cloneFromBaseline(viz: Viz): SystemConfigB {
     label: "Sistema B",
     falde: viz.meta.falde.map((f) => ({ id: f.id, azimuth: f.azimuth, panelCount: f.panelCount, wp: f.wp })),
     acCapKw: viz.meta.acCapKw,
-    // viz exposes only the usable figure → treat it as total at 100% so B == baseline by default
-    batteryTotalKwh: viz.meta.batteryUsableKwh,
-    batteryUsablePct: 100,
+    batteryTotalKwh: viz.meta.batteryTotalKwh,
+    batteryUsablePct: viz.meta.batteryUsablePct,
     roundTrip: viz.meta.batteryRoundTrip,
   };
 }
@@ -76,19 +75,18 @@ export function parseSystemConfigB(text: string): SystemConfigB {
       wp: reqNumber(fo["wp"], `falde[${i}].wp`),
     };
   });
-  // Backwards-compatible: accept an older `batteryUsableKwh` field as total at 100%.
-  const total =
-    typeof o["batteryTotalKwh"] === "number"
-      ? o["batteryTotalKwh"]
-      : typeof o["batteryUsableKwh"] === "number"
-        ? o["batteryUsableKwh"]
-        : undefined;
+  // Backwards-compatible: an older `batteryUsableKwh` field is read as total at 100% usable.
+  const hasTotal = typeof o["batteryTotalKwh"] === "number";
+  const legacyUsable = typeof o["batteryUsableKwh"] === "number";
+  const total = hasTotal ? o["batteryTotalKwh"] : legacyUsable ? o["batteryUsableKwh"] : undefined;
+  const pct =
+    typeof o["batteryUsablePct"] === "number" ? o["batteryUsablePct"] : !hasTotal && legacyUsable ? 100 : undefined;
   return {
     label: typeof o["label"] === "string" ? o["label"] : "Sistema B",
     falde,
     acCapKw: reqNumber(o["acCapKw"], "acCapKw"),
     batteryTotalKwh: reqNumber(total, "batteryTotalKwh"),
-    batteryUsablePct: typeof o["batteryUsablePct"] === "number" ? o["batteryUsablePct"] : 100,
+    batteryUsablePct: reqNumber(pct, "batteryUsablePct"),
     roundTrip: reqNumber(o["roundTrip"], "roundTrip"),
   };
 }

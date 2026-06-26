@@ -12,6 +12,8 @@
   },
   "usable_energy_kwh": 10.24,
   "_usable_energy_note": "DC usable energy. Condizioni: 100% DOD, carica 0.2C e scarica @ +25 C. Puo variare con la marca di inverter.",
+  "usable_percent": 100,
+  "_usable_percent_note": "Quota della capacita nominale totale effettivamente utilizzabile (DOD). 100 perche usable_energy_kwh e gia riferita a 100% DOD per questo modello.",
   "max_output_current_a": 25,
   "peak_output_current_a": 50,
   "peak_output_duration_s": 3,

@@ -18,6 +18,8 @@ test("writeVizJson emits a viz.json matching the analysis", async () => {
       hoursInYear: number;
       acCapKw: number;
       batteryUsableKwh: number;
+      batteryTotalKwh: number;
+      batteryUsablePct: number;
       batteryPortKw: number;
       batteryRoundTrip: number;
       consumptionAnnualKwh: number;
@@ -36,6 +38,8 @@ test("writeVizJson emits a viz.json matching the analysis", async () => {
   expect(v.meta.acCapKw).toBe(6);
   expect(v.meta.batteryUsableKwh).toBeCloseTo(10.24, 2);
   expect(v.meta.batteryPortKw).toBe(6);
+  expect(v.meta.batteryUsablePct).toBe(100);
+  expect(v.meta.batteryTotalKwh).toBeCloseTo(10.24, 2);
   expect(v.meta.batteryRoundTrip).toBeCloseTo(0.9, 6);
   expect(v.meta.consumptionAnnualKwh).toBeGreaterThan(0);
   expect(v.meta.falde.length).toBe(2);

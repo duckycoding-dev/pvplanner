@@ -5,7 +5,7 @@ import { MONTHS } from "../core/units.ts";
 import type { AnnualMetrics } from "../core/types.ts";
 import { DEFAULT_ROUND_TRIP } from "../core/simulation/battery.ts";
 import type { ResolvedConfig } from "../config/schema.ts";
-import { inverterBatteryPortKw } from "../products/specAccessors.ts";
+import { batteryUsableKwh, batteryUsablePercent, inverterBatteryPortKw } from "../products/specAccessors.ts";
 import type { ProductionAnalysis } from "../app/analyzeProduction.ts";
 import type { SimulationAnalysis } from "../app/analyzeSimulation.ts";
 
@@ -67,6 +67,12 @@ export async function writeVizJson(
       hoursInYear: result.hoursInYear,
       acCapKw: result.acCapKw,
       batteryUsableKwh: wb.metrics.battery?.usableKwh ?? 0,
+      batteryTotalKwh: r3(
+        batteryUsablePercent(cfg.battery) > 0
+          ? batteryUsableKwh(cfg.battery) / (batteryUsablePercent(cfg.battery) / 100)
+          : batteryUsableKwh(cfg.battery),
+      ),
+      batteryUsablePct: batteryUsablePercent(cfg.battery),
       batteryPortKw: inverterBatteryPortKw(cfg.inverter),
       batteryRoundTrip: DEFAULT_ROUND_TRIP,
       consumptionAnnualKwh: r3(sim.consumption.annualKwh),

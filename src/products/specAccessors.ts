@@ -28,3 +28,12 @@ export function batteryUsableKwh(battery: BatterySpec): number {
   }
   return v;
 }
+
+/** Documented usable fraction of the battery's total nominal capacity [%]. */
+export function batteryUsablePercent(battery: BatterySpec): number {
+  const v = (battery as { usable_percent?: unknown }).usable_percent;
+  if (typeof v !== "number") {
+    throw new Error("battery spec: missing numeric usable_percent");
+  }
+  return v;
+}
