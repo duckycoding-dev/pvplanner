@@ -3,6 +3,9 @@ import { dirname } from "node:path";
 import { fromRoot } from "../paths.ts";
 import { MONTHS } from "../core/units.ts";
 import type { AnnualMetrics } from "../core/types.ts";
+import { DEFAULT_ROUND_TRIP } from "../core/simulation/battery.ts";
+import type { ResolvedConfig } from "../config/schema.ts";
+import { inverterBatteryPortKw } from "../products/specAccessors.ts";
 import type { ProductionAnalysis } from "../app/analyzeProduction.ts";
 import type { SimulationAnalysis } from "../app/analyzeSimulation.ts";
 
@@ -26,6 +29,7 @@ function metricsToViz(m: AnnualMetrics) {
 export async function writeVizJson(
   prod: ProductionAnalysis,
   sim: SimulationAnalysis,
+  cfg: ResolvedConfig,
   outPath = fromRoot("web", "viz.json"),
 ): Promise<string> {
   const { result, hourly } = prod;
@@ -63,7 +67,16 @@ export async function writeVizJson(
       hoursInYear: result.hoursInYear,
       acCapKw: result.acCapKw,
       batteryUsableKwh: wb.metrics.battery?.usableKwh ?? 0,
-      falde: result.falde.map((f) => ({ id: f.id, azimuth: f.azimuth, peakKwp: f.peakKwp })),
+      batteryPortKw: inverterBatteryPortKw(cfg.inverter),
+      batteryRoundTrip: DEFAULT_ROUND_TRIP,
+      consumptionAnnualKwh: r3(sim.consumption.annualKwh),
+      falde: cfg.resolvedFalde.map((f) => ({
+        id: f.id,
+        azimuth: f.azimuth,
+        peakKwp: f.peakpower_kw,
+        panelCount: f.panel_count,
+        wp: cfg.module.peak_power_wp,
+      })),
       consumptionSource: sim.consumption.source,
       consumptionNote: sim.consumption.notes[0] ?? "",
     },
@@ -97,6 +110,12 @@ export async function writeVizJson(
     hourly: {
       timestampsUtc: [...base.timestampsUtc],
       months: [...base.months],
+      falde: prod.hourly.map((f) => ({
+        id: f.id,
+        azimuth: f.azimuth,
+        peakKwp: f.peakKwp,
+        productionKwh: arr3(f.productionKwh),
+      })),
       productionTheoreticalKwh: arr3(result.combined.hourly.theoreticalKwh),
       productionPracticalKwh: arr3(result.combined.hourly.practicalKwh),
       clippingKwh: arr3(result.combined.hourly.clippingLossKwh),

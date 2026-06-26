@@ -15,9 +15,17 @@ export interface MonthRow {
   wb: { selfConsumedKwh: number; importKwh: number; exportKwh: number; dischargeKwh: number };
 }
 
+export interface FaldaHourly {
+  id: string;
+  azimuth: number;
+  peakKwp: number;
+  productionKwh: number[];
+}
+
 export interface Hourly {
   timestampsUtc: number[];
   months: number[];
+  falde: FaldaHourly[];
   productionTheoreticalKwh: number[];
   productionPracticalKwh: number[];
   clippingKwh: number[];
@@ -39,7 +47,10 @@ export interface Viz {
     hoursInYear: number;
     acCapKw: number;
     batteryUsableKwh: number;
-    falde: { id: string; azimuth: number; peakKwp: number }[];
+    batteryPortKw: number;
+    batteryRoundTrip: number;
+    consumptionAnnualKwh: number;
+    falde: { id: string; azimuth: number; peakKwp: number; panelCount: number; wp: number }[];
     consumptionSource: string;
     consumptionNote: string;
   };
@@ -69,4 +80,4 @@ export interface Viz {
 }
 
 export type Scenario = "con" | "senza" | "entrambi";
-export type Tab = "annuale" | "mensile" | "giorno" | "glossario";
+export type Tab = "annuale" | "mensile" | "giorno" | "config" | "confronto" | "glossario";

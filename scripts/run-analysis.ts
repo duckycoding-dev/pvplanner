@@ -44,7 +44,7 @@ console.log(`\n  Battery effect: +${cmp.delta.selfSufficiencyPoints.toFixed(1)} 
   `−${cmp.delta.importReductionKwh.toFixed(0)} kWh imported/yr (SoC converged in ${cmp.withBattery.convergencePasses} pass).`);
 
 const writtenSim = await writeSimulationOutputs(sim, analysis);
-const vizPath = await writeVizJson(analysis, sim);
+const vizPath = await writeVizJson(analysis, sim, cfg);
 
 console.log("\nWrote:");
 for (const p of [...written, ...writtenSim, vizPath]) console.log(`  ${p}`);
