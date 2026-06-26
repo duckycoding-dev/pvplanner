@@ -37,7 +37,8 @@ riassunto, stato, legenda simboli/unità, documenti collegati).
 - [`01-downloader-pvgis.md`](01-downloader-pvgis.md) — come si scaricano e validano i dati PVGIS
 - [`02-modello-produzione.md`](02-modello-produzione.md) — combine falde + clipping
 - [`03-simulazione-batteria.md`](03-simulazione-batteria.md) — bilancio orario + dispatch + confronto
-- _(prossimi)_ `04-economia.md`, `05-consumi.md`
+- [`04-confronto-sistemi.md`](04-confronto-sistemi.md) — confronto live di due sistemi (scaling + ricalcolo nel browser)
+- _(prossimi)_ `05-economia.md`, `06-consumi.md`
 
 ## Esecuzione
 
