@@ -80,4 +80,9 @@ export const GLOSSARY: Record<string, GlossaryEntry> = {
     term: "Consumo",
     desc: "Consumo elettrico della casa. Per ora è un profilo SINTETICO segnaposto (pompa di calore, invernale): va sostituito con dati reali.",
   },
+  delta: {
+    term: "Δ (differenza B − A)",
+    desc: "Variazione dell'indicatore passando dal sistema A (baseline) al sistema B. Per i tassi è espressa in punti percentuali.",
+    formula: "Δ = valore(B) − valore(A)",
+  },
 };
