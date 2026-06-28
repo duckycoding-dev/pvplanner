@@ -6,6 +6,7 @@ import { MonthlyView } from "./components/MonthlyView.tsx";
 import { DailyExplorer } from "./components/DailyExplorer.tsx";
 import { Glossary } from "./components/Glossary.tsx";
 import { ConfigPage } from "./components/ConfigPage.tsx";
+import { ComparePage } from "./components/ComparePage.tsx";
 import { type SystemConfigB, cloneFromBaseline, validateAgainstBaseline } from "./lib/systemConfig.ts";
 
 const viz = vizRaw as unknown as Viz;
@@ -16,6 +17,7 @@ const TABS: { key: Tab; label: string }[] = [
   { key: "mensile", label: "Mensile" },
   { key: "giorno", label: "Giorno per giorno" },
   { key: "config", label: "Configurazione" },
+  { key: "confronto", label: "Confronto" },
   { key: "glossario", label: "Glossario" },
 ];
 
@@ -72,6 +74,7 @@ export function App() {
         {tab === "mensile" && <MonthlyView viz={viz} />}
         {tab === "giorno" && <DailyExplorer viz={viz} />}
         {tab === "config" && <ConfigPage viz={viz} systemB={systemB} setSystemB={setSystemB} />}
+        {tab === "confronto" && <ComparePage viz={viz} systemB={systemB} />}
         {tab === "glossario" && <Glossary />}
       </main>
 

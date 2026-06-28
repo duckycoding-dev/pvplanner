@@ -49,5 +49,9 @@ bun run web        # dashboard su http://localhost:2345  (richiede prima `analys
 bun test           # suite di test
 ```
 
-Dashboard (SPA Bun+React+Recharts): 3 viste — panoramica annuale, mensile, giorno-per-giorno —
-che leggono `web/viz.json`. Spec di design: `docs/specs/2026-06-25-visualizzazione-dashboard-design.md`.
+Dashboard (SPA Bun+React+Recharts), schede che leggono `web/viz.json`: panoramica annuale, mensile,
+giorno-per-giorno, **Configurazione** (definizione del Sistema B) e **Confronto** (A vs B, calcolato
+live nel browser), più il glossario. Spec di design:
+`docs/specs/2026-06-25-visualizzazione-dashboard-design.md` (dashboard) e
+`docs/specs/2026-06-26-confronto-sistemi-design.md` (confronto); calcoli del confronto in
+`04-confronto-sistemi.md`.
