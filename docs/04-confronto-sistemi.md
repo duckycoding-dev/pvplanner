@@ -75,6 +75,12 @@ Dato un sistema (la baseline A o il sistema B modificato), il calcolo è:
 Ogni sistema produce **un** risultato secondo la propria configurazione (la batteria è parte del
 sistema; qui non c'è il toggle con/senza della pagina mono-sistema).
 
+> **Sistema A editabile.** A non è più un clone fisso della baseline: è il **Sistema A** modificabile
+> dal menu (come B), seedato dai default di `config.json`. La stessa `computeSystem`/`runSystem` alimenta
+> ora anche le viste mono (Panoramica/Mensile/Giorno), che seguono A e ne calcolano senza/con batteria
+> dal vivo. La colonna **B** in tabella appare quando B **differisce da A** (`equalsSystems`), non più
+> "dalla baseline". Vedi `specs/2026-06-29-sistema-a-editabile-design.md`.
+
 ### Batteria: capacità totale × percentuale utilizzabile
 
 L'energia effettivamente ciclata è `utile = totale_kWh × %utilizzabile / 100`. La `%utilizzabile` è

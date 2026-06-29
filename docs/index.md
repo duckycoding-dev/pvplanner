@@ -51,10 +51,15 @@ bun run web        # dashboard su http://localhost:2345  (richiede prima `analys
 bun test           # suite di test
 ```
 
-Dashboard (SPA Bun+React+Recharts), schede che leggono `web/viz.json`: panoramica annuale, mensile,
-giorno-per-giorno, **Confronto** (A vs B, live nel browser) e glossario. La configurazione (Sistema B +
-tariffa elettrica) si apre dalla colonna a sinistra in un **menu modale** (`<dialog>`, hotkey `m`); i
-costi a fasce orarie compaiono in tutte le view, in tabelle con/senza batteria collassabili. Spec di design: `docs/specs/2026-06-25-visualizzazione-dashboard-design.md` (dashboard),
-`docs/specs/2026-06-26-confronto-sistemi-design.md` (confronto),
-`docs/specs/2026-06-29-config-sidebar-e-prezzi-fasce-design.md` (sidebar + prezzi); calcoli in
-`04-confronto-sistemi.md` e `05-costi-fasce.md`.
+Dashboard (SPA Bun+React+Recharts): panoramica annuale, mensile, giorno-per-giorno, **Confronto**
+(A vs B) e glossario, **tutto calcolato live nel browser**. Le viste mono seguono il **Sistema A**,
+ricalcolato dal vivo (senza/con = batteria di A off/on; se la batteria di A è 0, si mostra solo
+«senza»). Sistema A e Sistema B sono **pienamente editabili** (pannelli, W, inverter, batteria,
+round-trip, costo installazione): `config.json` è solo il **seed** dei default. La configurazione
+(Sistema A, Sistema B, tariffa, incentivi) si apre dalla colonna a sinistra in un **menu modale**
+(`<dialog>`, hotkey `m`); i costi a fasce orarie compaiono in tutte le view, in tabelle con/senza
+batteria collassabili. Spec di design: `docs/specs/2026-06-25-visualizzazione-dashboard-design.md`
+(dashboard), `docs/specs/2026-06-26-confronto-sistemi-design.md` (confronto),
+`docs/specs/2026-06-29-config-sidebar-e-prezzi-fasce-design.md` (sidebar + prezzi),
+`docs/specs/2026-06-29-sistema-a-editabile-design.md` (Sistema A editabile + viste mono live);
+calcoli in `04-confronto-sistemi.md`, `05-costi-fasce.md`, `06-economia.md`.

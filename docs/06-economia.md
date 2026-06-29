@@ -19,8 +19,9 @@ Sopra al calcolo dei costi a fasce (`05-costi-fasce.md`) si stima il **tempo di 
 di installazione. Tutto live nel browser; nessun nuovo dato scaricato.
 
 ## Dati
-- **CAPEX per sistema** (€): per la baseline (A) viene da `config.json` → `economics.installation_cost_eur`
-  (→ `viz.meta.installationCostEur`); per il Sistema B è modificabile nel menu; per «senza FV» è 0.
+- **CAPEX per sistema** (€): modificabile nel menu sia per il Sistema A sia per il Sistema B; il valore
+  iniziale (seed) viene da `config.json` → `economics.installation_cost_eur` (→
+  `viz.meta.installationCostEur`); per «senza FV» è 0.
 - **Incentivo** (policy condivisa, modificabile nel menu, seed da `config.json` →
   `economics.incentive`): **% del CAPEX** *oppure* **importo fisso €**, restituito in **N anni**
   (1 = immediato).
@@ -39,7 +40,8 @@ di installazione. Tutto live nel browser; nessun nuovo dato scaricato.
   rientra entro l'orizzonte. Funzione pura `paybackYears` in `src/core/economics/payback.ts`.
 
 ## Dove si vede
-- **Panoramica annuale**: card «Tempo di rientro» per il sistema baseline (con batteria) vs «senza FV».
+- **Panoramica annuale**: card «Tempo di rientro» per il **Sistema A** (con la sua batteria, se
+  presente) vs «senza FV»; se A non ha batteria è il payback del solo FV.
 - **Confronto**: riga «Tempo di rientro» per ogni colonna (la colonna «senza FV», priva di CAPEX,
   mostra «—»).
 
