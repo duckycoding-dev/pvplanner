@@ -2,8 +2,10 @@ import { useEffect, useRef, useState } from "react";
 import type { Viz } from "../types.ts";
 import type { SystemConfigB } from "../lib/systemConfig.ts";
 import type { Tariff } from "../../../src/core/economics/tariff.ts";
+import type { Incentive } from "../lib/economics.ts";
 import { TariffEditor } from "./TariffEditor.tsx";
 import { SystemBEditor } from "./SystemBEditor.tsx";
+import { IncentiveEditor } from "./IncentiveEditor.tsx";
 
 /**
  * Fixed left rail with a single toggle that opens the configuration as a native
@@ -15,6 +17,8 @@ export function Sidebar({
   setSystemB,
   tariff,
   setTariff,
+  incentive,
+  setIncentive,
   open,
   setOpen,
 }: {
@@ -23,11 +27,14 @@ export function Sidebar({
   setSystemB: (c: SystemConfigB) => void;
   tariff: Tariff;
   setTariff: (t: Tariff) => void;
+  incentive: Incentive;
+  setIncentive: (i: Incentive) => void;
   open: boolean;
   setOpen: (v: boolean) => void;
 }) {
   const [openTariff, setOpenTariff] = useState(true);
   const [openB, setOpenB] = useState(true);
+  const [openInc, setOpenInc] = useState(false);
   const ref = useRef<HTMLDialogElement>(null);
 
   useEffect(() => {
@@ -65,6 +72,12 @@ export function Sidebar({
               {openTariff ? "▾" : "▸"} Tariffa
             </button>
             {openTariff && <TariffEditor tariff={tariff} setTariff={setTariff} />}
+          </section>
+          <section className="sidebar-section">
+            <button className="section-toggle" onClick={() => setOpenInc((o) => !o)}>
+              {openInc ? "▾" : "▸"} Incentivi <span className="hint">(payback)</span>
+            </button>
+            {openInc && <IncentiveEditor incentive={incentive} setIncentive={setIncentive} />}
           </section>
           <section className="sidebar-section">
             <button className="section-toggle" onClick={() => setOpenB((o) => !o)}>

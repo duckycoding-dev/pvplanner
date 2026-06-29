@@ -45,7 +45,7 @@ export function SystemBEditor({
       <p className="editor-ref">
         <b>A (baseline)</b>:{" "}
         {viz.meta.falde.map((f) => `${f.id} ${f.panelCount}×${f.wp}W`).join(" · ")} · batteria{" "}
-        {viz.meta.batteryUsableKwh} kWh
+        {viz.meta.batteryUsableKwh} kWh · costo {viz.meta.installationCostEur} €
       </p>
 
       <label className="text-field">
@@ -112,6 +112,15 @@ export function SystemBEditor({
         max={1}
         step={0.01}
         onChange={(v) => setSystemB({ ...systemB, roundTrip: v })}
+      />
+      <NumberField
+        label="Costo installazione"
+        unit="€"
+        value={systemB.installationCostEur}
+        min={0}
+        max={60000}
+        step={100}
+        onChange={(v) => setSystemB({ ...systemB, installationCostEur: v })}
       />
 
       <p className="editor-total">

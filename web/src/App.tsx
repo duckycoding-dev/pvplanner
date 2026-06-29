@@ -10,10 +10,12 @@ import { ComparePage } from "./components/ComparePage.tsx";
 import { Sidebar } from "./components/Sidebar.tsx";
 import { type SystemConfigB, cloneFromBaseline, validateAgainstBaseline } from "./lib/systemConfig.ts";
 import { defaultTariff, validateTariff } from "./lib/tariffPresets.ts";
+import { type Incentive, defaultIncentive } from "./lib/economics.ts";
 
 const viz = vizRaw as unknown as Viz;
 const SB_KEY = "systemB";
 const TARIFF_KEY = "tariff";
+const INCENTIVE_KEY = "incentive";
 
 const TABS: { key: Tab; label: string }[] = [
   { key: "annuale", label: "Panoramica annuale" },
@@ -49,10 +51,26 @@ function loadTariff(): Tariff {
   return defaultTariff();
 }
 
+function loadIncentive(): Incentive {
+  try {
+    const raw = localStorage.getItem(INCENTIVE_KEY);
+    if (raw !== null) {
+      const i = JSON.parse(raw) as Incentive;
+      if ((i.mode === "percent" || i.mode === "fixed") && typeof i.value === "number" && typeof i.years === "number") {
+        return i;
+      }
+    }
+  } catch {
+    /* ignore corrupt storage */
+  }
+  return defaultIncentive(viz);
+}
+
 export function App() {
   const [tab, setTab] = useState<Tab>("giorno");
   const [systemB, setSystemB] = useState<SystemConfigB>(loadSystemB);
   const [tariff, setTariff] = useState<Tariff>(loadTariff);
+  const [incentive, setIncentive] = useState<Incentive>(loadIncentive);
   const [menuOpen, setMenuOpen] = useState(false);
 
   // Hotkey "m" toggles the configuration menu (ignored while typing in a form field).
@@ -83,6 +101,13 @@ export function App() {
       /* ignore */
     }
   }, [tariff]);
+  useEffect(() => {
+    try {
+      localStorage.setItem(INCENTIVE_KEY, JSON.stringify(incentive));
+    } catch {
+      /* ignore */
+    }
+  }, [incentive]);
   const faldeLabel = viz.meta.falde
     .map((f) => `${f.id} ${f.azimuth > 0 ? "+" : ""}${f.azimuth}° ${f.peakKwp} kWp`)
     .join(" · ");
@@ -95,6 +120,8 @@ export function App() {
         setSystemB={setSystemB}
         tariff={tariff}
         setTariff={setTariff}
+        incentive={incentive}
+        setIncentive={setIncentive}
         open={menuOpen}
         setOpen={setMenuOpen}
       />
