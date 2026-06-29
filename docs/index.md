@@ -61,5 +61,6 @@ round-trip, costo installazione): `config.json` è solo il **seed** dei default.
 batteria collassabili. Spec di design: `docs/specs/2026-06-25-visualizzazione-dashboard-design.md`
 (dashboard), `docs/specs/2026-06-26-confronto-sistemi-design.md` (confronto),
 `docs/specs/2026-06-29-config-sidebar-e-prezzi-fasce-design.md` (sidebar + prezzi),
-`docs/specs/2026-06-29-sistema-a-editabile-design.md` (Sistema A editabile + viste mono live);
+`docs/specs/2026-06-29-sistema-a-editabile-design.md` (Sistema A editabile + viste mono live),
+`docs/specs/2026-06-29-cashflow-scomposizione-design.md` (cashflow + scomposizione rientro);
 calcoli in `04-confronto-sistemi.md`, `05-costi-fasce.md`, `06-economia.md`.

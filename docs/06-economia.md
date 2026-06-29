@@ -44,6 +44,12 @@ di installazione. Tutto live nel browser; nessun nuovo dato scaricato.
   presente) vs «senza FV»; se A non ha batteria è il payback del solo FV.
 - **Confronto**: riga «Tempo di rientro» per ogni colonna (la colonna «senza FV», priva di CAPEX,
   mostra «—»).
+- **Confronto → Andamento economico (cashflow)**: curva del **cumulato** di due sistemi scelti
+  (tra A, B, senza FV) su un orizzonte di anni regolabile; la curva taglia lo zero al payback (punto
+  evidenziato). Sotto, la **scomposizione del rientro** mostra di cosa è fatto il risparmio annuo
+  (acquisto evitato + ricavo export) più la quota incentivo e il CAPEX, e una tabella del cumulato per
+  anno. Calcolo: `cashflowSeries` in `web/src/lib/cashflow.ts` (coerente con `paybackYears`). Vedi
+  `specs/2026-06-29-cashflow-scomposizione-design.md`.
 
 ## Limiti (v1)
 Stima **semplice**: nessuna inflazione dei prezzi dell'energia, nessun degrado dei pannelli, nessun
