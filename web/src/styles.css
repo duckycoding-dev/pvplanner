@@ -181,6 +181,20 @@ footer { margin-top: 24px; color: var(--muted); font-size: 12px; border-top: 1px
 .file-pick { color: var(--accent); cursor: pointer; text-decoration: underline; }
 .err { color: #dc2626; font-size: 13px; margin: 10px 0 0; }
 
+/* --- metrics table (cost recaps + comparison) --- */
+.metrics-wrap { overflow-x: auto; }
+.metrics-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+.metrics-table th, .metrics-table td { text-align: right; padding: 7px 10px; border-bottom: 1px solid var(--border); white-space: nowrap; }
+.metrics-table th:first-child, .metrics-table td:first-child { text-align: left; }
+.metrics-table thead th { color: var(--muted); font-weight: 600; }
+.metrics-table td.pos { color: #16a34a; }
+.metrics-table td.neg { color: #dc2626; }
+.row-toggle { border: none; background: none; cursor: pointer; font: inherit; color: var(--text); padding: 0; text-align: left; }
+.row-toggle:hover { color: var(--accent); text-decoration: line-through; }
+.metrics-hidden { margin-top: 8px; font-size: 12px; color: var(--muted); display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.metrics-hidden .chip { border: 1px solid var(--border); background: var(--card); border-radius: 12px; padding: 2px 8px; cursor: pointer; font-size: 11px; color: var(--muted); }
+.metrics-hidden .chip:hover { border-color: var(--accent); color: var(--accent); }
+
 /* --- comparison KPI table (Confronto page) --- */
 .kpi-table { width: 100%; border-collapse: collapse; font-size: 14px; }
 .kpi-table th, .kpi-table td { text-align: right; padding: 7px 10px; border-bottom: 1px solid var(--border); }
