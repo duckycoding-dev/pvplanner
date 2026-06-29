@@ -1,5 +1,6 @@
 import { type ChangeEvent, useMemo, useState } from "react";
 import {
+  Area,
   CartesianGrid,
   ComposedChart,
   Legend,
@@ -79,11 +80,12 @@ export function CompareDayChart({
           <Tooltip formatter={(v) => Number(v).toFixed(2)} labelFormatter={(h) => `ore ${h}`} />
           <Legend onClick={onClick} wrapperStyle={{ cursor: "pointer" }} />
 
+          {/* coverage drawn first as filled areas so production/load lines sit on top */}
+          <Area type="monotone" dataKey="selfA" name={`coperto ${labelA}`} stroke="#3b82f6" fill="#93c5fd" fillOpacity={0.5} isAnimationActive={false} hide={isHidden("selfA")} />
+          <Area type="monotone" dataKey="selfB" name={`coperto ${labelB}`} stroke="#3b82f6" strokeDasharray="5 3" fill="#bfdbfe" fillOpacity={0.3} isAnimationActive={false} hide={isHidden("selfB")} />
           <Line type="monotone" dataKey="load" name="consumo" stroke="#dc2626" strokeWidth={2} dot={false} isAnimationActive={false} hide={isHidden("load")} />
           <Line type="monotone" dataKey="prodA" name={`produzione ${labelA}`} stroke="#16a34a" strokeWidth={2} dot={false} isAnimationActive={false} hide={isHidden("prodA")} />
           <Line type="monotone" dataKey="prodB" name={`produzione ${labelB}`} stroke="#16a34a" strokeDasharray="5 3" dot={false} isAnimationActive={false} hide={isHidden("prodB")} />
-          <Line type="monotone" dataKey="selfA" name={`coperto ${labelA}`} stroke="#3b82f6" strokeWidth={2} dot={false} isAnimationActive={false} hide={isHidden("selfA")} />
-          <Line type="monotone" dataKey="selfB" name={`coperto ${labelB}`} stroke="#3b82f6" strokeDasharray="5 3" dot={false} isAnimationActive={false} hide={isHidden("selfB")} />
           <Line type="monotone" dataKey="socA" name={`SoC ${labelA}`} stroke="#f59e0b" strokeWidth={2} dot={false} isAnimationActive={false} hide={isHidden("socA")} />
           <Line type="monotone" dataKey="socB" name={`SoC ${labelB}`} stroke="#f59e0b" strokeDasharray="5 3" dot={false} isAnimationActive={false} hide={isHidden("socB")} />
         </ComposedChart>
