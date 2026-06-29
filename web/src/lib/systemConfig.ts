@@ -15,6 +15,7 @@ export interface SystemConfigB {
   batteryTotalKwh: number; // nominal total capacity; 0 = no battery
   batteryUsablePct: number; // usable fraction of total [%], 0..100 (DoD / usable per datasheet)
   roundTrip: number; // AC-to-AC round-trip efficiency, 0..1
+  installationCostEur: number; // CAPEX of this system
 }
 
 export function faldaPeakKwp(f: FaldaConfigB): number {
@@ -38,6 +39,7 @@ export function cloneFromBaseline(viz: Viz): SystemConfigB {
     batteryTotalKwh: viz.meta.batteryTotalKwh,
     batteryUsablePct: viz.meta.batteryUsablePct,
     roundTrip: viz.meta.batteryRoundTrip,
+    installationCostEur: viz.meta.installationCostEur,
   };
 }
 
@@ -53,6 +55,7 @@ export function equalsBaseline(cfg: SystemConfigB, viz: Viz): boolean {
     cfg.batteryTotalKwh !== base.batteryTotalKwh ||
     cfg.batteryUsablePct !== base.batteryUsablePct ||
     cfg.roundTrip !== base.roundTrip ||
+    cfg.installationCostEur !== base.installationCostEur ||
     cfg.falde.length !== base.falde.length
   ) {
     return false;
@@ -67,7 +70,13 @@ export function equalsBaseline(cfg: SystemConfigB, viz: Viz): boolean {
 /** A "no PV" system: same geometry but zero panels and no battery (import = full load). */
 export function noPvConfig(viz: Viz): SystemConfigB {
   const base = cloneFromBaseline(viz);
-  return { ...base, label: "senza FV", falde: base.falde.map((f) => ({ ...f, panelCount: 0 })), batteryTotalKwh: 0 };
+  return {
+    ...base,
+    label: "senza FV",
+    falde: base.falde.map((f) => ({ ...f, panelCount: 0 })),
+    batteryTotalKwh: 0,
+    installationCostEur: 0,
+  };
 }
 
 function reqNumber(v: unknown, ctx: string): number {
@@ -113,6 +122,7 @@ export function parseSystemConfigB(text: string): SystemConfigB {
     batteryTotalKwh: reqNumber(total, "batteryTotalKwh"),
     batteryUsablePct: reqNumber(pct, "batteryUsablePct"),
     roundTrip: reqNumber(o["roundTrip"], "roundTrip"),
+    installationCostEur: typeof o["installationCostEur"] === "number" ? o["installationCostEur"] : 0,
   };
 }
 
@@ -135,5 +145,6 @@ export function validateAgainstBaseline(cfg: SystemConfigB, viz: Viz): string | 
   if (cfg.batteryTotalKwh < 0) return "Capacità batteria non valida.";
   if (cfg.batteryUsablePct < 0 || cfg.batteryUsablePct > 100) return "Percentuale utilizzabile deve essere 0–100.";
   if (cfg.roundTrip <= 0 || cfg.roundTrip > 1) return "Round-trip deve essere tra 0 e 1.";
+  if (cfg.installationCostEur < 0) return "Costo installazione non valido.";
   return null;
 }

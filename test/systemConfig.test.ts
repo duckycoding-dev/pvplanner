@@ -20,6 +20,7 @@ function makeViz(): Viz {
       batteryTotalKwh: 10.24,
       batteryUsablePct: 100,
       batteryRoundTrip: 0.9,
+      installationCostEur: 16000,
       falde: [
         { id: "est", azimuth: -45, peakKwp: 5.115, panelCount: 11, wp: 465 },
         { id: "ovest", azimuth: 45, peakKwp: 5.115, panelCount: 11, wp: 465 },
