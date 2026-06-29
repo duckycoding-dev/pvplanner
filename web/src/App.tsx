@@ -56,11 +56,26 @@ export function App() {
   const [tariff, setTariff] = useState<Tariff>(loadTariff);
   const [collapsed, setCollapsed] = useState<boolean>(() => {
     try {
-      return localStorage.getItem(COLLAPSE_KEY) === "1";
+      const v = localStorage.getItem(COLLAPSE_KEY);
+      return v === null ? true : v === "1"; // default: closed (overlay)
     } catch {
-      return false;
+      return true;
     }
   });
+
+  // Hotkey "m" toggles the sidebar (ignored while typing in a form field).
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent): void => {
+      if (e.key !== "m" && e.key !== "M") return;
+      if (e.metaKey || e.ctrlKey || e.altKey) return;
+      const t = e.target as HTMLElement | null;
+      const tag = t?.tagName;
+      if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT" || t?.isContentEditable === true) return;
+      setCollapsed((c) => !c);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
 
   useEffect(() => {
     try {

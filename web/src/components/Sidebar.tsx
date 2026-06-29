@@ -27,26 +27,33 @@ export function Sidebar({
   const [openB, setOpenB] = useState(true);
 
   return (
-    <aside className={collapsed ? "sidebar collapsed" : "sidebar"}>
-      <button className="sidebar-toggle" onClick={onToggle} title={collapsed ? "Apri configurazione" : "Chiudi"}>
-        {collapsed ? "›" : "‹"}
+    <>
+      <button
+        className="sidebar-toggle"
+        onClick={onToggle}
+        title={collapsed ? "Apri configurazione (m)" : "Chiudi (m)"}
+        aria-label="Configurazione"
+      >
+        {collapsed ? "☰" : "✕"}
       </button>
       {!collapsed && (
-        <div className="sidebar-body">
-          <section className="sidebar-section">
-            <button className="section-toggle" onClick={() => setOpenTariff((o) => !o)}>
-              {openTariff ? "▾" : "▸"} Tariffa
-            </button>
-            {openTariff && <TariffEditor tariff={tariff} setTariff={setTariff} />}
-          </section>
-          <section className="sidebar-section">
-            <button className="section-toggle" onClick={() => setOpenB((o) => !o)}>
-              {openB ? "▾" : "▸"} Sistema B <span className="hint">(Confronto)</span>
-            </button>
-            {openB && <SystemBEditor viz={viz} systemB={systemB} setSystemB={setSystemB} />}
-          </section>
-        </div>
+        <aside className="sidebar-panel">
+          <div className="sidebar-body">
+            <section className="sidebar-section">
+              <button className="section-toggle" onClick={() => setOpenTariff((o) => !o)}>
+                {openTariff ? "▾" : "▸"} Tariffa
+              </button>
+              {openTariff && <TariffEditor tariff={tariff} setTariff={setTariff} />}
+            </section>
+            <section className="sidebar-section">
+              <button className="section-toggle" onClick={() => setOpenB((o) => !o)}>
+                {openB ? "▾" : "▸"} Sistema B <span className="hint">(Confronto)</span>
+              </button>
+              {openB && <SystemBEditor viz={viz} systemB={systemB} setSystemB={setSystemB} />}
+            </section>
+          </div>
+        </aside>
       )}
-    </aside>
+    </>
   );
 }
