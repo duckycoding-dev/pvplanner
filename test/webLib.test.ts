@@ -9,6 +9,8 @@ function makeHourly(days: number): Hourly {
   return {
     timestampsUtc: Array.from({ length: n }, (_, i) => Date.UTC(2023, 0, 1, 0) + i * 3_600_000),
     months: Array.from({ length: n }, () => 1),
+    localHour: Array.from({ length: n }, (_, i) => i % 24),
+    weekday: Array.from({ length: n }, () => 0),
     falde: [],
     productionTheoreticalKwh: zero(),
     productionPracticalKwh: zero(),

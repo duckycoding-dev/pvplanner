@@ -29,6 +29,8 @@ test("writeVizJson emits a viz.json matching the analysis", async () => {
     monthly: unknown[];
     hourly: {
       productionPracticalKwh: number[];
+      localHour: number[];
+      weekday: number[];
       wb: { socKwh: number[] };
       falde: { id: string; peakKwp: number; productionKwh: number[] }[];
     };
@@ -52,6 +54,12 @@ test("writeVizJson emits a viz.json matching the analysis", async () => {
   expect(v.hourly.wb.socKwh.length).toBe(8760);
   expect(v.hourly.falde.length).toBe(2);
   expect(v.hourly.falde[0]!.productionKwh.length).toBe(8760);
+  expect(v.hourly.localHour.length).toBe(8760);
+  expect(v.hourly.weekday.length).toBe(8760);
+  expect(Math.max(...v.hourly.localHour)).toBeLessThanOrEqual(23);
+  expect(Math.min(...v.hourly.localHour)).toBeGreaterThanOrEqual(0);
+  expect(Math.max(...v.hourly.weekday)).toBeLessThanOrEqual(6);
+  expect(Math.min(...v.hourly.weekday)).toBeGreaterThanOrEqual(0);
   // per-falda hourly must sum to the combined theoretical (before clipping)
   const sumFalde = v.hourly.falde.reduce((s, f) => s + f.productionKwh.reduce((a, b) => a + b, 0), 0);
   expect(sumFalde).toBeCloseTo(v.annual.production.theoreticalKwh, 0);

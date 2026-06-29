@@ -25,6 +25,8 @@ export interface FaldaHourly {
 export interface Hourly {
   timestampsUtc: number[];
   months: number[];
+  localHour: number[];
+  weekday: number[];
   falde: FaldaHourly[];
   productionTheoreticalKwh: number[];
   productionPracticalKwh: number[];
