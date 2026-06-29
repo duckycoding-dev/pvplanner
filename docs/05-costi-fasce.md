@@ -80,11 +80,16 @@ netto = verde se credito / rosso se paghi); la colonna **Δ** colora ogni riga p
 (verde = meglio secondo la metrica, es. import che cala o produzione che sale). Le righe si possono
 **nascondere** (click sull'etichetta).
 
-- **Panoramica annuale**: tabella costi **senza | con batteria** (spesa/ricavo/netto) con Δ = effetto
-  batteria (il netto Δ negativo = risparmio, in verde).
-- **Mensile**: stessa tabella costi annui + una tabella **netto per mese** (senza | con | Δ).
+Nelle viste mono (che seguono il **Sistema A**) la **prima colonna è sempre «senza FV»** (riferimento:
+intero consumo importato, nessun export); la **Δ** resta sulle **ultime due** colonne, quindi vale
+«effetto batteria» (con vs senza) quando A ha la batteria, oppure «FV vs senza FV» (l'effetto
+dell'impianto) quando A non ha batteria; le etichette si adattano al caso.
+
+- **Panoramica annuale**: tabella costi **senza FV | senza batteria | con batteria** (spesa/ricavo/
+  netto), Δ = effetto batteria (netto Δ negativo = risparmio, in verde). Senza batteria: **senza FV | FV**.
+- **Mensile**: stessa tabella costi annui + una tabella **netto per mese**, stesse colonne.
 - **Giorno per giorno**: tabella riepilogo del giorno (produzione/consumo/autoconsumo/import/export/
-  clipping/cicli/**netto €**) per **senza | con** con Δ; mostra sempre entrambi gli scenari.
+  clipping/cicli/round-trip/**netto €**), colonne **senza FV | senza batteria | con batteria**.
 - **Confronto**: tabella con indicatori energetici **e** di costo. Due colonne valore + Δ: se il
   Sistema B è stato modificato → **A | B | Δ(B−A)**; se B è ancora uguale alla baseline → **senza FV |
   A | Δ(A−senza FV)** (così un B non toccato mostra comunque il valore dell'impianto). Il caso
