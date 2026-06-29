@@ -198,6 +198,23 @@ footer { margin-top: 24px; color: var(--muted); font-size: 12px; border-top: 1px
 .metrics-title { width: 100%; text-align: left; border: none; background: none; cursor: pointer;
   font-size: 15px; font-weight: 600; color: var(--text); padding: 0 0 8px; }
 .metrics-title:hover { color: var(--accent); }
+.info-bubble--fixed {
+  position: fixed;
+  bottom: auto;
+  display: block;
+  transform: translate(-50%, calc(-100% - 8px));
+  z-index: 1000;
+  pointer-events: none;
+}
+.crossover-note {
+  margin: 8px 0 4px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  background: #f5f3ff;
+  border: 1px solid #ddd6fe;
+  color: #5b21b6;
+  font-size: 13px;
+}
 .metrics-wrap { overflow-x: auto; }
 .metrics-table { width: 100%; border-collapse: collapse; font-size: 14px; }
 .metrics-table th, .metrics-table td { text-align: right; padding: 7px 10px; border-bottom: 1px solid var(--border); white-space: nowrap; }

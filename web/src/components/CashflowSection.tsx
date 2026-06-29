@@ -11,7 +11,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { cashflowSeries } from "../lib/cashflow.ts";
+import { cashflowSeries, firstCrossover } from "../lib/cashflow.ts";
 import { paybackYears } from "../../../src/core/economics/payback.ts";
 import { type Incentive, incentiveTotalEur } from "../lib/economics.ts";
 import { fmt } from "../lib/format.ts";
@@ -66,6 +66,19 @@ export function CashflowSection({
   const m2 = metricsFor(sys2);
 
   const data = Array.from({ length: years + 1 }, (_, y) => ({ year: y, s1: m1.series[y] ?? 0, s2: m2.series[y] ?? 0 }));
+
+  // Crossover: when does one system overtake the other in cumulative savings?
+  const interp = (s: number[], x: number): number => {
+    const i = Math.floor(x);
+    const f = x - i;
+    return (s[i] ?? 0) * (1 - f) + (s[i + 1] ?? s[i] ?? 0) * f;
+  };
+  const sameSystem = sys1.id === sys2.id;
+  const cross = sameSystem ? null : firstCrossover(m1.series, m2.series);
+  const endDiff = (m1.series[years] ?? 0) - (m2.series[years] ?? 0);
+  const leader = endDiff >= 0 ? sys1 : sys2;
+  const trailer = endDiff >= 0 ? sys2 : sys1;
+  const crossY = cross !== null ? interp(m1.series, cross) : 0;
 
   const breakdownCols = [
     { key: "s1", label: sys1.label },
@@ -156,8 +169,32 @@ export function CashflowSection({
           {m2.payback !== null && m2.payback <= years && (
             <ReferenceDot x={m2.payback} y={0} r={5} fill={COLORS[1]} stroke="#fff" />
           )}
+          {cross !== null && (
+            <ReferenceLine
+              x={cross}
+              stroke="#7c3aed"
+              strokeDasharray="3 3"
+              label={{ value: `sorpasso ${cross.toFixed(1)}a`, position: "top", fill: "#7c3aed", fontSize: 11 }}
+            />
+          )}
+          {cross !== null && <ReferenceDot x={cross} y={crossY} r={5} fill="#7c3aed" stroke="#fff" />}
         </LineChart>
       </ResponsiveContainer>
+
+      {!sameSystem && (
+        <div className="crossover-note">
+          {cross !== null ? (
+            <>
+              🔀 <b>{leader.label}</b> supera <b>{trailer.label}</b> dopo <b>{cross.toFixed(1)} anni</b> (cumulato ≈{" "}
+              {eur(crossY)}).
+            </>
+          ) : (
+            <>
+              <b>{leader.label}</b> resta sempre davanti a <b>{trailer.label}</b> entro {years} anni (nessun sorpasso).
+            </>
+          )}
+        </div>
+      )}
 
       <h4 className="subchart-title">Scomposizione del rientro (€/anno)</h4>
       <MetricsTable columns={breakdownCols} rows={breakdownRows} />

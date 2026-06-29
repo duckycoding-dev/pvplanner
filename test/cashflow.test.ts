@@ -1,5 +1,5 @@
 import { expect, test } from "bun:test";
-import { cashflowSeries } from "../web/src/lib/cashflow.ts";
+import { cashflowSeries, firstCrossover } from "../web/src/lib/cashflow.ts";
 import { paybackYears } from "../src/core/economics/payback.ts";
 
 test("series starts at −capex and has years+1 points", () => {
@@ -40,4 +40,25 @@ test("zero crossing matches paybackYears", () => {
 test("senza FV style input (no capex, no saving) is a flat zero line", () => {
   const s = cashflowSeries({ capex: 0, annualSaving: 0, incentiveTotal: 0, incentiveYears: 1, years: 10 });
   expect(s.every((v) => v === 0)).toBe(true);
+});
+
+test("firstCrossover finds the year a cheaper-but-smaller system is overtaken", () => {
+  // a: low capex, low saving; b: high capex, high saving → b overtakes a
+  const a = cashflowSeries({ capex: 5000, annualSaving: 500, incentiveTotal: 0, incentiveYears: 1, years: 30 });
+  const b = cashflowSeries({ capex: 11000, annualSaving: 1200, incentiveTotal: 0, incentiveYears: 1, years: 30 });
+  const x = firstCrossover(a, b);
+  expect(x).not.toBeNull();
+  // a−b starts positive (a less negative), ends negative → crossing where 5000+500y = 11000+1200y... solve: −6000 = 700y → y≈8.57
+  expect(x!).toBeCloseTo(6000 / 700, 1);
+});
+
+test("firstCrossover is null when one system dominates the whole horizon", () => {
+  const a = cashflowSeries({ capex: 5000, annualSaving: 1500, incentiveTotal: 0, incentiveYears: 1, years: 20 });
+  const b = cashflowSeries({ capex: 6000, annualSaving: 500, incentiveTotal: 0, incentiveYears: 1, years: 20 });
+  expect(firstCrossover(a, b)).toBeNull();
+});
+
+test("firstCrossover is null for identical series", () => {
+  const a = cashflowSeries({ capex: 8000, annualSaving: 900, incentiveTotal: 1000, incentiveYears: 5, years: 15 });
+  expect(firstCrossover(a, [...a])).toBeNull();
 });

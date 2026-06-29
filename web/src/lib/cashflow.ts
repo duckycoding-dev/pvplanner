@@ -22,3 +22,20 @@ export function cashflowSeries(input: CashflowInput): number[] {
   }
   return out;
 }
+
+/**
+ * First (fractional) year at which the cumulative cash flow of series `a` crosses `b`
+ * — i.e. the difference a−b changes sign. Returns null if they never cross (one stays
+ * ahead the whole horizon) or are identical. Used to mark when one system overtakes the other.
+ */
+export function firstCrossover(a: number[], b: number[]): number | null {
+  const n = Math.min(a.length, b.length);
+  for (let y = 1; y < n; y++) {
+    const prev = (a[y - 1] ?? 0) - (b[y - 1] ?? 0);
+    const cur = (a[y] ?? 0) - (b[y] ?? 0);
+    if (prev === 0) continue; // ignore a shared starting point
+    if (cur === 0) return y;
+    if (prev * cur < 0) return y - 1 + Math.abs(prev) / (Math.abs(prev) + Math.abs(cur));
+  }
+  return null;
+}
