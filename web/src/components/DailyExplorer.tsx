@@ -6,7 +6,13 @@ import { quickPickDays } from "../lib/quickPickDays.ts";
 import { dayIndexToDateInput, fmt, formatDayLabel } from "../lib/format.ts";
 import { PowerChart } from "./PowerChart.tsx";
 import { BatteryChart } from "./BatteryChart.tsx";
+import { MetricsTable, type MetricRow } from "./MetricsTable.tsx";
 import { InfoTip } from "./InfoTip.tsx";
+
+const DAY_COLS = [
+  { key: "senza", label: "senza batteria" },
+  { key: "con", label: "con batteria" },
+];
 
 const SCENARIOS: { key: Scenario; label: string }[] = [
   { key: "con", label: "con batteria" },
@@ -36,25 +42,41 @@ export function DailyExplorer({ viz, tariff }: { viz: Viz; tariff: Tariff }) {
     }
   };
 
+  const isNb = scenario === "senza";
   const sum = (f: (p: DayPoint) => number): number => pts.reduce((s, p) => s + f(p), 0);
   const prod = sum((p) => p.prodPractical);
   const cons = sum((p) => p.load);
   const clip = sum((p) => p.clipping);
-  const isNb = scenario === "senza";
-  const self = isNb ? sum((p) => p.nbSelf) : sum((p) => p.wbSelf);
-  const imp = isNb ? sum((p) => p.nbImport) : sum((p) => p.wbImport);
-  const exp = isNb ? sum((p) => p.nbExport) : sum((p) => p.wbExport);
-  const cycles = sum((p) => p.discharge) / (viz.meta.batteryUsableKwh || 1);
+  const selfSenza = sum((p) => p.nbSelf);
+  const selfCon = sum((p) => p.wbSelf);
+  const impSenza = sum((p) => p.nbImport);
+  const impCon = sum((p) => p.wbImport);
+  const expSenza = sum((p) => p.nbExport);
+  const expCon = sum((p) => p.wbExport);
+  const cycCon = sum((p) => p.discharge) / (viz.meta.batteryUsableKwh || 1);
 
   const dayStart = dayIndex * 24;
-  let dayNet = 0;
+  let netSenza = 0;
+  let netCon = 0;
   for (let i = 0; i < 24; i++) {
     const j = dayStart + i;
     const price = priceForHour(tariff, h.localHour[j] ?? 0, h.weekday[j] ?? 0);
-    const dImp = isNb ? h.nb.importKwh[j] ?? 0 : h.wb.importKwh[j] ?? 0;
-    const dExp = isNb ? h.nb.exportKwh[j] ?? 0 : h.wb.exportKwh[j] ?? 0;
-    dayNet += dImp * price - dExp * tariff.sellPrice;
+    netSenza += (h.nb.importKwh[j] ?? 0) * price - (h.nb.exportKwh[j] ?? 0) * tariff.sellPrice;
+    netCon += (h.wb.importKwh[j] ?? 0) * price - (h.wb.exportKwh[j] ?? 0) * tariff.sellPrice;
   }
+
+  const kwh1 = (v: number): string => `${fmt(v, 1)} kWh`;
+  const eur = (v: number): string => `${fmt(v, 2)} €`;
+  const dayRows: MetricRow[] = [
+    { key: "prod", label: "Produzione", info: "produzione", good: "higher", render: kwh1, values: [prod, prod] },
+    { key: "cons", label: "Consumo", info: "consumo", good: "none", render: kwh1, values: [cons, cons] },
+    { key: "self", label: "Autoconsumo", info: "autoconsumo", good: "higher", render: kwh1, values: [selfSenza, selfCon] },
+    { key: "imp", label: "Import", info: "import", good: "lower", render: kwh1, values: [impSenza, impCon] },
+    { key: "exp", label: "Export", info: "export", good: "higher", render: kwh1, values: [expSenza, expCon] },
+    { key: "clip", label: "Clipping", info: "clipping", good: "lower", render: kwh1, values: [clip, clip] },
+    { key: "cyc", label: "Cicli", info: "cicli", good: "none", render: (v) => (v > 0 ? v.toFixed(2) : "—"), values: [0, cycCon] },
+    { key: "net", label: "Netto giorno", info: "nettoCosto", good: "lower", render: eur, values: [netSenza, netCon] },
+  ];
 
   return (
     <div>
@@ -85,23 +107,10 @@ export function DailyExplorer({ viz, tariff }: { viz: Viz; tariff: Tariff }) {
         </div>
       </div>
 
-      <div className="day-summary">
-        <span>produzione<InfoTip k="produzione" /> <b>{fmt(prod, 1)}</b></span>
-        <span>consumo<InfoTip k="consumo" /> <b>{fmt(cons, 1)}</b></span>
-        <span>autoconsumo<InfoTip k="autoconsumo" /> <b>{fmt(self, 1)}</b></span>
-        <span>import<InfoTip k="import" /> <b>{fmt(imp, 1)}</b></span>
-        <span>export<InfoTip k="export" /> <b>{fmt(exp, 1)}</b></span>
-        <span>clipping<InfoTip k="clipping" /> <b>{fmt(clip, 1)}</b></span>
-        {!isNb && (
-          <span>
-            cicli<InfoTip k="cicli" /> <b>{cycles.toFixed(2)}</b>
-          </span>
-        )}
-        <span>
-          netto<InfoTip k="nettoCosto" /> <b>{fmt(dayNet, 2)} €</b>
-        </span>
-        <span className="unit">kWh · €</span>
-      </div>
+      <section className="chart-card">
+        <h3>Riepilogo giorno (Δ = effetto batteria)</h3>
+        <MetricsTable columns={DAY_COLS} rows={dayRows} />
+      </section>
 
       <div className="chart-card">
         <div className="section-head">
