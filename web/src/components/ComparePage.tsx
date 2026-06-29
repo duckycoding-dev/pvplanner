@@ -59,8 +59,11 @@ export function ComparePage({ viz, systemB, tariff }: { viz: Viz; systemB: Syste
       </p>
 
       <section className="chart-card">
-        <h3>Indicatori annui</h3>
-        <MetricsTable columns={[{ key: "c1", label: label1 }, { key: "c2", label: label2 }]} rows={rows} />
+        <MetricsTable
+          title="Indicatori annui"
+          columns={[{ key: "c1", label: label1 }, { key: "c2", label: label2 }]}
+          rows={rows}
+        />
       </section>
 
       <CompareDayChart a={r1} b={r2} viz={viz} labelA={label1} labelB={label2} />

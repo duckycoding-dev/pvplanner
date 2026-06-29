@@ -121,8 +121,7 @@ export function AnnualOverview({ viz, tariff }: { viz: Viz; tariff: Tariff }) {
       </section>
 
       <section className="chart-card">
-        <h3>Costi energia (Δ = effetto batteria)</h3>
-        <MetricsTable columns={COST_COLS} rows={costRows} />
+        <MetricsTable title="Costi energia (Δ = effetto batteria)" columns={COST_COLS} rows={costRows} />
       </section>
 
       <section className="chart-card">

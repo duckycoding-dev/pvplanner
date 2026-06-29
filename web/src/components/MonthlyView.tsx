@@ -82,17 +82,11 @@ export function MonthlyView({ viz, tariff }: { viz: Viz; tariff: Tariff }) {
   return (
     <div>
       <section className="chart-card">
-        <div className="section-head">
-          <h3>Costi energia (Δ = effetto batteria)</h3>
-        </div>
-        <MetricsTable columns={COST_COLS} rows={costRows} />
+        <MetricsTable title="Costi energia (Δ = effetto batteria)" columns={COST_COLS} rows={costRows} />
       </section>
 
       <section className="chart-card">
-        <div className="section-head">
-          <h3>Costo netto per mese</h3>
-        </div>
-        <MetricsTable columns={COST_COLS} rows={monthlyNetRows} />
+        <MetricsTable title="Costo netto per mese" columns={COST_COLS} rows={monthlyNetRows} />
       </section>
 
       <section className="chart-card">

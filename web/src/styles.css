@@ -185,6 +185,9 @@ footer { margin-top: 24px; color: var(--muted); font-size: 12px; border-top: 1px
 .err { color: #dc2626; font-size: 13px; margin: 10px 0 0; }
 
 /* --- metrics table (cost recaps + comparison) --- */
+.metrics-title { width: 100%; text-align: left; border: none; background: none; cursor: pointer;
+  font-size: 15px; font-weight: 600; color: var(--text); padding: 0 0 8px; }
+.metrics-title:hover { color: var(--accent); }
 .metrics-wrap { overflow-x: auto; }
 .metrics-table { width: 100%; border-collapse: collapse; font-size: 14px; }
 .metrics-table th, .metrics-table td { text-align: right; padding: 7px 10px; border-bottom: 1px solid var(--border); white-space: nowrap; }

@@ -108,8 +108,7 @@ export function DailyExplorer({ viz, tariff }: { viz: Viz; tariff: Tariff }) {
       </div>
 
       <section className="chart-card">
-        <h3>Riepilogo giorno (Δ = effetto batteria)</h3>
-        <MetricsTable columns={DAY_COLS} rows={dayRows} />
+        <MetricsTable title="Riepilogo giorno (Δ = effetto batteria)" columns={DAY_COLS} rows={dayRows} />
       </section>
 
       <div className="chart-card">

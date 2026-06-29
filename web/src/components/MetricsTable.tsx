@@ -26,12 +26,15 @@ export function MetricsTable({
   columns,
   rows,
   showDelta,
+  title,
 }: {
   columns: MetricCol[];
   rows: MetricRow[];
   showDelta?: boolean;
+  title?: string;
 }) {
   const [hidden, setHidden] = useState<Set<string>>(new Set());
+  const [bodyOpen, setBodyOpen] = useState(true);
   const toggle = (key: string): void =>
     setHidden((h) => {
       const next = new Set(h);
@@ -44,7 +47,7 @@ export function MetricsTable({
   const visible = rows.filter((r) => !hidden.has(r.key));
   const hiddenRows = rows.filter((r) => hidden.has(r.key));
 
-  return (
+  const body = (
     <div className="metrics-wrap">
       <table className="metrics-table">
         <thead>
@@ -93,6 +96,16 @@ export function MetricsTable({
           ))}
         </div>
       )}
+    </div>
+  );
+
+  if (title === undefined) return body;
+  return (
+    <div className="metrics-block">
+      <button className="metrics-title" onClick={() => setBodyOpen((o) => !o)}>
+        {bodyOpen ? "▾" : "▸"} {title}
+      </button>
+      {bodyOpen && body}
     </div>
   );
 }
