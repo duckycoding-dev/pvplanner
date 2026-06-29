@@ -1,5 +1,6 @@
 import { type ChangeEvent, useMemo, useState } from "react";
 import type { Scenario, Viz } from "../types.ts";
+import { priceForHour, type Tariff } from "../../../src/core/economics/tariff.ts";
 import { type DayPoint, dayCount, sliceDay } from "../lib/sliceDay.ts";
 import { quickPickDays } from "../lib/quickPickDays.ts";
 import { dayIndexToDateInput, fmt, formatDayLabel } from "../lib/format.ts";
@@ -15,7 +16,7 @@ const SCENARIOS: { key: Scenario; label: string }[] = [
 
 const DAY_MS = 86_400_000;
 
-export function DailyExplorer({ viz }: { viz: Viz }) {
+export function DailyExplorer({ viz, tariff }: { viz: Viz; tariff: Tariff }) {
   const h = viz.hourly;
   const total = dayCount(h);
   const picks = useMemo(() => quickPickDays(h), [h]);
@@ -44,6 +45,16 @@ export function DailyExplorer({ viz }: { viz: Viz }) {
   const imp = isNb ? sum((p) => p.nbImport) : sum((p) => p.wbImport);
   const exp = isNb ? sum((p) => p.nbExport) : sum((p) => p.wbExport);
   const cycles = sum((p) => p.discharge) / (viz.meta.batteryUsableKwh || 1);
+
+  const dayStart = dayIndex * 24;
+  let dayNet = 0;
+  for (let i = 0; i < 24; i++) {
+    const j = dayStart + i;
+    const price = priceForHour(tariff, h.localHour[j] ?? 0, h.weekday[j] ?? 0);
+    const dImp = isNb ? h.nb.importKwh[j] ?? 0 : h.wb.importKwh[j] ?? 0;
+    const dExp = isNb ? h.nb.exportKwh[j] ?? 0 : h.wb.exportKwh[j] ?? 0;
+    dayNet += dImp * price - dExp * tariff.sellPrice;
+  }
 
   return (
     <div>
@@ -86,7 +97,10 @@ export function DailyExplorer({ viz }: { viz: Viz }) {
             cicli<InfoTip k="cicli" /> <b>{cycles.toFixed(2)}</b>
           </span>
         )}
-        <span className="unit">kWh</span>
+        <span>
+          netto<InfoTip k="nettoCosto" /> <b>{fmt(dayNet, 2)} €</b>
+        </span>
+        <span className="unit">kWh · €</span>
       </div>
 
       <div className="chart-card">

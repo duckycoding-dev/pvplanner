@@ -1,8 +1,11 @@
 import { useState } from "react";
 import { Bar, BarChart, CartesianGrid, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import type { Scenario, Viz } from "../types.ts";
+import type { Tariff } from "../../../src/core/economics/tariff.ts";
 import { fmt, MONTH_LABELS } from "../lib/format.ts";
 import { useLegendToggle } from "../lib/useLegendToggle.ts";
+import { batterySavingEur, scenarioCost } from "../lib/viewCosts.ts";
+import { CostSummary } from "./CostSummary.tsx";
 import { InfoTip } from "./InfoTip.tsx";
 
 interface BarSpec {
@@ -38,10 +41,12 @@ const SCENARIOS: { key: Scenario; label: string }[] = [
   { key: "entrambi", label: "entrambi" },
 ];
 
-export function MonthlyView({ viz }: { viz: Viz }) {
+export function MonthlyView({ viz, tariff }: { viz: Viz; tariff: Tariff }) {
   const prodToggle = useLegendToggle();
   const netToggle = useLegendToggle();
   const [scenario, setScenario] = useState<Scenario>("con");
+  const costCon = scenarioCost(viz, "con", tariff);
+  const saving = batterySavingEur(viz, tariff);
 
   const data = viz.monthly.map((m) => ({
     name: MONTH_LABELS[m.month - 1],
@@ -57,6 +62,16 @@ export function MonthlyView({ viz }: { viz: Viz }) {
 
   return (
     <div>
+      <section className="chart-card">
+        <div className="section-head">
+          <h3>Costi energia (scenario con batteria)</h3>
+        </div>
+        <CostSummary cost={costCon} savingEur={saving} />
+        <p className="note">
+          Netto €/mese: {costCon.monthly.map((m) => `${MONTH_LABELS[m.month - 1]} ${fmt(m.netCost, 0)}`).join(" · ")}
+        </p>
+      </section>
+
       <section className="chart-card">
         <div className="section-head">
           <h3>

@@ -1,7 +1,10 @@
 import { Bar, BarChart, CartesianGrid, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import type { Viz } from "../types.ts";
+import type { Tariff } from "../../../src/core/economics/tariff.ts";
 import { fmt, pct } from "../lib/format.ts";
 import { useLegendToggle } from "../lib/useLegendToggle.ts";
+import { batterySavingEur, scenarioCost } from "../lib/viewCosts.ts";
+import { CostSummary } from "./CostSummary.tsx";
 import { InfoTip } from "./InfoTip.tsx";
 
 function KpiCard({
@@ -36,12 +39,14 @@ function KpiCard({
   );
 }
 
-export function AnnualOverview({ viz }: { viz: Viz }) {
+export function AnnualOverview({ viz, tariff }: { viz: Viz; tariff: Tariff }) {
   const { onClick, isHidden } = useLegendToggle();
   const p = viz.annual.production;
   const nb = viz.annual.noBattery;
   const wb = viz.annual.withBattery;
   const d = viz.annual.delta;
+  const costCon = scenarioCost(viz, "con", tariff);
+  const saving = batterySavingEur(viz, tariff);
 
   const barData = [
     { metric: "autoconsumo", senza: nb.selfConsumedKwh, con: wb.selfConsumedKwh },
@@ -102,6 +107,11 @@ export function AnnualOverview({ viz }: { viz: Viz }) {
           senza="—"
           con={`${fmt(wb.battery.roundTripLossKwh)} kWh`}
         />
+      </section>
+
+      <section className="chart-card">
+        <h3>Costi energia (scenario con batteria)</h3>
+        <CostSummary cost={costCon} savingEur={saving} />
       </section>
 
       <section className="chart-card">

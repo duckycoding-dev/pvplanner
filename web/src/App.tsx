@@ -119,9 +119,9 @@ export function App() {
         </nav>
 
         <main>
-          {tab === "annuale" && <AnnualOverview viz={viz} />}
-          {tab === "mensile" && <MonthlyView viz={viz} />}
-          {tab === "giorno" && <DailyExplorer viz={viz} />}
+          {tab === "annuale" && <AnnualOverview viz={viz} tariff={tariff} />}
+          {tab === "mensile" && <MonthlyView viz={viz} tariff={tariff} />}
+          {tab === "giorno" && <DailyExplorer viz={viz} tariff={tariff} />}
           {tab === "confronto" && <ComparePage viz={viz} systemB={systemB} />}
           {tab === "glossario" && <Glossary />}
         </main>
