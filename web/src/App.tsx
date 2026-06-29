@@ -14,7 +14,6 @@ import { defaultTariff, validateTariff } from "./lib/tariffPresets.ts";
 const viz = vizRaw as unknown as Viz;
 const SB_KEY = "systemB";
 const TARIFF_KEY = "tariff";
-const COLLAPSE_KEY = "sidebarCollapsed";
 
 const TABS: { key: Tab; label: string }[] = [
   { key: "annuale", label: "Panoramica annuale" },
@@ -54,16 +53,9 @@ export function App() {
   const [tab, setTab] = useState<Tab>("giorno");
   const [systemB, setSystemB] = useState<SystemConfigB>(loadSystemB);
   const [tariff, setTariff] = useState<Tariff>(loadTariff);
-  const [collapsed, setCollapsed] = useState<boolean>(() => {
-    try {
-      const v = localStorage.getItem(COLLAPSE_KEY);
-      return v === null ? true : v === "1"; // default: closed (overlay)
-    } catch {
-      return true;
-    }
-  });
+  const [menuOpen, setMenuOpen] = useState(false);
 
-  // Hotkey "m" toggles the sidebar (ignored while typing in a form field).
+  // Hotkey "m" toggles the configuration menu (ignored while typing in a form field).
   useEffect(() => {
     const onKey = (e: KeyboardEvent): void => {
       if (e.key !== "m" && e.key !== "M") return;
@@ -71,7 +63,7 @@ export function App() {
       const t = e.target as HTMLElement | null;
       const tag = t?.tagName;
       if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT" || t?.isContentEditable === true) return;
-      setCollapsed((c) => !c);
+      setMenuOpen((o) => !o);
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
@@ -91,14 +83,6 @@ export function App() {
       /* ignore */
     }
   }, [tariff]);
-  useEffect(() => {
-    try {
-      localStorage.setItem(COLLAPSE_KEY, collapsed ? "1" : "0");
-    } catch {
-      /* ignore */
-    }
-  }, [collapsed]);
-
   const faldeLabel = viz.meta.falde
     .map((f) => `${f.id} ${f.azimuth > 0 ? "+" : ""}${f.azimuth}° ${f.peakKwp} kWp`)
     .join(" · ");
@@ -111,8 +95,8 @@ export function App() {
         setSystemB={setSystemB}
         tariff={tariff}
         setTariff={setTariff}
-        collapsed={collapsed}
-        onToggle={() => setCollapsed((c) => !c)}
+        open={menuOpen}
+        setOpen={setMenuOpen}
       />
 
       <div className="main">
