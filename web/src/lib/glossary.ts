@@ -85,4 +85,24 @@ export const GLOSSARY: Record<string, GlossaryEntry> = {
     desc: "Variazione dell'indicatore passando dal sistema A (baseline) al sistema B. Per i tassi è espressa in punti percentuali.",
     formula: "Δ = valore(B) − valore(A)",
   },
+  costo: {
+    term: "Spesa acquisto",
+    desc: "Quanto spendi per l'energia prelevata dalla rete, valorizzata ora per ora al prezzo della fascia oraria in cui avviene il prelievo.",
+    formula: "Σ import(ora) × prezzo_acquisto(fascia)",
+  },
+  ricavo: {
+    term: "Ricavo vendita",
+    desc: "Quanto incassi per l'energia immessa in rete, al prezzo di vendita (RID/ritiro dedicato).",
+    formula: "Σ export × prezzo_vendita",
+  },
+  nettoCosto: {
+    term: "Costo netto",
+    desc: "Bolletta netta dell'energia: spesa di acquisto meno ricavo di vendita. Può essere negativo (saldo a credito). La batteria è già conteggiata, perché abbassa import ed export.",
+    formula: "netto = spesa acquisto − ricavo vendita",
+  },
+  risparmioBatteria: {
+    term: "Risparmio batteria/anno",
+    desc: "Quanto fa risparmiare la batteria in un anno: differenza tra il costo netto senza batteria e quello con batteria. È esatto (tiene conto di rendimento e fasce).",
+    formula: "netto(senza) − netto(con)",
+  },
 };
