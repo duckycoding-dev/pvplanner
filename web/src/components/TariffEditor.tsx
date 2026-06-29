@@ -79,11 +79,6 @@ export function TariffEditor({ tariff, setTariff }: { tariff: Tariff; setTariff:
                 value={b.name}
                 onChange={(e) => updateBand(b.id, { name: e.target.value })}
               />
-              <input
-                type="color"
-                value={b.color}
-                onChange={(e) => updateBand(b.id, { color: e.target.value })}
-              />
               <button className="band-del" onClick={() => setTariff({ ...tariff, bands: tariff.bands.filter((x) => x.id !== b.id) })}>
                 ✕
               </button>
