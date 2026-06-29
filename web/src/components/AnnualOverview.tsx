@@ -3,7 +3,8 @@ import type { Viz } from "../types.ts";
 import type { Tariff } from "../../../src/core/economics/tariff.ts";
 import { fmt, pct } from "../lib/format.ts";
 import { useLegendToggle } from "../lib/useLegendToggle.ts";
-import { scenarioCost } from "../lib/viewCosts.ts";
+import { noPvCost, scenarioCost } from "../lib/viewCosts.ts";
+import { type Incentive, incentiveTotalEur, systemPaybackYears } from "../lib/economics.ts";
 import { MetricsTable, type MetricRow } from "./MetricsTable.tsx";
 import { InfoTip } from "./InfoTip.tsx";
 
@@ -45,7 +46,7 @@ function KpiCard({
   );
 }
 
-export function AnnualOverview({ viz, tariff }: { viz: Viz; tariff: Tariff }) {
+export function AnnualOverview({ viz, tariff, incentive }: { viz: Viz; tariff: Tariff; incentive: Incentive }) {
   const { onClick, isHidden } = useLegendToggle();
   const p = viz.annual.production;
   const nb = viz.annual.noBattery;
@@ -53,6 +54,9 @@ export function AnnualOverview({ viz, tariff }: { viz: Viz; tariff: Tariff }) {
   const d = viz.annual.delta;
   const cs = scenarioCost(viz, "senza", tariff);
   const cc = scenarioCost(viz, "con", tariff);
+  const capex = viz.meta.installationCostEur;
+  const payback = systemPaybackYears(capex, cc.annual.netCost, noPvCost(viz, tariff).annual.netCost, incentive);
+  const paybackText = payback === null ? "oltre 40 anni" : `${payback.toFixed(1)} anni`;
   const costRows: MetricRow[] = [
     { key: "buy", label: "Spesa acquisto", info: "costo", good: "lower", money: "pay", render: eur, values: [cs.annual.buyCost, cc.annual.buyCost] },
     { key: "sell", label: "Ricavo vendita", info: "ricavo", good: "higher", money: "earn", render: eur, values: [cs.annual.sellRevenue, cc.annual.sellRevenue] },
@@ -122,6 +126,18 @@ export function AnnualOverview({ viz, tariff }: { viz: Viz; tariff: Tariff }) {
 
       <section className="chart-card">
         <MetricsTable title="Costi energia (Δ = effetto batteria)" columns={COST_COLS} rows={costRows} />
+      </section>
+
+      <section className="cards">
+        <div className="card">
+          <h3>
+            Tempo di rientro<InfoTip k="payback" />
+          </h3>
+          <p className="big">{paybackText}</p>
+          <p className="muted">
+            CAPEX {fmt(capex)} € · incentivo {fmt(incentiveTotalEur(incentive, capex))} € · vs «senza FV»
+          </p>
+        </div>
       </section>
 
       <section className="chart-card">

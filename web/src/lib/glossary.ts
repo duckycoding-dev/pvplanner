@@ -105,4 +105,9 @@ export const GLOSSARY: Record<string, GlossaryEntry> = {
     desc: "Quanto fa risparmiare la batteria in un anno: differenza tra il costo netto senza batteria e quello con batteria. È esatto (tiene conto di rendimento e fasce).",
     formula: "netto(senza) − netto(con)",
   },
+  payback: {
+    term: "Tempo di rientro (payback)",
+    desc: "Anni perché il risparmio annuo in bolletta (rispetto al non avere impianto) ripaghi il costo di installazione, tenendo conto degli incentivi. Stima semplice: non considera inflazione dei prezzi né degrado dei pannelli.",
+    formula: "−costo + Σ (risparmio annuo + quota incentivo) ≥ 0",
+  },
 };

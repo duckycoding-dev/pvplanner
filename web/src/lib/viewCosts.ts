@@ -24,3 +24,9 @@ export function systemCost(viz: Viz, r: SystemResult, tariff: Tariff): CostResul
 export function batterySavingEur(viz: Viz, tariff: Tariff): number {
   return scenarioCost(viz, "senza", tariff).annual.netCost - scenarioCost(viz, "con", tariff).annual.netCost;
 }
+
+/** Cost with no PV at all: the whole load is imported, nothing exported. */
+export function noPvCost(viz: Viz, tariff: Tariff): CostResult {
+  const zeros = viz.hourly.loadKwh.map(() => 0);
+  return aggregateCost(viz.hourly.loadKwh, zeros, viz.hourly.localHour, viz.hourly.weekday, viz.hourly.months, tariff);
+}

@@ -12,6 +12,7 @@ import {
 } from "../lib/systemConfig.ts";
 import { runSystem } from "../lib/runSystem.ts";
 import { systemCost } from "../lib/viewCosts.ts";
+import { type Incentive, systemPaybackYears } from "../lib/economics.ts";
 import { fmt, pct } from "../lib/format.ts";
 import { type Good, type Money } from "../lib/metricsTable.ts";
 import { MetricsTable, type MetricRow } from "./MetricsTable.tsx";
@@ -51,7 +52,17 @@ const DEFS: RowDef[] = [
   { key: "net", label: "Costo netto/anno", info: "nettoCosto", good: "lower", money: "net", render: eur, get: (s) => s.c.annual.netCost },
 ];
 
-export function ComparePage({ viz, systemB, tariff }: { viz: Viz; systemB: SystemConfigB; tariff: Tariff }) {
+export function ComparePage({
+  viz,
+  systemB,
+  tariff,
+  incentive,
+}: {
+  viz: Viz;
+  systemB: SystemConfigB;
+  tariff: Tariff;
+  incentive: Incentive;
+}) {
   const systemA = useMemo(() => cloneFromBaseline(viz), [viz]);
   const bDiffers = useMemo(() => !equalsBaseline(systemB, viz), [systemB, viz]);
 
@@ -83,6 +94,23 @@ export function ComparePage({ viz, systemB, tariff }: { viz: Viz; systemB: Syste
     render: d.render,
     values: cases.map(d.get),
   }));
+
+  // Payback row: vs "senza FV"; the reference column itself has no CAPEX → "—".
+  const capexByCase = (bDiffers ? [0, systemA.installationCostEur, systemB.installationCostEur] : [0, systemA.installationCostEur]);
+  const noPvNet = noPv.c.annual.netCost;
+  rows.push({
+    key: "pay",
+    label: "Tempo di rientro",
+    info: "payback",
+    good: "lower",
+    render: (v) => (Number.isFinite(v) ? `${v.toFixed(1)} anni` : "—"),
+    values: cases.map((s, i) => {
+      const capex = capexByCase[i] ?? 0;
+      if (capex <= 0) return Infinity;
+      const p = systemPaybackYears(capex, s.c.annual.netCost, noPvNet, incentive);
+      return p === null ? Infinity : p;
+    }),
+  });
 
   return (
     <div className="compare-page">
