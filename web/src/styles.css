@@ -118,22 +118,60 @@ header .sub { margin: 0; color: var(--muted); font-size: 13px; }
 .note { color: var(--muted); }
 footer { margin-top: 24px; color: var(--muted); font-size: 12px; border-top: 1px solid var(--border); padding-top: 12px; }
 
-/* --- system comparison: config page + import modal --- */
-.config-page { display: grid; gap: 16px; }
-.sys-block { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; }
-.sys-block h3 { margin: 0 0 10px; font-size: 15px; }
-.falda-row { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; padding: 8px 0; border-bottom: 1px solid var(--border); }
-.falda-row:last-of-type { border-bottom: none; }
-.falda-row .falda-id { min-width: 120px; font-weight: 600; }
-.falda-row .kwp { margin-left: auto; color: var(--muted); }
-.falda-row label, .field label { display: inline-flex; flex-direction: column; gap: 3px; font-size: 12px; color: var(--muted); }
-.field { display: flex; flex-direction: column; gap: 4px; margin: 10px 0; max-width: 360px; }
-.field > label { font-size: 13px; color: var(--muted); }
-.config-page input { border: 1px solid var(--border); border-radius: 7px; padding: 6px 8px; font-size: 13px; width: 130px; }
-.field > input { width: 100%; }
-.config-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
-.config-actions button { border: 1px solid var(--border); background: var(--card); border-radius: 7px; padding: 7px 12px; cursor: pointer; font-size: 13px; color: var(--text); }
-.config-actions button:hover { border-color: var(--accent); color: var(--accent); }
+/* --- layout: sidebar + main --- */
+.layout { display: flex; align-items: flex-start; gap: 0; }
+.main { flex: 1; min-width: 0; max-width: 1120px; margin: 0 auto; padding: 20px 18px 60px; }
+.sidebar { position: sticky; top: 0; align-self: stretch; width: 320px; min-height: 100vh; background: var(--card);
+  border-right: 1px solid var(--border); display: flex; flex-direction: column; }
+.sidebar.collapsed { width: 34px; }
+.sidebar-toggle { align-self: flex-end; border: 1px solid var(--border); background: var(--card); border-radius: 7px;
+  margin: 8px; width: 22px; height: 26px; cursor: pointer; color: var(--muted); }
+.sidebar-body { padding: 0 12px 24px; overflow-y: auto; }
+.sidebar-section { border-top: 1px solid var(--border); padding: 6px 0; }
+.section-toggle { width: 100%; text-align: left; border: none; background: none; cursor: pointer; font-size: 14px;
+  font-weight: 600; color: var(--text); padding: 8px 2px; }
+.section-toggle .hint { color: var(--muted); font-weight: 400; font-size: 12px; }
+
+/* editors (System B + Tariff) */
+.editor { display: flex; flex-direction: column; gap: 10px; padding: 2px 2px 8px; }
+.editor-ref, .editor-total { margin: 0; font-size: 12px; color: var(--muted); }
+.editor-actions { display: flex; flex-wrap: wrap; gap: 6px; }
+.editor-actions button { border: 1px solid var(--border); background: var(--card); border-radius: 7px;
+  padding: 6px 10px; cursor: pointer; font-size: 12px; color: var(--text); }
+.editor-actions button:hover { border-color: var(--accent); color: var(--accent); }
+.text-field { display: flex; flex-direction: column; gap: 3px; font-size: 12px; color: var(--muted); }
+.text-field input { border: 1px solid var(--border); border-radius: 7px; padding: 6px 8px; font-size: 13px; }
+.falda-edit, .band-edit { border: 1px solid var(--border); border-left: 3px solid var(--accent); border-radius: 8px;
+  padding: 6px 10px; display: flex; flex-direction: column; gap: 6px; }
+.falda-edit legend, .band-edit legend { font-size: 12px; font-weight: 600; padding: 0 4px;
+  display: flex; align-items: center; gap: 6px; }
+.band-name { width: 90px; border: 1px solid var(--border); border-radius: 6px; padding: 2px 6px; font-size: 12px; }
+.band-del { border: none; background: none; cursor: pointer; color: var(--muted); }
+.band-hours { display: flex; gap: 8px; }
+.band-days { display: flex; gap: 3px; }
+.band-days .day { width: 24px; height: 24px; border: 1px solid var(--border); background: var(--card);
+  border-radius: 6px; cursor: pointer; font-size: 11px; color: var(--muted); }
+.band-days .day.on { background: var(--accent); color: #fff; border-color: var(--accent); }
+
+/* slider + input control */
+.number-field { display: flex; flex-direction: column; gap: 2px; }
+.number-field > label { font-size: 11px; color: var(--muted); }
+.number-field .nf-row { display: flex; align-items: center; gap: 6px; }
+.number-field input[type="range"] { flex: 1; min-width: 0; }
+.number-field input[type="number"] { width: 64px; border: 1px solid var(--border); border-radius: 6px;
+  padding: 3px 5px; font-size: 12px; }
+
+/* cost summary block (reuses day-summary look) */
+.cost-summary { display: flex; flex-wrap: wrap; gap: 16px; padding: 10px 14px; background: var(--card);
+  border: 1px solid var(--border); border-radius: 10px; margin-bottom: 16px; font-size: 13px; color: var(--muted); }
+.cost-summary b { color: var(--text); }
+.cost-summary .unit { margin-left: auto; }
+
+@media (max-width: 900px) {
+  .layout { flex-direction: column; }
+  .sidebar, .sidebar.collapsed { width: auto; min-height: 0; position: static; border-right: none;
+    border-bottom: 1px solid var(--border); }
+}
 
 .modal-overlay { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.4); display: flex; align-items: center; justify-content: center; z-index: 200; }
 .modal { background: var(--card); border-radius: 12px; padding: 18px 20px; width: 420px; max-width: 90vw; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25); }
