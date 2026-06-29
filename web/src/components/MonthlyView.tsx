@@ -54,14 +54,15 @@ export function MonthlyView({ viz, tariff }: { viz: Viz; tariff: Tariff }) {
   const cs = scenarioCost(viz, "senza", tariff);
   const cc = scenarioCost(viz, "con", tariff);
   const costRows: MetricRow[] = [
-    { key: "buy", label: "Spesa acquisto", info: "costo", good: "lower", render: eur, values: [cs.annual.buyCost, cc.annual.buyCost] },
-    { key: "sell", label: "Ricavo vendita", info: "ricavo", good: "higher", render: eur, values: [cs.annual.sellRevenue, cc.annual.sellRevenue] },
-    { key: "net", label: "Costo netto/anno", info: "nettoCosto", good: "lower", render: eur, values: [cs.annual.netCost, cc.annual.netCost] },
+    { key: "buy", label: "Spesa acquisto", info: "costo", good: "lower", money: "pay", render: eur, values: [cs.annual.buyCost, cc.annual.buyCost] },
+    { key: "sell", label: "Ricavo vendita", info: "ricavo", good: "higher", money: "earn", render: eur, values: [cs.annual.sellRevenue, cc.annual.sellRevenue] },
+    { key: "net", label: "Costo netto/anno", info: "nettoCosto", good: "lower", money: "net", render: eur, values: [cs.annual.netCost, cc.annual.netCost] },
   ];
   const monthlyNetRows: MetricRow[] = MONTH_LABELS.map((name, k) => ({
     key: `m${k}`,
     label: name,
     good: "lower",
+    money: "net",
     render: eur,
     values: [cs.monthly[k]?.netCost ?? 0, cc.monthly[k]?.netCost ?? 0],
   }));

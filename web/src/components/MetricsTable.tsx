@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { type Good, bestWorstClasses, deltaClass } from "../lib/metricsTable.ts";
+import { type Good, type Money, deltaClass, moneyClass } from "../lib/metricsTable.ts";
 import { InfoTip } from "./InfoTip.tsx";
 
 export interface MetricCol {
@@ -11,7 +11,8 @@ export interface MetricRow {
   key: string;
   label: string;
   info?: string; // glossary key
-  good: Good;
+  good: Good; // drives the Δ colour
+  money?: Money; // if set, value cells are coloured by sign
   render: (v: number) => string;
   values: number[]; // aligned with columns
 }
@@ -57,7 +58,6 @@ export function MetricsTable({
         </thead>
         <tbody>
           {visible.map((r) => {
-            const cls = bestWorstClasses(r.values, r.good);
             const d = (r.values[1] ?? 0) - (r.values[0] ?? 0);
             return (
               <tr key={r.key}>
@@ -68,7 +68,7 @@ export function MetricsTable({
                   {r.info !== undefined && <InfoTip k={r.info} />}
                 </td>
                 {r.values.map((v, i) => (
-                  <td key={columns[i]?.key ?? i} className={cls[i]}>
+                  <td key={columns[i]?.key ?? i} className={moneyClass(v, r.money)}>
                     {r.render(v)}
                   </td>
                 ))}

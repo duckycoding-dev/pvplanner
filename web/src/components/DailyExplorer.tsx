@@ -75,7 +75,7 @@ export function DailyExplorer({ viz, tariff }: { viz: Viz; tariff: Tariff }) {
     { key: "exp", label: "Export", info: "export", good: "higher", render: kwh1, values: [expSenza, expCon] },
     { key: "clip", label: "Clipping", info: "clipping", good: "lower", render: kwh1, values: [clip, clip] },
     { key: "cyc", label: "Cicli", info: "cicli", good: "none", render: (v) => (v > 0 ? v.toFixed(2) : "—"), values: [0, cycCon] },
-    { key: "net", label: "Netto giorno", info: "nettoCosto", good: "lower", render: eur, values: [netSenza, netCon] },
+    { key: "net", label: "Netto giorno", info: "nettoCosto", good: "lower", money: "net", render: eur, values: [netSenza, netCon] },
   ];
 
   return (

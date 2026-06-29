@@ -43,9 +43,9 @@ export function ComparePage({ viz, systemB, tariff }: { viz: Viz; systemB: Syste
     { key: "imp", label: "Import da rete", info: "import", good: "lower", render: kwh, values: [r1.metrics.importKwh, r2.metrics.importKwh] },
     { key: "exp", label: "Export in rete", info: "export", good: "higher", render: kwh, values: [r1.metrics.exportKwh, r2.metrics.exportKwh] },
     { key: "cyc", label: "Cicli batteria/anno", info: "cicli", good: "none", render: cyc, values: [r1.metrics.battery?.equivalentCycles ?? 0, r2.metrics.battery?.equivalentCycles ?? 0] },
-    { key: "buy", label: "Spesa acquisto", info: "costo", good: "lower", render: eur, values: [c1.annual.buyCost, c2.annual.buyCost] },
-    { key: "sell", label: "Ricavo vendita", info: "ricavo", good: "higher", render: eur, values: [c1.annual.sellRevenue, c2.annual.sellRevenue] },
-    { key: "net", label: "Costo netto/anno", info: "nettoCosto", good: "lower", render: eur, values: [c1.annual.netCost, c2.annual.netCost] },
+    { key: "buy", label: "Spesa acquisto", info: "costo", good: "lower", money: "pay", render: eur, values: [c1.annual.buyCost, c2.annual.buyCost] },
+    { key: "sell", label: "Ricavo vendita", info: "ricavo", good: "higher", money: "earn", render: eur, values: [c1.annual.sellRevenue, c2.annual.sellRevenue] },
+    { key: "net", label: "Costo netto/anno", info: "nettoCosto", good: "lower", money: "net", render: eur, values: [c1.annual.netCost, c2.annual.netCost] },
   ];
 
   return (
