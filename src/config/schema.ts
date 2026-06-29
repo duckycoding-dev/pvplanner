@@ -45,11 +45,30 @@ export interface ConsumptionCsvConfig {
   has_header?: boolean;
 }
 
+/** House/heating parameters for the physically-grounded synthetic load (all optional → defaults). */
+export interface HouseConfig {
+  heated_area_m2?: number;
+  specific_heat_demand_kwh_m2y?: number;
+  heating_base_temp_c?: number;
+  occupants?: number;
+  wfh_occupants?: number;
+  heat_pump_scop?: number;
+  heat_pump_cop_ref?: number;
+  heat_pump_cop_ref_outdoor_c?: number;
+  heat_pump_flow_temp_c?: number;
+  dhw_cop?: number;
+  dhw_kwh_per_person_y?: number;
+  base_load_annual_kwh?: number;
+  storage_standby_loss_pct?: number;
+  buffer_smoothing_hours?: number;
+}
+
 export interface ConsumptionConfig {
   source: "csv" | "synthetic";
   annual_kwh_target?: number;
   timezone?: string;
   csv?: ConsumptionCsvConfig;
+  house?: HouseConfig;
 }
 
 export interface IncentiveConfig {
@@ -170,6 +189,31 @@ export function validateSystemConfig(raw: unknown): SystemConfig {
   if (source !== "csv" && source !== "synthetic") {
     throw new Error(`config: consumption.source must be "csv" or "synthetic"`);
   }
+  let house: HouseConfig | undefined;
+  if (consObj["house"] !== undefined) {
+    const h = asObject(consObj["house"], "consumption.house");
+    const keys = [
+      "heated_area_m2",
+      "specific_heat_demand_kwh_m2y",
+      "heating_base_temp_c",
+      "occupants",
+      "wfh_occupants",
+      "heat_pump_scop",
+      "heat_pump_cop_ref",
+      "heat_pump_cop_ref_outdoor_c",
+      "heat_pump_flow_temp_c",
+      "dhw_cop",
+      "dhw_kwh_per_person_y",
+      "base_load_annual_kwh",
+      "storage_standby_loss_pct",
+      "buffer_smoothing_hours",
+    ] as const;
+    house = {};
+    for (const k of keys) {
+      if (h[k] !== undefined) house[k] = asNumber(h[k], `consumption.house.${k}`);
+    }
+  }
+
   const consumption: ConsumptionConfig = {
     source,
     ...(consObj["annual_kwh_target"] === undefined
@@ -178,6 +222,7 @@ export function validateSystemConfig(raw: unknown): SystemConfig {
     ...(consObj["timezone"] === undefined
       ? {}
       : { timezone: asString(consObj["timezone"], "consumption.timezone") }),
+    ...(house === undefined ? {} : { house }),
   };
 
   let economics: EconomicsConfig | undefined;

@@ -40,7 +40,8 @@ riassunto, stato, legenda simboli/unità, documenti collegati).
 - [`04-confronto-sistemi.md`](04-confronto-sistemi.md) — confronto live di due sistemi (scaling + ricalcolo nel browser)
 - [`05-costi-fasce.md`](05-costi-fasce.md) — costi/ricavi energia per fasce orarie (acquisto, vendita, netto, risparmio batteria)
 - [`06-economia.md`](06-economia.md) — costo installazione, incentivi e tempo di rientro (payback)
-- _(prossimi)_ `07-consumi.md` (dataset reali), NPV/TIR + sensibilità
+- [`07-consumi.md`](07-consumi.md) — profilo di consumo sintetico V2 (PDC + puffer, da dati casa + T2m sito)
+- _(prossimi)_ dataset consumi reali (CSV), NPV/TIR + sensibilità
 
 ## Esecuzione
 

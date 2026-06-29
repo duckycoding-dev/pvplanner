@@ -78,7 +78,7 @@ export const GLOSSARY: Record<string, GlossaryEntry> = {
   },
   consumo: {
     term: "Consumo",
-    desc: "Consumo elettrico della casa. Per ora è un profilo SINTETICO segnaposto (pompa di calore, invernale): va sostituito con dati reali.",
+    desc: "Consumo elettrico della casa. Profilo SINTETICO stimato dai dati reali della casa (PDC + puffer, ACS, base) sulle temperature orarie reali del sito — non sono misure. Da sostituire con dati misurati quando disponibili. Dettagli: docs/07-consumi.md.",
   },
   delta: {
     term: "Δ (differenza B − A)",
