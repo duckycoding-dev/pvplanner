@@ -4,7 +4,7 @@ import type { SystemConfigB } from "../lib/systemConfig.ts";
 import type { Tariff } from "../../../src/core/economics/tariff.ts";
 import type { Incentive } from "../lib/economics.ts";
 import { TariffEditor } from "./TariffEditor.tsx";
-import { SystemBEditor } from "./SystemBEditor.tsx";
+import { SystemEditor } from "./SystemEditor.tsx";
 import { IncentiveEditor } from "./IncentiveEditor.tsx";
 
 /**
@@ -13,6 +13,8 @@ import { IncentiveEditor } from "./IncentiveEditor.tsx";
  */
 export function Sidebar({
   viz,
+  systemA,
+  setSystemA,
   systemB,
   setSystemB,
   tariff,
@@ -23,6 +25,8 @@ export function Sidebar({
   setOpen,
 }: {
   viz: Viz;
+  systemA: SystemConfigB;
+  setSystemA: (c: SystemConfigB) => void;
   systemB: SystemConfigB;
   setSystemB: (c: SystemConfigB) => void;
   tariff: Tariff;
@@ -33,7 +37,8 @@ export function Sidebar({
   setOpen: (v: boolean) => void;
 }) {
   const [openTariff, setOpenTariff] = useState(true);
-  const [openB, setOpenB] = useState(true);
+  const [openA, setOpenA] = useState(true);
+  const [openB, setOpenB] = useState(false);
   const [openInc, setOpenInc] = useState(false);
   const ref = useRef<HTMLDialogElement>(null);
 
@@ -80,10 +85,27 @@ export function Sidebar({
             {openInc && <IncentiveEditor incentive={incentive} setIncentive={setIncentive} />}
           </section>
           <section className="sidebar-section">
+            <button className="section-toggle" onClick={() => setOpenA((o) => !o)}>
+              {openA ? "▾" : "▸"} Sistema A <span className="hint">(viste mono)</span>
+            </button>
+            {openA && (
+              <SystemEditor viz={viz} system={systemA} setSystem={setSystemA} title="Sistema A" downloadName="sistema-a.json" />
+            )}
+          </section>
+          <section className="sidebar-section">
             <button className="section-toggle" onClick={() => setOpenB((o) => !o)}>
               {openB ? "▾" : "▸"} Sistema B <span className="hint">(Confronto)</span>
             </button>
-            {openB && <SystemBEditor viz={viz} systemB={systemB} setSystemB={setSystemB} />}
+            {openB && (
+              <SystemEditor
+                viz={viz}
+                system={systemB}
+                setSystem={setSystemB}
+                title="Sistema B"
+                downloadName="sistema-b.json"
+                copyFrom={{ label: systemA.label, system: systemA }}
+              />
+            )}
           </section>
         </div>
       </dialog>

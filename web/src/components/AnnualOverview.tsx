@@ -23,30 +23,49 @@ function KpiCard({
 }: {
   label: string;
   senza: string;
-  con: string;
+  con?: string;
   highlight?: string;
   info?: string;
 }) {
+  const single = con === undefined;
   return (
     <div className="card kpi">
       <h3>
         {label}
         {info !== undefined && <InfoTip k={info} />}
       </h3>
-      <div className="row">
-        <span className="k">senza</span>
-        <span>{senza}</span>
-      </div>
-      <div className="row">
-        <span className="k">con</span>
-        <span>{con}</span>
-      </div>
-      {highlight !== undefined && <div className="highlight">{highlight}</div>}
+      {single ? (
+        <div className="row">
+          <span>{senza}</span>
+        </div>
+      ) : (
+        <>
+          <div className="row">
+            <span className="k">senza</span>
+            <span>{senza}</span>
+          </div>
+          <div className="row">
+            <span className="k">con</span>
+            <span>{con}</span>
+          </div>
+        </>
+      )}
+      {highlight !== undefined && !single && <div className="highlight">{highlight}</div>}
     </div>
   );
 }
 
-export function AnnualOverview({ viz, tariff, incentive }: { viz: Viz; tariff: Tariff; incentive: Incentive }) {
+export function AnnualOverview({
+  viz,
+  tariff,
+  incentive,
+  hasBattery,
+}: {
+  viz: Viz;
+  tariff: Tariff;
+  incentive: Incentive;
+  hasBattery: boolean;
+}) {
   const { onClick, isHidden } = useLegendToggle();
   const p = viz.annual.production;
   const nb = viz.annual.noBattery;
@@ -57,10 +76,13 @@ export function AnnualOverview({ viz, tariff, incentive }: { viz: Viz; tariff: T
   const capex = viz.meta.installationCostEur;
   const payback = systemPaybackYears(capex, cc.annual.netCost, noPvCost(viz, tariff).annual.netCost, incentive);
   const paybackText = payback === null ? "oltre 40 anni" : `${payback.toFixed(1)} anni`;
+
+  const costCols = hasBattery ? COST_COLS : [{ key: "fv", label: "FV" }];
+  const v2 = (senza: number, con: number): number[] => (hasBattery ? [senza, con] : [senza]);
   const costRows: MetricRow[] = [
-    { key: "buy", label: "Spesa acquisto", info: "costo", good: "lower", money: "pay", render: eur, values: [cs.annual.buyCost, cc.annual.buyCost] },
-    { key: "sell", label: "Ricavo vendita", info: "ricavo", good: "higher", money: "earn", render: eur, values: [cs.annual.sellRevenue, cc.annual.sellRevenue] },
-    { key: "net", label: "Costo netto/anno", info: "nettoCosto", good: "lower", money: "net", render: eur, values: [cs.annual.netCost, cc.annual.netCost] },
+    { key: "buy", label: "Spesa acquisto", info: "costo", good: "lower", money: "pay", render: eur, values: v2(cs.annual.buyCost, cc.annual.buyCost) },
+    { key: "sell", label: "Ricavo vendita", info: "ricavo", good: "higher", money: "earn", render: eur, values: v2(cs.annual.sellRevenue, cc.annual.sellRevenue) },
+    { key: "net", label: "Costo netto/anno", info: "nettoCosto", good: "lower", money: "net", render: eur, values: v2(cs.annual.netCost, cc.annual.netCost) },
   ];
 
   const barData = [
@@ -93,39 +115,47 @@ export function AnnualOverview({ viz, tariff, incentive }: { viz: Viz; tariff: T
           label="Tasso autoconsumo"
           info="tassoAutoconsumo"
           senza={pct(nb.selfConsumptionRate)}
-          con={pct(wb.selfConsumptionRate)}
+          con={hasBattery ? pct(wb.selfConsumptionRate) : undefined}
         />
         <KpiCard
           label="Autosufficienza"
           info="autosufficienza"
           senza={pct(nb.selfSufficiency)}
-          con={pct(wb.selfSufficiency)}
+          con={hasBattery ? pct(wb.selfSufficiency) : undefined}
           highlight={`+${d.selfSufficiencyPoints.toFixed(1)} punti`}
         />
         <KpiCard
           label="Import da rete"
           info="import"
           senza={`${fmt(nb.importKwh)} kWh`}
-          con={`${fmt(wb.importKwh)} kWh`}
+          con={hasBattery ? `${fmt(wb.importKwh)} kWh` : undefined}
           highlight={`−${fmt(d.importReductionKwh)} kWh`}
         />
         <KpiCard
           label="Export in rete"
           info="export"
           senza={`${fmt(nb.exportKwh)} kWh`}
-          con={`${fmt(wb.exportKwh)} kWh`}
+          con={hasBattery ? `${fmt(wb.exportKwh)} kWh` : undefined}
         />
-        <KpiCard label="Cicli batteria/anno" info="cicli" senza="—" con={fmt(wb.battery.equivalentCycles)} />
-        <KpiCard
-          label="Perdita round-trip"
-          info="roundTripLoss"
-          senza="—"
-          con={`${fmt(wb.battery.roundTripLossKwh)} kWh`}
-        />
+        {hasBattery && (
+          <KpiCard label="Cicli batteria/anno" info="cicli" senza="—" con={fmt(wb.battery.equivalentCycles)} />
+        )}
+        {hasBattery && (
+          <KpiCard
+            label="Perdita round-trip"
+            info="roundTripLoss"
+            senza="—"
+            con={`${fmt(wb.battery.roundTripLossKwh)} kWh`}
+          />
+        )}
       </section>
 
       <section className="chart-card">
-        <MetricsTable title="Costi energia (Δ = effetto batteria)" columns={COST_COLS} rows={costRows} />
+        <MetricsTable
+          title={hasBattery ? "Costi energia (Δ = effetto batteria)" : "Costi energia"}
+          columns={costCols}
+          rows={costRows}
+        />
       </section>
 
       <section className="cards">
@@ -141,7 +171,7 @@ export function AnnualOverview({ viz, tariff, incentive }: { viz: Viz; tariff: T
       </section>
 
       <section className="chart-card">
-        <h3>Energia: senza vs con batteria</h3>
+        <h3>{hasBattery ? "Energia: senza vs con batteria" : "Energia (FV)"}</h3>
         <ResponsiveContainer width="100%" height={300}>
           <BarChart data={barData}>
             <CartesianGrid strokeDasharray="3 3" />
@@ -149,8 +179,8 @@ export function AnnualOverview({ viz, tariff, incentive }: { viz: Viz; tariff: T
             <YAxis label={{ value: "kWh", angle: -90, position: "insideLeft" }} />
             <Tooltip formatter={(v: number) => `${fmt(v)} kWh`} />
             <Legend onClick={onClick} wrapperStyle={{ cursor: "pointer" }} />
-            <Bar dataKey="senza" name="senza batteria" fill="#94a3b8" hide={isHidden("senza")} />
-            <Bar dataKey="con" name="con batteria" fill="#3b82f6" hide={isHidden("con")} />
+            <Bar dataKey="senza" name={hasBattery ? "senza batteria" : "FV"} fill="#94a3b8" hide={isHidden("senza")} />
+            {hasBattery && <Bar dataKey="con" name="con batteria" fill="#3b82f6" hide={isHidden("con")} />}
           </BarChart>
         </ResponsiveContainer>
       </section>

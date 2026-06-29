@@ -22,12 +22,13 @@ const SCENARIOS: { key: Scenario; label: string }[] = [
 
 const DAY_MS = 86_400_000;
 
-export function DailyExplorer({ viz, tariff }: { viz: Viz; tariff: Tariff }) {
+export function DailyExplorer({ viz, tariff, hasBattery }: { viz: Viz; tariff: Tariff; hasBattery: boolean }) {
   const h = viz.hourly;
   const total = dayCount(h);
   const picks = useMemo(() => quickPickDays(h), [h]);
   const [dayIndex, setDayIndex] = useState<number>(picks.maxClipping);
   const [scenario, setScenario] = useState<Scenario>("con");
+  const effScenario: Scenario = hasBattery ? scenario : "senza";
 
   const pts = useMemo(() => sliceDay(h, dayIndex), [h, dayIndex]);
   const firstTs = h.timestampsUtc[0] ?? 0;
@@ -42,7 +43,7 @@ export function DailyExplorer({ viz, tariff }: { viz: Viz; tariff: Tariff }) {
     }
   };
 
-  const isNb = scenario === "senza";
+  const isNb = effScenario === "senza";
   const sum = (f: (p: DayPoint) => number): number => pts.reduce((s, p) => s + f(p), 0);
   const prod = sum((p) => p.prodPractical);
   const cons = sum((p) => p.load);
@@ -70,16 +71,22 @@ export function DailyExplorer({ viz, tariff }: { viz: Viz; tariff: Tariff }) {
 
   const kwh1 = (v: number): string => `${fmt(v, 1)} kWh`;
   const eur = (v: number): string => `${fmt(v, 2)} €`;
+  const cols = hasBattery ? DAY_COLS : [{ key: "fv", label: "FV" }];
+  const v2 = (senza: number, con: number): number[] => (hasBattery ? [senza, con] : [senza]);
   const dayRows: MetricRow[] = [
-    { key: "prod", label: "Produzione", info: "produzione", good: "higher", render: kwh1, values: [prod, prod] },
-    { key: "cons", label: "Consumo", info: "consumo", good: "none", render: kwh1, values: [cons, cons] },
-    { key: "self", label: "Autoconsumo", info: "autoconsumo", good: "higher", render: kwh1, values: [selfSenza, selfCon] },
-    { key: "imp", label: "Import", info: "import", good: "lower", render: kwh1, values: [impSenza, impCon] },
-    { key: "exp", label: "Export", info: "export", good: "higher", render: kwh1, values: [expSenza, expCon] },
-    { key: "clip", label: "Clipping", info: "clipping", good: "lower", render: kwh1, values: [clip, clip] },
-    { key: "cyc", label: "Cicli", info: "cicli", good: "none", render: (v) => (v > 0 ? v.toFixed(2) : "—"), values: [0, cycCon] },
-    { key: "loss", label: "Perdita round-trip", info: "roundTripLoss", good: "lower", render: kwh1, values: [0, lossCon] },
-    { key: "net", label: "Netto giorno", info: "nettoCosto", good: "lower", money: "net", render: eur, values: [netSenza, netCon] },
+    { key: "prod", label: "Produzione", info: "produzione", good: "higher", render: kwh1, values: v2(prod, prod) },
+    { key: "cons", label: "Consumo", info: "consumo", good: "none", render: kwh1, values: v2(cons, cons) },
+    { key: "self", label: "Autoconsumo", info: "autoconsumo", good: "higher", render: kwh1, values: v2(selfSenza, selfCon) },
+    { key: "imp", label: "Import", info: "import", good: "lower", render: kwh1, values: v2(impSenza, impCon) },
+    { key: "exp", label: "Export", info: "export", good: "higher", render: kwh1, values: v2(expSenza, expCon) },
+    { key: "clip", label: "Clipping", info: "clipping", good: "lower", render: kwh1, values: v2(clip, clip) },
+    ...(hasBattery
+      ? [
+          { key: "cyc", label: "Cicli", info: "cicli", good: "none" as const, render: (v: number) => (v > 0 ? v.toFixed(2) : "—"), values: [0, cycCon] },
+          { key: "loss", label: "Perdita round-trip", info: "roundTripLoss", good: "lower" as const, render: kwh1, values: [0, lossCon] },
+        ]
+      : []),
+    { key: "net", label: "Netto giorno", info: "nettoCosto", good: "lower", money: "net", render: eur, values: v2(netSenza, netCon) },
   ];
 
   return (
@@ -102,17 +109,23 @@ export function DailyExplorer({ viz, tariff }: { viz: Viz; tariff: Tariff }) {
           <button onClick={() => setDayIndex(picks.maxProduction)}>max produzione</button>
           <button onClick={() => setDayIndex(picks.minProduction)}>min produzione</button>
         </div>
-        <div className="scenario">
-          {SCENARIOS.map((s) => (
-            <button key={s.key} className={scenario === s.key ? "active" : ""} onClick={() => setScenario(s.key)}>
-              {s.label}
-            </button>
-          ))}
-        </div>
+        {hasBattery && (
+          <div className="scenario">
+            {SCENARIOS.map((s) => (
+              <button key={s.key} className={scenario === s.key ? "active" : ""} onClick={() => setScenario(s.key)}>
+                {s.label}
+              </button>
+            ))}
+          </div>
+        )}
       </div>
 
       <section className="chart-card">
-        <MetricsTable title="Riepilogo giorno (Δ = effetto batteria)" columns={DAY_COLS} rows={dayRows} />
+        <MetricsTable
+          title={hasBattery ? "Riepilogo giorno (Δ = effetto batteria)" : "Riepilogo giorno"}
+          columns={cols}
+          rows={dayRows}
+        />
       </section>
 
       <div className="chart-card">
@@ -125,7 +138,9 @@ export function DailyExplorer({ viz, tariff }: { viz: Viz; tariff: Tariff }) {
         <PowerChart data={pts} scenario={scenario} acCapKw={viz.meta.acCapKw} />
       </div>
 
-      {!isNb ? (
+      {!hasBattery ? (
+        <p className="note">Sistema A senza batteria: nessun accumulo.</p>
+      ) : !isNb ? (
         <div className="chart-card">
           <div className="section-head">
             <h3>

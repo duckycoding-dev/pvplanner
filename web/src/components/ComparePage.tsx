@@ -4,8 +4,7 @@ import type { CostResult, Tariff } from "../../../src/core/economics/tariff.ts";
 import type { SystemResult } from "../../../src/core/comparison/computeSystem.ts";
 import {
   batteryUsableKwh,
-  cloneFromBaseline,
-  equalsBaseline,
+  equalsSystems,
   noPvConfig,
   type SystemConfigB,
   totalPeakKwp,
@@ -55,17 +54,18 @@ const DEFS: RowDef[] = [
 
 export function ComparePage({
   viz,
+  systemA,
   systemB,
   tariff,
   incentive,
 }: {
   viz: Viz;
+  systemA: SystemConfigB;
   systemB: SystemConfigB;
   tariff: Tariff;
   incentive: Incentive;
 }) {
-  const systemA = useMemo(() => cloneFromBaseline(viz), [viz]);
-  const bDiffers = useMemo(() => !equalsBaseline(systemB, viz), [systemB, viz]);
+  const bDiffers = useMemo(() => !equalsSystems(systemA, systemB), [systemA, systemB]);
 
   const noPv = useMemo<Case>(() => {
     const r = runSystem(noPvConfig(viz), viz);
@@ -80,12 +80,13 @@ export function ComparePage({
     return { r, c: systemCost(viz, r, tariff) };
   }, [systemB, viz, tariff]);
 
-  // Table: "senza FV" reference + A, plus B when it has been edited. Charts compare A vs B only.
+  // Table: "senza FV" reference + A, plus B when it differs from A. Charts compare A vs B only.
+  const labelA = systemA.label.length > 0 ? systemA.label : "A";
   const labelB = systemB.label.length > 0 ? systemB.label : "B";
   const cases: Case[] = bDiffers ? [noPv, caseA, caseB] : [noPv, caseA];
   const columns = bDiffers
-    ? [{ key: "novf", label: "senza FV" }, { key: "a", label: "A (baseline)" }, { key: "b", label: labelB }]
-    : [{ key: "novf", label: "senza FV" }, { key: "a", label: "A (baseline)" }];
+    ? [{ key: "novf", label: "senza FV" }, { key: "a", label: labelA }, { key: "b", label: labelB }]
+    : [{ key: "novf", label: "senza FV" }, { key: "a", label: labelA }];
   const rows: MetricRow[] = DEFS.map((d) => ({
     key: d.key,
     label: d.label,
@@ -116,9 +117,9 @@ export function ComparePage({
   return (
     <div className="compare-page">
       <p className="note">
-        Tabella: <b>senza FV</b> (riferimento) · <b>A (baseline)</b>
+        Tabella: <b>senza FV</b> (riferimento) · <b>{labelA}</b>
         {bDiffers ? <> · <b>{labelB}</b></> : null}. Grafici: A vs B.{" "}
-        {bDiffers ? "" : "Modifica il Sistema B nel menu per confrontarlo con A."} A:{" "}
+        {bDiffers ? "" : "Modifica il Sistema B nel menu per confrontarlo con A."} {labelA}:{" "}
         {totalPeakKwp(systemA).toFixed(2)} kWp · batteria {batteryUsableKwh(systemA).toFixed(2)} kWh — {labelB}:{" "}
         {totalPeakKwp(systemB).toFixed(2)} kWp · batteria {batteryUsableKwh(systemB).toFixed(2)} kWh.
       </p>
@@ -131,13 +132,13 @@ export function ComparePage({
         a={caseA.r}
         b={caseB.r}
         viz={viz}
-        labelA="A (baseline)"
+        labelA={labelA}
         labelB={labelB}
         usableA={batteryUsableKwh(systemA)}
         usableB={batteryUsableKwh(systemB)}
       />
-      <CompareMonthlyBars a={caseA.r} b={caseB.r} labelA="A (baseline)" labelB={labelB} />
-      <CompareAnnualBars a={caseA.r} b={caseB.r} labelA="A (baseline)" labelB={labelB} />
+      <CompareMonthlyBars a={caseA.r} b={caseB.r} labelA={labelA} labelB={labelB} />
+      <CompareAnnualBars a={caseA.r} b={caseB.r} labelA={labelA} labelB={labelB} />
     </div>
   );
 }

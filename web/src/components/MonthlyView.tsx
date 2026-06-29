@@ -47,16 +47,19 @@ const SCENARIOS: { key: Scenario; label: string }[] = [
   { key: "entrambi", label: "entrambi" },
 ];
 
-export function MonthlyView({ viz, tariff }: { viz: Viz; tariff: Tariff }) {
+export function MonthlyView({ viz, tariff, hasBattery }: { viz: Viz; tariff: Tariff; hasBattery: boolean }) {
   const prodToggle = useLegendToggle();
   const netToggle = useLegendToggle();
   const [scenario, setScenario] = useState<Scenario>("con");
+  const effScenario: Scenario = hasBattery ? scenario : "senza";
   const cs = scenarioCost(viz, "senza", tariff);
   const cc = scenarioCost(viz, "con", tariff);
+  const costCols = hasBattery ? COST_COLS : [{ key: "fv", label: "FV" }];
+  const v2 = (senza: number, con: number): number[] => (hasBattery ? [senza, con] : [senza]);
   const costRows: MetricRow[] = [
-    { key: "buy", label: "Spesa acquisto", info: "costo", good: "lower", money: "pay", render: eur, values: [cs.annual.buyCost, cc.annual.buyCost] },
-    { key: "sell", label: "Ricavo vendita", info: "ricavo", good: "higher", money: "earn", render: eur, values: [cs.annual.sellRevenue, cc.annual.sellRevenue] },
-    { key: "net", label: "Costo netto/anno", info: "nettoCosto", good: "lower", money: "net", render: eur, values: [cs.annual.netCost, cc.annual.netCost] },
+    { key: "buy", label: "Spesa acquisto", info: "costo", good: "lower", money: "pay", render: eur, values: v2(cs.annual.buyCost, cc.annual.buyCost) },
+    { key: "sell", label: "Ricavo vendita", info: "ricavo", good: "higher", money: "earn", render: eur, values: v2(cs.annual.sellRevenue, cc.annual.sellRevenue) },
+    { key: "net", label: "Costo netto/anno", info: "nettoCosto", good: "lower", money: "net", render: eur, values: v2(cs.annual.netCost, cc.annual.netCost) },
   ];
   const monthlyNetRows: MetricRow[] = MONTH_LABELS.map((name, k) => ({
     key: `m${k}`,
@@ -64,7 +67,7 @@ export function MonthlyView({ viz, tariff }: { viz: Viz; tariff: Tariff }) {
     good: "lower",
     money: "net",
     render: eur,
-    values: [cs.monthly[k]?.netCost ?? 0, cc.monthly[k]?.netCost ?? 0],
+    values: v2(cs.monthly[k]?.netCost ?? 0, cc.monthly[k]?.netCost ?? 0),
   }));
 
   const data = viz.monthly.map((m) => ({
@@ -82,11 +85,15 @@ export function MonthlyView({ viz, tariff }: { viz: Viz; tariff: Tariff }) {
   return (
     <div>
       <section className="chart-card">
-        <MetricsTable title="Costi energia (Δ = effetto batteria)" columns={COST_COLS} rows={costRows} />
+        <MetricsTable
+          title={hasBattery ? "Costi energia (Δ = effetto batteria)" : "Costi energia"}
+          columns={costCols}
+          rows={costRows}
+        />
       </section>
 
       <section className="chart-card">
-        <MetricsTable title="Costo netto per mese" columns={COST_COLS} rows={monthlyNetRows} />
+        <MetricsTable title="Costo netto per mese" columns={costCols} rows={monthlyNetRows} />
       </section>
 
       <section className="chart-card">
@@ -115,13 +122,15 @@ export function MonthlyView({ viz, tariff }: { viz: Viz; tariff: Tariff }) {
             Autoconsumo e rete per mese
             <InfoTip k="autoconsumo" />
           </h3>
-          <span className="seg">
-            {SCENARIOS.map((s) => (
-              <button key={s.key} className={scenario === s.key ? "active" : ""} onClick={() => setScenario(s.key)}>
-                {s.label}
-              </button>
-            ))}
-          </span>
+          {hasBattery && (
+            <span className="seg">
+              {SCENARIOS.map((s) => (
+                <button key={s.key} className={scenario === s.key ? "active" : ""} onClick={() => setScenario(s.key)}>
+                  {s.label}
+                </button>
+              ))}
+            </span>
+          )}
         </div>
         <ResponsiveContainer width="100%" height={320}>
           <BarChart data={data}>
@@ -130,7 +139,7 @@ export function MonthlyView({ viz, tariff }: { viz: Viz; tariff: Tariff }) {
             <YAxis label={{ value: "kWh", angle: -90, position: "insideLeft" }} />
             <Tooltip formatter={(v: number) => `${fmt(v)} kWh`} />
             <Legend onClick={netToggle.onClick} wrapperStyle={{ cursor: "pointer" }} />
-            {NET_BARS[scenario].map((b) => (
+            {NET_BARS[effScenario].map((b) => (
               <Bar key={b.key} dataKey={b.key} name={b.name} fill={b.fill} hide={netToggle.isHidden(b.key)} />
             ))}
           </BarChart>

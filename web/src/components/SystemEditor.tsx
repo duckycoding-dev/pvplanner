@@ -14,28 +14,38 @@ import {
 import { NumberField } from "./NumberField.tsx";
 import { ImportModal } from "./ImportModal.tsx";
 
-/** Editable System B (equipment only); System A shown compactly for reference. Lives in the sidebar. */
-export function SystemBEditor({
+/**
+ * Editable system (equipment + CAPEX). Used for both System A and System B in the menu.
+ * Geometry (azimuth/site) stays the baseline; only equipment varies. config.json (via
+ * viz.meta) is the default seed, restorable with "Reset ai default".
+ */
+export function SystemEditor({
   viz,
-  systemB,
-  setSystemB,
+  system,
+  setSystem,
+  title,
+  downloadName,
+  copyFrom,
 }: {
   viz: Viz;
-  systemB: SystemConfigB;
-  setSystemB: (c: SystemConfigB) => void;
+  system: SystemConfigB;
+  setSystem: (c: SystemConfigB) => void;
+  title: string;
+  downloadName: string;
+  copyFrom?: { label: string; system: SystemConfigB };
 }) {
   const [importing, setImporting] = useState(false);
 
   const updateFalda = (id: string, patch: Partial<FaldaConfigB>): void => {
-    setSystemB({ ...systemB, falde: systemB.falde.map((f) => (f.id === id ? { ...f, ...patch } : f)) });
+    setSystem({ ...system, falde: system.falde.map((f) => (f.id === id ? { ...f, ...patch } : f)) });
   };
 
-  const exportB = (): void => {
-    const blob = new Blob([serialize(systemB)], { type: "application/json" });
+  const exportSystem = (): void => {
+    const blob = new Blob([serialize(system)], { type: "application/json" });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;
-    link.download = "sistema-b.json";
+    link.download = downloadName;
     link.click();
     URL.revokeObjectURL(url);
   };
@@ -43,17 +53,17 @@ export function SystemBEditor({
   return (
     <div className="editor">
       <p className="editor-ref">
-        <b>A (baseline)</b>:{" "}
+        <b>default (config)</b>:{" "}
         {viz.meta.falde.map((f) => `${f.id} ${f.panelCount}×${f.wp}W`).join(" · ")} · batteria{" "}
         {viz.meta.batteryUsableKwh} kWh · costo {viz.meta.installationCostEur} €
       </p>
 
       <label className="text-field">
-        Nome B
-        <input value={systemB.label} onChange={(e) => setSystemB({ ...systemB, label: e.target.value })} />
+        Nome
+        <input value={system.label} onChange={(e) => setSystem({ ...system, label: e.target.value })} />
       </label>
 
-      {systemB.falde.map((f) => (
+      {system.falde.map((f) => (
         <fieldset className="falda-edit" key={f.id}>
           <legend>
             {f.id} ({f.azimuth > 0 ? "+" : ""}
@@ -81,65 +91,70 @@ export function SystemBEditor({
       <NumberField
         label="Tetto AC inverter"
         unit="kW"
-        value={systemB.acCapKw}
+        value={system.acCapKw}
         min={1}
         max={15}
         step={0.1}
-        onChange={(v) => setSystemB({ ...systemB, acCapKw: v })}
+        onChange={(v) => setSystem({ ...system, acCapKw: v })}
       />
       <NumberField
         label="Batteria capacità totale"
         unit="kWh, 0=nessuna"
-        value={systemB.batteryTotalKwh}
+        value={system.batteryTotalKwh}
         min={0}
         max={30}
         step={0.1}
-        onChange={(v) => setSystemB({ ...systemB, batteryTotalKwh: v })}
+        onChange={(v) => setSystem({ ...system, batteryTotalKwh: v })}
       />
       <NumberField
         label="Batteria % utilizzabile"
         unit="%"
-        value={systemB.batteryUsablePct}
+        value={system.batteryUsablePct}
         min={0}
         max={100}
         step={1}
-        onChange={(v) => setSystemB({ ...systemB, batteryUsablePct: v })}
+        onChange={(v) => setSystem({ ...system, batteryUsablePct: v })}
       />
       <NumberField
         label="Round-trip"
-        value={systemB.roundTrip}
+        value={system.roundTrip}
         min={0.5}
         max={1}
         step={0.01}
-        onChange={(v) => setSystemB({ ...systemB, roundTrip: v })}
+        onChange={(v) => setSystem({ ...system, roundTrip: v })}
       />
       <NumberField
         label="Costo installazione"
         unit="€"
-        value={systemB.installationCostEur}
+        value={system.installationCostEur}
         min={0}
         max={60000}
         step={100}
-        onChange={(v) => setSystemB({ ...systemB, installationCostEur: v })}
+        onChange={(v) => setSystem({ ...system, installationCostEur: v })}
       />
 
       <p className="editor-total">
-        Totale B: <b>{totalPeakKwp(systemB).toFixed(2)} kWp</b> · batteria utile{" "}
-        <b>{batteryUsableKwh(systemB).toFixed(2)} kWh</b>
+        Totale: <b>{totalPeakKwp(system).toFixed(2)} kWp</b> · batteria utile{" "}
+        <b>{batteryUsableKwh(system).toFixed(2)} kWh</b>
       </p>
 
       <div className="editor-actions">
-        <button onClick={() => setSystemB(cloneFromBaseline(viz))}>Copia da A</button>
-        <button onClick={exportB}>Esporta</button>
+        <button onClick={() => setSystem({ ...cloneFromBaseline(viz), label: system.label })}>Reset ai default</button>
+        {copyFrom !== undefined && (
+          <button onClick={() => setSystem({ ...copyFrom.system, label: system.label })}>
+            Copia da {copyFrom.label}
+          </button>
+        )}
+        <button onClick={exportSystem}>Esporta</button>
         <button onClick={() => setImporting(true)}>Importa</button>
       </div>
 
       {importing && (
         <ImportModal
-          title="Importa Sistema B"
+          title={`Importa ${title}`}
           parse={parseSystemConfigB}
           validate={(c) => validateAgainstBaseline(c, viz)}
-          onImport={setSystemB}
+          onImport={setSystem}
           onClose={() => setImporting(false)}
         />
       )}

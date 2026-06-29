@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import vizRaw from "../viz.json";
 import type { Tab, Viz } from "./types.ts";
 import type { Tariff } from "../../src/core/economics/tariff.ts";
@@ -9,10 +9,12 @@ import { Glossary } from "./components/Glossary.tsx";
 import { ComparePage } from "./components/ComparePage.tsx";
 import { Sidebar } from "./components/Sidebar.tsx";
 import { type SystemConfigB, cloneFromBaseline, validateAgainstBaseline } from "./lib/systemConfig.ts";
+import { deriveMonoViz } from "./lib/monoView.ts";
 import { defaultTariff, validateTariff } from "./lib/tariffPresets.ts";
 import { type Incentive, defaultIncentive } from "./lib/economics.ts";
 
 const viz = vizRaw as unknown as Viz;
+const SA_KEY = "systemA";
 const SB_KEY = "systemB";
 const TARIFF_KEY = "tariff";
 const INCENTIVE_KEY = "incentive";
@@ -25,9 +27,9 @@ const TABS: { key: Tab; label: string }[] = [
   { key: "glossario", label: "Glossario" },
 ];
 
-function loadSystemB(): SystemConfigB {
+function loadSystem(key: string, label: string): SystemConfigB {
   try {
-    const raw = localStorage.getItem(SB_KEY);
+    const raw = localStorage.getItem(key);
     if (raw !== null) {
       const cfg = JSON.parse(raw) as SystemConfigB;
       if (validateAgainstBaseline(cfg, viz) === null) return cfg;
@@ -35,7 +37,7 @@ function loadSystemB(): SystemConfigB {
   } catch {
     /* ignore corrupt storage */
   }
-  return cloneFromBaseline(viz);
+  return cloneFromBaseline(viz, label);
 }
 
 function loadTariff(): Tariff {
@@ -68,10 +70,14 @@ function loadIncentive(): Incentive {
 
 export function App() {
   const [tab, setTab] = useState<Tab>("giorno");
-  const [systemB, setSystemB] = useState<SystemConfigB>(loadSystemB);
+  const [systemA, setSystemA] = useState<SystemConfigB>(() => loadSystem(SA_KEY, "Sistema A"));
+  const [systemB, setSystemB] = useState<SystemConfigB>(() => loadSystem(SB_KEY, "Sistema B"));
   const [tariff, setTariff] = useState<Tariff>(loadTariff);
   const [incentive, setIncentive] = useState<Incentive>(loadIncentive);
   const [menuOpen, setMenuOpen] = useState(false);
+
+  // Mono views (annual/monthly/daily) follow System A, recomputed live.
+  const { vizA, hasBattery } = useMemo(() => deriveMonoViz(viz, systemA), [systemA]);
 
   // Hotkey "m" toggles the configuration menu (ignored while typing in a form field).
   useEffect(() => {
@@ -87,6 +93,13 @@ export function App() {
     return () => window.removeEventListener("keydown", onKey);
   }, []);
 
+  useEffect(() => {
+    try {
+      localStorage.setItem(SA_KEY, JSON.stringify(systemA));
+    } catch {
+      /* ignore */
+    }
+  }, [systemA]);
   useEffect(() => {
     try {
       localStorage.setItem(SB_KEY, JSON.stringify(systemB));
@@ -108,14 +121,17 @@ export function App() {
       /* ignore */
     }
   }, [incentive]);
-  const faldeLabel = viz.meta.falde
-    .map((f) => `${f.id} ${f.azimuth > 0 ? "+" : ""}${f.azimuth}° ${f.peakKwp} kWp`)
+  const faldeLabel = vizA.meta.falde
+    .map((f) => `${f.id} ${f.azimuth > 0 ? "+" : ""}${f.azimuth}° ${f.peakKwp.toFixed(2)} kWp`)
     .join(" · ");
+  const batteryLabel = hasBattery ? `batteria ${vizA.meta.batteryUsableKwh.toFixed(2)} kWh` : "senza batteria";
 
   return (
     <div className="layout">
       <Sidebar
         viz={viz}
+        systemA={systemA}
+        setSystemA={setSystemA}
         systemB={systemB}
         setSystemB={setSystemB}
         tariff={tariff}
@@ -129,10 +145,10 @@ export function App() {
       <div className="main">
         <header>
           <h1>
-            Analisi Fotovoltaico <span className="year">{viz.meta.year}</span>
+            Analisi Fotovoltaico <span className="year">{vizA.meta.year}</span>
           </h1>
           <p className="sub">
-            {faldeLabel} · tetto AC {viz.meta.acCapKw} kW · batteria {viz.meta.batteryUsableKwh} kWh
+            {systemA.label}: {faldeLabel} · tetto AC {vizA.meta.acCapKw} kW · {batteryLabel}
           </p>
         </header>
 
@@ -145,10 +161,12 @@ export function App() {
         </nav>
 
         <main>
-          {tab === "annuale" && <AnnualOverview viz={viz} tariff={tariff} incentive={incentive} />}
-          {tab === "mensile" && <MonthlyView viz={viz} tariff={tariff} />}
-          {tab === "giorno" && <DailyExplorer viz={viz} tariff={tariff} />}
-          {tab === "confronto" && <ComparePage viz={viz} systemB={systemB} tariff={tariff} incentive={incentive} />}
+          {tab === "annuale" && <AnnualOverview viz={vizA} tariff={tariff} incentive={incentive} hasBattery={hasBattery} />}
+          {tab === "mensile" && <MonthlyView viz={vizA} tariff={tariff} hasBattery={hasBattery} />}
+          {tab === "giorno" && <DailyExplorer viz={vizA} tariff={tariff} hasBattery={hasBattery} />}
+          {tab === "confronto" && (
+            <ComparePage viz={viz} systemA={systemA} systemB={systemB} tariff={tariff} incentive={incentive} />
+          )}
           {tab === "glossario" && <Glossary />}
         </main>
 
