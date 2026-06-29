@@ -54,6 +54,8 @@ export interface Viz {
     batteryPortKw: number;
     batteryRoundTrip: number;
     consumptionAnnualKwh: number;
+    installationCostEur: number;
+    incentive: { mode: "percent" | "fixed"; value: number; years: number };
     falde: { id: string; azimuth: number; peakKwp: number; panelCount: number; wp: number }[];
     consumptionSource: string;
     consumptionNote: string;

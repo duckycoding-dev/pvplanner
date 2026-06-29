@@ -23,6 +23,8 @@ test("writeVizJson emits a viz.json matching the analysis", async () => {
       batteryPortKw: number;
       batteryRoundTrip: number;
       consumptionAnnualKwh: number;
+      installationCostEur: number;
+      incentive: { mode: string; value: number; years: number };
       falde: { id: string; peakKwp: number; panelCount: number; wp: number }[];
     };
     annual: { production: { theoreticalKwh: number; clippedHours: number } };
@@ -43,6 +45,10 @@ test("writeVizJson emits a viz.json matching the analysis", async () => {
   expect(v.meta.batteryUsablePct).toBe(100);
   expect(v.meta.batteryTotalKwh).toBeCloseTo(10.24, 2);
   expect(v.meta.batteryRoundTrip).toBeCloseTo(0.9, 6);
+  expect(v.meta.installationCostEur).toBe(16000);
+  expect(v.meta.incentive.mode).toBe("percent");
+  expect(v.meta.incentive.value).toBe(50);
+  expect(v.meta.incentive.years).toBe(10);
   expect(v.meta.consumptionAnnualKwh).toBeGreaterThan(0);
   expect(v.meta.falde.length).toBe(2);
   expect(v.meta.falde[0]!.panelCount).toBe(11);

@@ -92,6 +92,8 @@ export async function writeVizJson(
       batteryPortKw: inverterBatteryPortKw(cfg.inverter),
       batteryRoundTrip: DEFAULT_ROUND_TRIP,
       consumptionAnnualKwh: r3(sim.consumption.annualKwh),
+      installationCostEur: cfg.economics?.installation_cost_eur ?? 0,
+      incentive: cfg.economics?.incentive ?? { mode: "percent", value: 0, years: 1 },
       falde: cfg.resolvedFalde.map((f) => ({
         id: f.id,
         azimuth: f.azimuth,

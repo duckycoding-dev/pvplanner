@@ -52,6 +52,17 @@ export interface ConsumptionConfig {
   csv?: ConsumptionCsvConfig;
 }
 
+export interface IncentiveConfig {
+  mode: "percent" | "fixed"; // % of CAPEX, or a fixed € amount
+  value: number;
+  years: number; // returned linearly over N years (1 = immediate)
+}
+
+export interface EconomicsConfig {
+  installation_cost_eur: number; // baseline system CAPEX
+  incentive: IncentiveConfig;
+}
+
 export interface SystemConfig {
   location: LocationConfig;
   timezone: string;
@@ -59,6 +70,7 @@ export interface SystemConfig {
   products: ProductsConfig;
   falde: FaldaConfig[];
   consumption: ConsumptionConfig;
+  economics?: EconomicsConfig;
 }
 
 // ---------------------------------------------------------------------------
@@ -168,6 +180,24 @@ export function validateSystemConfig(raw: unknown): SystemConfig {
       : { timezone: asString(consObj["timezone"], "consumption.timezone") }),
   };
 
+  let economics: EconomicsConfig | undefined;
+  if (root["economics"] !== undefined) {
+    const e = asObject(root["economics"], "economics");
+    const inc = asObject(e["incentive"], "economics.incentive");
+    const mode = asString(inc["mode"], "economics.incentive.mode");
+    if (mode !== "percent" && mode !== "fixed") {
+      throw new Error('config: economics.incentive.mode must be "percent" or "fixed"');
+    }
+    economics = {
+      installation_cost_eur: asNumber(e["installation_cost_eur"], "economics.installation_cost_eur"),
+      incentive: {
+        mode,
+        value: asNumber(inc["value"], "economics.incentive.value"),
+        years: asNumber(inc["years"], "economics.incentive.years"),
+      },
+    };
+  }
+
   return {
     location,
     timezone: asString(root["timezone"], "timezone"),
@@ -175,5 +205,6 @@ export function validateSystemConfig(raw: unknown): SystemConfig {
     products,
     falde,
     consumption,
+    ...(economics === undefined ? {} : { economics }),
   };
 }
