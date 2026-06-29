@@ -4,6 +4,8 @@ import {
   type SystemConfigB,
   batteryUsableKwh,
   cloneFromBaseline,
+  equalsBaseline,
+  noPvConfig,
   parseSystemConfigB,
   serialize,
   totalPeakKwp,
@@ -62,6 +64,20 @@ test("parse accepts a legacy batteryUsableKwh field as total at 100%", () => {
   );
   expect(cfg.batteryTotalKwh).toBe(8);
   expect(cfg.batteryUsablePct).toBe(100);
+});
+
+test("equalsBaseline ignores label, detects equipment changes; noPvConfig zeroes panels+battery", () => {
+  const viz = makeViz();
+  const base = cloneFromBaseline(viz);
+  expect(equalsBaseline(base, viz)).toBe(true);
+  expect(equalsBaseline({ ...base, label: "Altro nome" }, viz)).toBe(true); // label ignored
+  expect(equalsBaseline({ ...base, batteryTotalKwh: 5 }, viz)).toBe(false);
+  expect(equalsBaseline({ ...base, falde: base.falde.map((f, i) => (i === 0 ? { ...f, panelCount: 99 } : f)) }, viz)).toBe(false);
+
+  const noPv = noPvConfig(viz);
+  expect(noPv.falde.every((f) => f.panelCount === 0)).toBe(true);
+  expect(noPv.batteryTotalKwh).toBe(0);
+  expect(totalPeakKwp(noPv)).toBe(0);
 });
 
 test("validateAgainstBaseline accepts the clone and rejects different geometry", () => {

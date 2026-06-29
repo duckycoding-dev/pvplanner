@@ -45,6 +45,31 @@ export function serialize(cfg: SystemConfigB): string {
   return JSON.stringify(cfg, null, 2);
 }
 
+/** True if cfg matches the baseline equipment (ignoring the label) → "no second system yet". */
+export function equalsBaseline(cfg: SystemConfigB, viz: Viz): boolean {
+  const base = cloneFromBaseline(viz);
+  if (
+    cfg.acCapKw !== base.acCapKw ||
+    cfg.batteryTotalKwh !== base.batteryTotalKwh ||
+    cfg.batteryUsablePct !== base.batteryUsablePct ||
+    cfg.roundTrip !== base.roundTrip ||
+    cfg.falde.length !== base.falde.length
+  ) {
+    return false;
+  }
+  for (const bf of base.falde) {
+    const cf = cfg.falde.find((x) => x.id === bf.id);
+    if (cf === undefined || cf.panelCount !== bf.panelCount || cf.wp !== bf.wp) return false;
+  }
+  return true;
+}
+
+/** A "no PV" system: same geometry but zero panels and no battery (import = full load). */
+export function noPvConfig(viz: Viz): SystemConfigB {
+  const base = cloneFromBaseline(viz);
+  return { ...base, label: "senza FV", falde: base.falde.map((f) => ({ ...f, panelCount: 0 })), batteryTotalKwh: 0 };
+}
+
 function reqNumber(v: unknown, ctx: string): number {
   if (typeof v !== "number" || Number.isNaN(v)) throw new Error(`Config non valida: ${ctx} deve essere un numero.`);
   return v;
