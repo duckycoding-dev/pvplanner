@@ -33,6 +33,7 @@ export function CompareDayChart({
   labelB: string;
 }) {
   const { onClick, isHidden } = useLegendToggle();
+  const soc = useLegendToggle();
   const total = Math.floor(viz.hourly.loadKwh.length / 24);
   const picks = useMemo(() => quickPickDays(viz.hourly), [viz]);
   const [dayIndex, setDayIndex] = useState<number>(picks.maxProduction);
@@ -88,6 +89,19 @@ export function CompareDayChart({
           <Line type="monotone" dataKey="prodB" name={`produzione ${labelB}`} stroke="#16a34a" strokeDasharray="5 3" dot={false} isAnimationActive={false} hide={isHidden("prodB")} />
           <Line type="monotone" dataKey="socA" name={`SoC ${labelA}`} stroke="#f59e0b" strokeWidth={2} dot={false} isAnimationActive={false} hide={isHidden("socA")} />
           <Line type="monotone" dataKey="socB" name={`SoC ${labelB}`} stroke="#f59e0b" strokeDasharray="5 3" dot={false} isAnimationActive={false} hide={isHidden("socB")} />
+        </ComposedChart>
+      </ResponsiveContainer>
+
+      <h4 className="subchart-title">Stato di carica batteria (SoC)</h4>
+      <ResponsiveContainer width="100%" height={200}>
+        <ComposedChart data={pts} margin={{ top: 6, right: 24, left: 0, bottom: 4 }}>
+          <CartesianGrid strokeDasharray="3 3" />
+          <XAxis dataKey="hour" />
+          <YAxis label={{ value: "kWh", angle: -90, position: "insideLeft" }} />
+          <Tooltip formatter={(v) => Number(v).toFixed(2)} labelFormatter={(h) => `ore ${h}`} />
+          <Legend onClick={soc.onClick} wrapperStyle={{ cursor: "pointer" }} />
+          <Line type="monotone" dataKey="socA" name={`SoC ${labelA}`} stroke="#f59e0b" strokeWidth={2} dot={false} isAnimationActive={false} hide={soc.isHidden("socA")} />
+          <Line type="monotone" dataKey="socB" name={`SoC ${labelB}`} stroke="#f59e0b" strokeDasharray="5 3" dot={false} isAnimationActive={false} hide={soc.isHidden("socB")} />
         </ComposedChart>
       </ResponsiveContainer>
     </div>

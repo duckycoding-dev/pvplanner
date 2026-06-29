@@ -22,7 +22,7 @@ header h1 { margin: 0 0 4px; font-size: 22px; }
 header h1 .year { color: var(--muted); font-weight: 400; }
 header .sub { margin: 0; color: var(--muted); font-size: 13px; }
 
-.tabs { display: flex; gap: 6px; margin: 18px 0; border-bottom: 1px solid var(--border); }
+.tabs { display: flex; flex-wrap: wrap; gap: 6px; margin: 18px 0; border-bottom: 1px solid var(--border); }
 .tabs button {
   border: none; background: none; padding: 9px 14px; cursor: pointer;
   font-size: 14px; color: var(--muted); border-bottom: 2px solid transparent;
@@ -41,6 +41,7 @@ header .sub { margin: 0; color: var(--muted); font-size: 13px; }
 
 .chart-card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; margin-bottom: 16px; }
 .chart-card h3 { margin: 0 0 10px; font-size: 15px; }
+.subchart-title { margin: 16px 0 6px; font-size: 14px; color: var(--muted); }
 
 .day-toolbar { display: flex; flex-wrap: wrap; gap: 14px; align-items: center; margin-bottom: 12px; }
 .day-nav, .picks, .scenario { display: flex; gap: 6px; align-items: center; }
@@ -102,7 +103,7 @@ header .sub { margin: 0; color: var(--muted); font-size: 13px; }
 
 .section-head { display: flex; align-items: center; gap: 6px; justify-content: space-between; margin-bottom: 10px; }
 .section-head h3 { margin: 0; font-size: 15px; }
-.seg { display: inline-flex; gap: 4px; }
+.seg { display: inline-flex; flex-wrap: wrap; gap: 4px; }
 .seg button { border: 1px solid var(--border); background: var(--card); border-radius: 7px; padding: 4px 10px;
   cursor: pointer; font-size: 12px; color: var(--text); }
 .seg button.active { background: var(--accent); color: #fff; border-color: var(--accent); }
@@ -127,7 +128,14 @@ footer { margin-top: 24px; color: var(--muted); font-size: 12px; border-top: 1px
   border-radius: 9px; cursor: pointer; font-size: 18px; line-height: 1; color: var(--text); }
 .rail-toggle:hover { border-color: var(--accent); color: var(--accent); }
 
-.menu-dialog { margin: 0; border: none; padding: 0; height: 100vh; max-height: 100vh; width: min(440px, 92vw);
+@media (max-width: 640px) {
+  .layout { padding-left: 0; }
+  .rail { position: sticky; top: 0; right: 0; bottom: auto; width: auto; height: 44px; z-index: 50;
+    flex-direction: row; align-items: center; justify-content: flex-start; padding: 0 10px;
+    border-right: none; border-bottom: 1px solid var(--border); }
+}
+
+.menu-dialog { overscroll-behavior: contain; margin: 0; border: none; padding: 0; height: 100vh; max-height: 100vh; min-height: 100vh; width: min(500px, 92vw);
   max-width: 92vw; inset: 0 auto 0 0; background: var(--card); box-shadow: 0 0 28px rgba(0, 0, 0, 0.25); color: var(--text); }
 .menu-dialog::backdrop { background: rgba(0, 0, 0, 0.4); }
 .menu-head { display: flex; justify-content: space-between; align-items: center; padding: 12px 16px;
@@ -144,7 +152,7 @@ footer { margin-top: 24px; color: var(--muted); font-size: 12px; border-top: 1px
 .editor { display: flex; flex-direction: column; gap: 10px; padding: 2px 2px 8px; }
 .editor-ref, .editor-total { margin: 0; font-size: 12px; color: var(--muted); }
 .editor-actions { display: flex; flex-wrap: wrap; gap: 6px; }
-.editor-actions button { border: 1px solid var(--border); background: var(--card); border-radius: 7px;
+.editor-actions button { border: 1px solid var(--border); background: var(--card); border-radius: 7px; width: 100%;
   padding: 6px 10px; cursor: pointer; font-size: 12px; color: var(--text); }
 .editor-actions button:hover { border-color: var(--accent); color: var(--accent); }
 .text-field { display: flex; flex-direction: column; gap: 3px; font-size: 12px; color: var(--muted); }
@@ -155,7 +163,7 @@ footer { margin-top: 24px; color: var(--muted); font-size: 12px; border-top: 1px
   display: flex; align-items: center; gap: 6px; }
 .band-name { width: 90px; border: 1px solid var(--border); border-radius: 6px; padding: 2px 6px; font-size: 12px; }
 .band-del { border: none; background: none; cursor: pointer; color: var(--muted); }
-.band-hours { display: flex; gap: 8px; }
+.band-hours { display: flex; flex-wrap: wrap; gap: 8px; }
 .band-days { display: flex; gap: 3px; }
 .band-days .day { width: 24px; height: 24px; border: 1px solid var(--border); background: var(--card);
   border-radius: 6px; cursor: pointer; font-size: 11px; color: var(--muted); }
@@ -177,8 +185,8 @@ footer { margin-top: 24px; color: var(--muted); font-size: 12px; border-top: 1px
 
 
 .modal-overlay { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.4); display: flex; align-items: center; justify-content: center; z-index: 200; }
-.modal { background: var(--card); border-radius: 12px; padding: 18px 20px; width: 420px; max-width: 90vw; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25); }
-.modal h3 { margin: 0 0 12px; }
+.modal { background: var(--card); border-radius: 12px; padding: 18px 20px; width: 420px; max-width: 90vw; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25); display: grid; gap: 12px;}
+.modal h3 { margin: 0; }
 .dropzone { border: 2px dashed var(--border); border-radius: 10px; padding: 26px 16px; text-align: center; color: var(--muted); }
 .dropzone.drag { border-color: var(--accent); background: rgba(59, 130, 246, 0.06); color: var(--accent); }
 .file-pick { color: var(--accent); cursor: pointer; text-decoration: underline; }
