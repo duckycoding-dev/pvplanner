@@ -1,6 +1,7 @@
 import { useMemo } from "react";
 import type { Viz } from "../types.ts";
-import type { Tariff } from "../../../src/core/economics/tariff.ts";
+import type { CostResult, Tariff } from "../../../src/core/economics/tariff.ts";
+import type { SystemResult } from "../../../src/core/comparison/computeSystem.ts";
 import {
   batteryUsableKwh,
   cloneFromBaseline,
@@ -12,6 +13,7 @@ import {
 import { runSystem } from "../lib/runSystem.ts";
 import { systemCost } from "../lib/viewCosts.ts";
 import { fmt, pct } from "../lib/format.ts";
+import { type Good, type Money } from "../lib/metricsTable.ts";
 import { MetricsTable, type MetricRow } from "./MetricsTable.tsx";
 import { CompareDayChart } from "./CompareDayChart.tsx";
 import { CompareAnnualBars, CompareMonthlyBars } from "./CompareBars.tsx";
@@ -20,55 +22,85 @@ const kwh = (v: number): string => `${fmt(v)} kWh`;
 const eur = (v: number): string => `${fmt(v, 2)} €`;
 const cyc = (v: number): string => (v > 0 ? fmt(v) : "—");
 
+interface Case {
+  r: SystemResult;
+  c: CostResult;
+}
+
+interface RowDef {
+  key: string;
+  label: string;
+  info?: string;
+  good: Good;
+  money?: Money;
+  render: (v: number) => string;
+  get: (s: Case) => number;
+}
+
+const DEFS: RowDef[] = [
+  { key: "prod", label: "Produzione pratica", info: "produzione", good: "higher", render: kwh, get: (s) => s.r.production.annual.practicalKwh },
+  { key: "clip", label: "Clipping", info: "clipping", good: "lower", render: kwh, get: (s) => s.r.production.annual.clippingLossKwh },
+  { key: "self", label: "Autoconsumo", info: "autoconsumo", good: "higher", render: kwh, get: (s) => s.r.metrics.selfConsumedKwh },
+  { key: "rate", label: "Tasso autoconsumo", info: "tassoAutoconsumo", good: "higher", render: pct, get: (s) => s.r.metrics.selfConsumptionRate },
+  { key: "suff", label: "Autosufficienza", info: "autosufficienza", good: "higher", render: pct, get: (s) => s.r.metrics.selfSufficiency },
+  { key: "imp", label: "Import da rete", info: "import", good: "lower", render: kwh, get: (s) => s.r.metrics.importKwh },
+  { key: "exp", label: "Export in rete", info: "export", good: "higher", render: kwh, get: (s) => s.r.metrics.exportKwh },
+  { key: "cyc", label: "Cicli batteria/anno", info: "cicli", good: "none", render: cyc, get: (s) => s.r.metrics.battery?.equivalentCycles ?? 0 },
+  { key: "buy", label: "Spesa acquisto", info: "costo", good: "lower", money: "pay", render: eur, get: (s) => s.c.annual.buyCost },
+  { key: "sell", label: "Ricavo vendita", info: "ricavo", good: "higher", money: "earn", render: eur, get: (s) => s.c.annual.sellRevenue },
+  { key: "net", label: "Costo netto/anno", info: "nettoCosto", good: "lower", money: "net", render: eur, get: (s) => s.c.annual.netCost },
+];
+
 export function ComparePage({ viz, systemB, tariff }: { viz: Viz; systemB: SystemConfigB; tariff: Tariff }) {
   const systemA = useMemo(() => cloneFromBaseline(viz), [viz]);
-  // Two columns: A vs B once B has been edited; otherwise "senza FV" vs A.
   const bDiffers = useMemo(() => !equalsBaseline(systemB, viz), [systemB, viz]);
-  const cfg1 = useMemo(() => (bDiffers ? systemA : noPvConfig(viz)), [bDiffers, systemA, viz]);
-  const cfg2 = useMemo(() => (bDiffers ? systemB : systemA), [bDiffers, systemB, systemA]);
-  const label1 = bDiffers ? "A (baseline)" : "senza FV";
-  const label2 = bDiffers ? (systemB.label.length > 0 ? systemB.label : "B") : "A (baseline)";
 
-  const r1 = useMemo(() => runSystem(cfg1, viz), [cfg1, viz]);
-  const r2 = useMemo(() => runSystem(cfg2, viz), [cfg2, viz]);
-  const c1 = useMemo(() => systemCost(viz, r1, tariff), [viz, r1, tariff]);
-  const c2 = useMemo(() => systemCost(viz, r2, tariff), [viz, r2, tariff]);
+  const noPv = useMemo<Case>(() => {
+    const r = runSystem(noPvConfig(viz), viz);
+    return { r, c: systemCost(viz, r, tariff) };
+  }, [viz, tariff]);
+  const caseA = useMemo<Case>(() => {
+    const r = runSystem(systemA, viz);
+    return { r, c: systemCost(viz, r, tariff) };
+  }, [systemA, viz, tariff]);
+  const caseB = useMemo<Case>(() => {
+    const r = runSystem(systemB, viz);
+    return { r, c: systemCost(viz, r, tariff) };
+  }, [systemB, viz, tariff]);
 
-  const rows: MetricRow[] = [
-    { key: "prod", label: "Produzione pratica", info: "produzione", good: "higher", render: kwh, values: [r1.production.annual.practicalKwh, r2.production.annual.practicalKwh] },
-    { key: "clip", label: "Clipping", info: "clipping", good: "lower", render: kwh, values: [r1.production.annual.clippingLossKwh, r2.production.annual.clippingLossKwh] },
-    { key: "self", label: "Autoconsumo", info: "autoconsumo", good: "higher", render: kwh, values: [r1.metrics.selfConsumedKwh, r2.metrics.selfConsumedKwh] },
-    { key: "rate", label: "Tasso autoconsumo", info: "tassoAutoconsumo", good: "higher", render: pct, values: [r1.metrics.selfConsumptionRate, r2.metrics.selfConsumptionRate] },
-    { key: "suff", label: "Autosufficienza", info: "autosufficienza", good: "higher", render: pct, values: [r1.metrics.selfSufficiency, r2.metrics.selfSufficiency] },
-    { key: "imp", label: "Import da rete", info: "import", good: "lower", render: kwh, values: [r1.metrics.importKwh, r2.metrics.importKwh] },
-    { key: "exp", label: "Export in rete", info: "export", good: "higher", render: kwh, values: [r1.metrics.exportKwh, r2.metrics.exportKwh] },
-    { key: "cyc", label: "Cicli batteria/anno", info: "cicli", good: "none", render: cyc, values: [r1.metrics.battery?.equivalentCycles ?? 0, r2.metrics.battery?.equivalentCycles ?? 0] },
-    { key: "buy", label: "Spesa acquisto", info: "costo", good: "lower", money: "pay", render: eur, values: [c1.annual.buyCost, c2.annual.buyCost] },
-    { key: "sell", label: "Ricavo vendita", info: "ricavo", good: "higher", money: "earn", render: eur, values: [c1.annual.sellRevenue, c2.annual.sellRevenue] },
-    { key: "net", label: "Costo netto/anno", info: "nettoCosto", good: "lower", money: "net", render: eur, values: [c1.annual.netCost, c2.annual.netCost] },
-  ];
+  // Table: "senza FV" reference + A, plus B when it has been edited. Charts compare A vs B only.
+  const labelB = systemB.label.length > 0 ? systemB.label : "B";
+  const cases: Case[] = bDiffers ? [noPv, caseA, caseB] : [noPv, caseA];
+  const columns = bDiffers
+    ? [{ key: "novf", label: "senza FV" }, { key: "a", label: "A (baseline)" }, { key: "b", label: labelB }]
+    : [{ key: "novf", label: "senza FV" }, { key: "a", label: "A (baseline)" }];
+  const rows: MetricRow[] = DEFS.map((d) => ({
+    key: d.key,
+    label: d.label,
+    ...(d.info === undefined ? {} : { info: d.info }),
+    good: d.good,
+    ...(d.money === undefined ? {} : { money: d.money }),
+    render: d.render,
+    values: cases.map(d.get),
+  }));
 
   return (
     <div className="compare-page">
       <p className="note">
-        <b>{label1}</b>: {totalPeakKwp(cfg1).toFixed(2)} kWp · batteria utile {batteryUsableKwh(cfg1).toFixed(2)} kWh
-        {"  —  "}
-        <b>{label2}</b>: {totalPeakKwp(cfg2).toFixed(2)} kWp · batteria utile {batteryUsableKwh(cfg2).toFixed(2)} kWh.
-        {"  "}
-        {bDiffers ? "Modifica B nella sidebar." : "Modifica il Sistema B nella sidebar per confrontarlo con A."}
+        Tabella: <b>senza FV</b> (riferimento) · <b>A (baseline)</b>
+        {bDiffers ? <> · <b>{labelB}</b></> : null}. Grafici: A vs B.{" "}
+        {bDiffers ? "" : "Modifica il Sistema B nel menu per confrontarlo con A."} A:{" "}
+        {totalPeakKwp(systemA).toFixed(2)} kWp · batteria {batteryUsableKwh(systemA).toFixed(2)} kWh — {labelB}:{" "}
+        {totalPeakKwp(systemB).toFixed(2)} kWp · batteria {batteryUsableKwh(systemB).toFixed(2)} kWh.
       </p>
 
       <section className="chart-card">
-        <MetricsTable
-          title="Indicatori annui"
-          columns={[{ key: "c1", label: label1 }, { key: "c2", label: label2 }]}
-          rows={rows}
-        />
+        <MetricsTable title="Indicatori annui" columns={columns} rows={rows} />
       </section>
 
-      <CompareDayChart a={r1} b={r2} viz={viz} labelA={label1} labelB={label2} />
-      <CompareMonthlyBars a={r1} b={r2} labelA={label1} labelB={label2} />
-      <CompareAnnualBars a={r1} b={r2} labelA={label1} labelB={label2} />
+      <CompareDayChart a={caseA.r} b={caseB.r} viz={viz} labelA="A (baseline)" labelB={labelB} />
+      <CompareMonthlyBars a={caseA.r} b={caseB.r} labelA="A (baseline)" labelB={labelB} />
+      <CompareAnnualBars a={caseA.r} b={caseB.r} labelA="A (baseline)" labelB={labelB} />
     </div>
   );
 }

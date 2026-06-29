@@ -43,7 +43,8 @@ export function MetricsTable({
       return next;
     });
 
-  const delta = (showDelta ?? columns.length === 2) && columns.length === 2;
+  const delta = (showDelta ?? columns.length >= 2) && columns.length >= 2;
+  const nCols = columns.length;
   const visible = rows.filter((r) => !hidden.has(r.key));
   const hiddenRows = rows.filter((r) => hidden.has(r.key));
 
@@ -61,7 +62,7 @@ export function MetricsTable({
         </thead>
         <tbody>
           {visible.map((r) => {
-            const d = (r.values[1] ?? 0) - (r.values[0] ?? 0);
+            const d = (r.values[nCols - 1] ?? 0) - (r.values[nCols - 2] ?? 0);
             return (
               <tr key={r.key}>
                 <td>
