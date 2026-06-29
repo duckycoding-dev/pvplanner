@@ -1,4 +1,5 @@
 import type { SystemResult } from "../../../src/core/comparison/computeSystem.ts";
+import type { CostResult } from "../../../src/core/economics/tariff.ts";
 import { fmt, pct } from "../lib/format.ts";
 import { InfoTip } from "./InfoTip.tsx";
 
@@ -17,13 +18,18 @@ export function KpiTable({
   b,
   labelA,
   labelB,
+  costA,
+  costB,
 }: {
   a: SystemResult;
   b: SystemResult;
   labelA: string;
   labelB: string;
+  costA?: CostResult;
+  costB?: CostResult;
 }) {
   const kwh = (v: number): string => `${fmt(v)} kWh`;
+  const eur = (v: number): string => `${fmt(v, 2)} €`;
   const points = (x: number, y: number): string => `${((y - x) * 100 >= 0 ? "+" : "")}${((y - x) * 100).toFixed(1)} pt`;
 
   const rows: Row[] = [
@@ -36,6 +42,14 @@ export function KpiTable({
     { label: "Export in rete", info: "export", a: a.metrics.exportKwh, b: b.metrics.exportKwh, render: kwh },
     { label: "Cicli batteria/anno", info: "cicli", a: a.metrics.battery?.equivalentCycles ?? 0, b: b.metrics.battery?.equivalentCycles ?? 0, render: (v) => (v > 0 ? fmt(v) : "—") },
   ];
+
+  if (costA !== undefined && costB !== undefined) {
+    rows.push(
+      { label: "Spesa acquisto", info: "costo", a: costA.annual.buyCost, b: costB.annual.buyCost, render: eur },
+      { label: "Ricavo vendita", info: "ricavo", a: costA.annual.sellRevenue, b: costB.annual.sellRevenue, render: eur },
+      { label: "Costo netto/anno", info: "nettoCosto", a: costA.annual.netCost, b: costB.annual.netCost, render: eur },
+    );
+  }
 
   const renderDelta = (r: Row): string => {
     if (r.delta) return r.delta(r.a, r.b);

@@ -122,7 +122,7 @@ export function App() {
           {tab === "annuale" && <AnnualOverview viz={viz} tariff={tariff} />}
           {tab === "mensile" && <MonthlyView viz={viz} tariff={tariff} />}
           {tab === "giorno" && <DailyExplorer viz={viz} tariff={tariff} />}
-          {tab === "confronto" && <ComparePage viz={viz} systemB={systemB} />}
+          {tab === "confronto" && <ComparePage viz={viz} systemB={systemB} tariff={tariff} />}
           {tab === "glossario" && <Glossary />}
         </main>
 
