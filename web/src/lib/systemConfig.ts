@@ -31,9 +31,9 @@ export function batteryUsableKwh(cfg: SystemConfigB): number {
   return (cfg.batteryTotalKwh * cfg.batteryUsablePct) / 100;
 }
 
-export function cloneFromBaseline(viz: Viz): SystemConfigB {
+export function cloneFromBaseline(viz: Viz, label = "Sistema B"): SystemConfigB {
   return {
-    label: "Sistema B",
+    label,
     falde: viz.meta.falde.map((f) => ({ id: f.id, azimuth: f.azimuth, panelCount: f.panelCount, wp: f.wp })),
     acCapKw: viz.meta.acCapKw,
     batteryTotalKwh: viz.meta.batteryTotalKwh,
@@ -43,28 +43,32 @@ export function cloneFromBaseline(viz: Viz): SystemConfigB {
   };
 }
 
+/** True if two systems have identical equipment + CAPEX (label ignored). */
+export function equalsSystems(a: SystemConfigB, b: SystemConfigB): boolean {
+  if (
+    a.acCapKw !== b.acCapKw ||
+    a.batteryTotalKwh !== b.batteryTotalKwh ||
+    a.batteryUsablePct !== b.batteryUsablePct ||
+    a.roundTrip !== b.roundTrip ||
+    a.installationCostEur !== b.installationCostEur ||
+    a.falde.length !== b.falde.length
+  ) {
+    return false;
+  }
+  for (const af of a.falde) {
+    const bf = b.falde.find((x) => x.id === af.id);
+    if (bf === undefined || bf.panelCount !== af.panelCount || bf.wp !== af.wp) return false;
+  }
+  return true;
+}
+
 export function serialize(cfg: SystemConfigB): string {
   return JSON.stringify(cfg, null, 2);
 }
 
 /** True if cfg matches the baseline equipment (ignoring the label) → "no second system yet". */
 export function equalsBaseline(cfg: SystemConfigB, viz: Viz): boolean {
-  const base = cloneFromBaseline(viz);
-  if (
-    cfg.acCapKw !== base.acCapKw ||
-    cfg.batteryTotalKwh !== base.batteryTotalKwh ||
-    cfg.batteryUsablePct !== base.batteryUsablePct ||
-    cfg.roundTrip !== base.roundTrip ||
-    cfg.installationCostEur !== base.installationCostEur ||
-    cfg.falde.length !== base.falde.length
-  ) {
-    return false;
-  }
-  for (const bf of base.falde) {
-    const cf = cfg.falde.find((x) => x.id === bf.id);
-    if (cf === undefined || cf.panelCount !== bf.panelCount || cf.wp !== bf.wp) return false;
-  }
-  return true;
+  return equalsSystems(cfg, cloneFromBaseline(viz));
 }
 
 /** A "no PV" system: same geometry but zero panels and no battery (import = full load). */
