@@ -73,10 +73,12 @@ DST-corretti via `Intl` su `Europe/Rome` (le due transizioni dell'ora legale son
 simulazione resta sull'asse UTC; questi due array servono solo alla tariffazione.
 
 ## Dove si vedono i costi
-Tutti i recap usano una **tabella unica** (`MetricsTable`): colonne = casi, righe = metriche, **Δ**
-quando le colonne sono due. Ogni riga ha una **direzione "buona"** (alto o basso è meglio) e le celle
-sono colorate di conseguenza (verde = migliore, rosso = peggiore); il Δ è verde se rappresenta un
-miglioramento. Le righe si possono **nascondere** (click sull'etichetta).
+Tutti i recap usano una **tabella unica** (`MetricsTable`), **collassabile** (header cliccabile):
+colonne = casi, righe = metriche, **Δ** quando le colonne sono due. Colori: nelle **colonne valore**
+sono colorate solo le righe monetarie, per **segno del valore stesso** (spesa = rosso, ricavo = verde,
+netto = verde se credito / rosso se paghi); la colonna **Δ** colora ogni riga per **miglioramento**
+(verde = meglio secondo la metrica, es. import che cala o produzione che sale). Le righe si possono
+**nascondere** (click sull'etichetta).
 
 - **Panoramica annuale**: tabella costi **senza | con batteria** (spesa/ricavo/netto) con Δ = effetto
   batteria (il netto Δ negativo = risparmio, in verde).
