@@ -3,9 +3,15 @@ import type { Viz } from "../types.ts";
 import type { Tariff } from "../../../src/core/economics/tariff.ts";
 import { fmt, pct } from "../lib/format.ts";
 import { useLegendToggle } from "../lib/useLegendToggle.ts";
-import { batterySavingEur, scenarioCost } from "../lib/viewCosts.ts";
-import { CostSummary } from "./CostSummary.tsx";
+import { scenarioCost } from "../lib/viewCosts.ts";
+import { MetricsTable, type MetricRow } from "./MetricsTable.tsx";
 import { InfoTip } from "./InfoTip.tsx";
+
+const eur = (v: number): string => `${fmt(v, 2)} €`;
+const COST_COLS = [
+  { key: "senza", label: "senza batteria" },
+  { key: "con", label: "con batteria" },
+];
 
 function KpiCard({
   label,
@@ -45,8 +51,13 @@ export function AnnualOverview({ viz, tariff }: { viz: Viz; tariff: Tariff }) {
   const nb = viz.annual.noBattery;
   const wb = viz.annual.withBattery;
   const d = viz.annual.delta;
-  const costCon = scenarioCost(viz, "con", tariff);
-  const saving = batterySavingEur(viz, tariff);
+  const cs = scenarioCost(viz, "senza", tariff);
+  const cc = scenarioCost(viz, "con", tariff);
+  const costRows: MetricRow[] = [
+    { key: "buy", label: "Spesa acquisto", info: "costo", good: "lower", render: eur, values: [cs.annual.buyCost, cc.annual.buyCost] },
+    { key: "sell", label: "Ricavo vendita", info: "ricavo", good: "higher", render: eur, values: [cs.annual.sellRevenue, cc.annual.sellRevenue] },
+    { key: "net", label: "Costo netto/anno", info: "nettoCosto", good: "lower", render: eur, values: [cs.annual.netCost, cc.annual.netCost] },
+  ];
 
   const barData = [
     { metric: "autoconsumo", senza: nb.selfConsumedKwh, con: wb.selfConsumedKwh },
@@ -110,8 +121,8 @@ export function AnnualOverview({ viz, tariff }: { viz: Viz; tariff: Tariff }) {
       </section>
 
       <section className="chart-card">
-        <h3>Costi energia (scenario con batteria)</h3>
-        <CostSummary cost={costCon} savingEur={saving} />
+        <h3>Costi energia (Δ = effetto batteria)</h3>
+        <MetricsTable columns={COST_COLS} rows={costRows} />
       </section>
 
       <section className="chart-card">
