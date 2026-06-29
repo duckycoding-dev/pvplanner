@@ -4,9 +4,15 @@ import type { Scenario, Viz } from "../types.ts";
 import type { Tariff } from "../../../src/core/economics/tariff.ts";
 import { fmt, MONTH_LABELS } from "../lib/format.ts";
 import { useLegendToggle } from "../lib/useLegendToggle.ts";
-import { batterySavingEur, scenarioCost } from "../lib/viewCosts.ts";
-import { CostSummary } from "./CostSummary.tsx";
+import { scenarioCost } from "../lib/viewCosts.ts";
+import { MetricsTable, type MetricRow } from "./MetricsTable.tsx";
 import { InfoTip } from "./InfoTip.tsx";
+
+const eur = (v: number): string => `${fmt(v, 2)} €`;
+const COST_COLS = [
+  { key: "senza", label: "senza batteria" },
+  { key: "con", label: "con batteria" },
+];
 
 interface BarSpec {
   key: string;
@@ -45,8 +51,20 @@ export function MonthlyView({ viz, tariff }: { viz: Viz; tariff: Tariff }) {
   const prodToggle = useLegendToggle();
   const netToggle = useLegendToggle();
   const [scenario, setScenario] = useState<Scenario>("con");
-  const costCon = scenarioCost(viz, "con", tariff);
-  const saving = batterySavingEur(viz, tariff);
+  const cs = scenarioCost(viz, "senza", tariff);
+  const cc = scenarioCost(viz, "con", tariff);
+  const costRows: MetricRow[] = [
+    { key: "buy", label: "Spesa acquisto", info: "costo", good: "lower", render: eur, values: [cs.annual.buyCost, cc.annual.buyCost] },
+    { key: "sell", label: "Ricavo vendita", info: "ricavo", good: "higher", render: eur, values: [cs.annual.sellRevenue, cc.annual.sellRevenue] },
+    { key: "net", label: "Costo netto/anno", info: "nettoCosto", good: "lower", render: eur, values: [cs.annual.netCost, cc.annual.netCost] },
+  ];
+  const monthlyNetRows: MetricRow[] = MONTH_LABELS.map((name, k) => ({
+    key: `m${k}`,
+    label: name,
+    good: "lower",
+    render: eur,
+    values: [cs.monthly[k]?.netCost ?? 0, cc.monthly[k]?.netCost ?? 0],
+  }));
 
   const data = viz.monthly.map((m) => ({
     name: MONTH_LABELS[m.month - 1],
@@ -64,12 +82,16 @@ export function MonthlyView({ viz, tariff }: { viz: Viz; tariff: Tariff }) {
     <div>
       <section className="chart-card">
         <div className="section-head">
-          <h3>Costi energia (scenario con batteria)</h3>
+          <h3>Costi energia (Δ = effetto batteria)</h3>
         </div>
-        <CostSummary cost={costCon} savingEur={saving} />
-        <p className="note">
-          Netto €/mese: {costCon.monthly.map((m) => `${MONTH_LABELS[m.month - 1]} ${fmt(m.netCost, 0)}`).join(" · ")}
-        </p>
+        <MetricsTable columns={COST_COLS} rows={costRows} />
+      </section>
+
+      <section className="chart-card">
+        <div className="section-head">
+          <h3>Costo netto per mese</h3>
+        </div>
+        <MetricsTable columns={COST_COLS} rows={monthlyNetRows} />
       </section>
 
       <section className="chart-card">
