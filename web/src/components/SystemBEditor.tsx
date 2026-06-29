@@ -6,8 +6,10 @@ import {
   batteryUsableKwh,
   cloneFromBaseline,
   faldaPeakKwp,
+  parseSystemConfigB,
   serialize,
   totalPeakKwp,
+  validateAgainstBaseline,
 } from "../lib/systemConfig.ts";
 import { NumberField } from "./NumberField.tsx";
 import { ImportModal } from "./ImportModal.tsx";
@@ -123,7 +125,15 @@ export function SystemBEditor({
         <button onClick={() => setImporting(true)}>Importa</button>
       </div>
 
-      {importing && <ImportModal viz={viz} onImport={setSystemB} onClose={() => setImporting(false)} />}
+      {importing && (
+        <ImportModal
+          title="Importa Sistema B"
+          parse={parseSystemConfigB}
+          validate={(c) => validateAgainstBaseline(c, viz)}
+          onImport={setSystemB}
+          onClose={() => setImporting(false)}
+        />
+      )}
     </div>
   );
 }

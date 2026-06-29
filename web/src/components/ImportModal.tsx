@@ -1,14 +1,17 @@
 import { type DragEvent, useState } from "react";
-import type { Viz } from "../types.ts";
-import { type SystemConfigB, parseSystemConfigB, validateAgainstBaseline } from "../lib/systemConfig.ts";
 
-export function ImportModal({
-  viz,
+/** Generic drag-and-drop import modal: parse a dropped/picked JSON file, validate, then import. */
+export function ImportModal<T>({
+  title,
+  parse,
+  validate,
   onImport,
   onClose,
 }: {
-  viz: Viz;
-  onImport: (cfg: SystemConfigB) => void;
+  title: string;
+  parse: (text: string) => T; // throws on malformed input
+  validate: (value: T) => string | null; // null = ok, else error message
+  onImport: (value: T) => void;
   onClose: () => void;
 }) {
   const [error, setError] = useState<string | null>(null);
@@ -16,13 +19,13 @@ export function ImportModal({
 
   const handleText = (text: string): void => {
     try {
-      const cfg = parseSystemConfigB(text);
-      const err = validateAgainstBaseline(cfg, viz);
+      const value = parse(text);
+      const err = validate(value);
       if (err !== null) {
         setError(err);
         return;
       }
-      onImport(cfg);
+      onImport(value);
       onClose();
     } catch (e) {
       setError(e instanceof Error ? e.message : "Errore di import.");
@@ -46,7 +49,7 @@ export function ImportModal({
   return (
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal" onClick={(e) => e.stopPropagation()}>
-        <h3>Importa Sistema B</h3>
+        <h3>{title}</h3>
         <div
           className={drag ? "dropzone drag" : "dropzone"}
           onDragOver={(e) => {
@@ -68,7 +71,7 @@ export function ImportModal({
           </label>
         </div>
         {error !== null && <p className="err">{error}</p>}
-        <div className="config-actions">
+        <div className="editor-actions">
           <button onClick={onClose}>Chiudi</button>
         </div>
       </div>
