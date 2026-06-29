@@ -2,13 +2,14 @@
 export type Good = "higher" | "lower" | "none";
 
 /** Monetary nature of a row, for colouring value cells by sign (household's view). */
-export type Money = "pay" | "earn" | "net";
+export type Money = "pay" | "earn" | "net" | "benefit";
 
 /** Colour a value cell by its own sign: money you pay = red, money you earn = green. */
 export function moneyClass(v: number, money: Money | undefined): string {
   if (money === undefined) return "";
   if (money === "pay") return v > 0 ? "neg" : ""; // an expense
   if (money === "earn") return v > 0 ? "pos" : ""; // income
+  if (money === "benefit") return v > 0 ? "pos" : v < 0 ? "neg" : ""; // net gain: >0 good, <0 in the red
   return v > 0 ? "neg" : v < 0 ? "pos" : ""; // net: >0 you pay, <0 credit
 }
 

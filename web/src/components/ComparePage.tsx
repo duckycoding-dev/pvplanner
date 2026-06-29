@@ -17,6 +17,7 @@ import { type Good, type Money } from "../lib/metricsTable.ts";
 import { MetricsTable, type MetricRow } from "./MetricsTable.tsx";
 import { CompareDayChart } from "./CompareDayChart.tsx";
 import { CompareAnnualBars, CompareMonthlyBars } from "./CompareBars.tsx";
+import { type CashSystem, CashflowSection } from "./CashflowSection.tsx";
 
 const kwh = (v: number): string => `${fmt(v)} kWh`;
 const eur = (v: number): string => `${fmt(v, 2)} €`;
@@ -100,6 +101,14 @@ export function ComparePage({
   // Payback row: vs "senza FV"; the reference column itself has no CAPEX → "—".
   const capexByCase = (bDiffers ? [0, systemA.installationCostEur, systemB.installationCostEur] : [0, systemA.installationCostEur]);
   const noPvNet = noPv.c.annual.netCost;
+
+  // Selectable systems for the cashflow section (A, B, senza FV).
+  const cashSystems: CashSystem[] = [
+    { id: "a", label: labelA, capex: systemA.installationCostEur, buy: caseA.c.annual.buyCost, sell: caseA.c.annual.sellRevenue, net: caseA.c.annual.netCost },
+    { id: "b", label: labelB, capex: systemB.installationCostEur, buy: caseB.c.annual.buyCost, sell: caseB.c.annual.sellRevenue, net: caseB.c.annual.netCost },
+    { id: "novf", label: "senza FV", capex: 0, buy: noPv.c.annual.buyCost, sell: noPv.c.annual.sellRevenue, net: noPvNet },
+  ];
+
   rows.push({
     key: "pay",
     label: "Tempo di rientro",
@@ -139,6 +148,13 @@ export function ComparePage({
       />
       <CompareMonthlyBars a={caseA.r} b={caseB.r} labelA={labelA} labelB={labelB} />
       <CompareAnnualBars a={caseA.r} b={caseB.r} labelA={labelA} labelB={labelB} />
+
+      <CashflowSection
+        systems={cashSystems}
+        noPv={{ net: noPv.c.annual.netCost, buy: noPv.c.annual.buyCost, sell: noPv.c.annual.sellRevenue }}
+        incentive={incentive}
+        defaultSecond={bDiffers ? "b" : "novf"}
+      />
     </div>
   );
 }

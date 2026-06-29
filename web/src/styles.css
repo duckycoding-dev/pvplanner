@@ -156,7 +156,9 @@ footer { margin-top: 24px; color: var(--muted); font-size: 12px; border-top: 1px
   padding: 6px 10px; cursor: pointer; font-size: 12px; color: var(--text); }
 .editor-actions button:hover { border-color: var(--accent); color: var(--accent); }
 .text-field { display: flex; flex-direction: column; gap: 3px; font-size: 12px; color: var(--muted); }
-.text-field input { border: 1px solid var(--border); border-radius: 7px; padding: 6px 8px; font-size: 13px; }
+.text-field input, .text-field select { border: 1px solid var(--border); border-radius: 7px; padding: 6px 8px; font-size: 13px; background: #fff; }
+.cashflow-controls { display: flex; flex-wrap: wrap; gap: 14px; align-items: flex-end; margin-bottom: 12px; }
+.cashflow-controls .text-field { min-width: 150px; }
 .falda-edit, .band-edit { border: 1px solid var(--border); border-left: 3px solid var(--accent); border-radius: 8px;
   padding: 6px 10px; display: flex; flex-direction: column; gap: 6px; }
 .falda-edit legend, .band-edit legend { font-size: 12px; font-weight: 600; padding: 0 4px;
