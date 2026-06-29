@@ -52,8 +52,8 @@ bun test           # suite di test
 
 Dashboard (SPA Bun+React+Recharts), schede che leggono `web/viz.json`: panoramica annuale, mensile,
 giorno-per-giorno, **Confronto** (A vs B, live nel browser) e glossario. La configurazione (Sistema B +
-tariffa elettrica) sta in una **sidebar** globale collassabile; i costi a fasce orarie compaiono in
-tutte le view. Spec di design: `docs/specs/2026-06-25-visualizzazione-dashboard-design.md` (dashboard),
+tariffa elettrica) sta in una **sidebar** a overlay collassabile (hotkey `m`); i costi a fasce orarie
+compaiono in tutte le view, in tabelle con/senza batteria con colorazione del valore migliore. Spec di design: `docs/specs/2026-06-25-visualizzazione-dashboard-design.md` (dashboard),
 `docs/specs/2026-06-26-confronto-sistemi-design.md` (confronto),
 `docs/specs/2026-06-29-config-sidebar-e-prezzi-fasce-design.md` (sidebar + prezzi); calcoli in
 `04-confronto-sistemi.md` e `05-costi-fasce.md`.

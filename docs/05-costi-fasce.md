@@ -73,18 +73,31 @@ DST-corretti via `Intl` su `Europe/Rome` (le due transizioni dell'ora legale son
 simulazione resta sull'asse UTC; questi due array servono solo alla tariffazione.
 
 ## Dove si vedono i costi
-- **Panoramica annuale**: spesa/ricavo/netto (scenario con batteria) + risparmio batteria/anno.
-- **Mensile**: spesa/ricavo/netto annui + netto €/mese.
-- **Giorno per giorno**: netto € del giorno selezionato, per lo scenario attivo.
-- **Confronto**: spesa acquisto, ricavo vendita e costo netto/anno di A e B con Δ, accanto agli
-  indicatori in kWh.
+Tutti i recap usano una **tabella unica** (`MetricsTable`): colonne = casi, righe = metriche, **Δ**
+quando le colonne sono due. Ogni riga ha una **direzione "buona"** (alto o basso è meglio) e le celle
+sono colorate di conseguenza (verde = migliore, rosso = peggiore); il Δ è verde se rappresenta un
+miglioramento. Le righe si possono **nascondere** (click sull'etichetta).
+
+- **Panoramica annuale**: tabella costi **senza | con batteria** (spesa/ricavo/netto) con Δ = effetto
+  batteria (il netto Δ negativo = risparmio, in verde).
+- **Mensile**: stessa tabella costi annui + una tabella **netto per mese** (senza | con | Δ).
+- **Giorno per giorno**: tabella riepilogo del giorno (produzione/consumo/autoconsumo/import/export/
+  clipping/cicli/**netto €**) per **senza | con** con Δ; mostra sempre entrambi gli scenari.
+- **Confronto**: tabella con indicatori energetici **e** di costo. Due colonne valore + Δ: se il
+  Sistema B è stato modificato → **A | B | Δ(B−A)**; se B è ancora uguale alla baseline → **senza FV |
+  A | Δ(A−senza FV)** (così un B non toccato mostra comunque il valore dell'impianto). Il caso
+  **senza FV** = impianto a 0 pannelli (import = intero consumo, export 0).
 
 ## Implementazione
 - `src/core/economics/tariff.ts` (puro): tipi `Tariff`/`TariffBand`/`CostResult`, `priceForHour`,
   `aggregateCost`.
 - `web/src/lib/tariffPresets.ts`: default/monorario/F1·F2·F3, serialize/parse/validate.
-- `web/src/lib/viewCosts.ts`: `scenarioCost` (baseline con/senza), `systemCost` (A/B nel confronto),
-  `batterySavingEur`.
+- `web/src/lib/viewCosts.ts`: `scenarioCost` (baseline con/senza), `systemCost` (per sistema nel
+  confronto), `batterySavingEur`.
+- `web/src/components/MetricsTable.tsx` + `web/src/lib/metricsTable.ts` (`bestWorstClasses`,
+  `deltaClass`): tabella riusabile con colorazione per direzione e righe nascondibili. Usata da tutte
+  le view e dal confronto.
+- `web/src/lib/systemConfig.ts`: `equalsBaseline` (B = baseline?) e `noPvConfig` (caso senza FV).
 
 ## Evoluzioni (non ora)
 Offerte multiple a confronto (il motore accetta già più tariffe), prezzo di vendita a fasce, scambio
