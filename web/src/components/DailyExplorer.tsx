@@ -9,11 +9,6 @@ import { BatteryChart } from "./BatteryChart.tsx";
 import { MetricsTable, type MetricRow } from "./MetricsTable.tsx";
 import { InfoTip } from "./InfoTip.tsx";
 
-const DAY_COLS = [
-  { key: "senza", label: "senza batteria" },
-  { key: "con", label: "con batteria" },
-];
-
 const SCENARIOS: { key: Scenario; label: string }[] = [
   { key: "con", label: "con batteria" },
   { key: "senza", label: "senza batteria" },
@@ -60,33 +55,39 @@ export function DailyExplorer({ viz, tariff, hasBattery }: { viz: Viz; tariff: T
   const cycCon = disCon / (viz.meta.batteryUsableKwh || 1);
 
   const dayStart = dayIndex * 24;
+  let netNoPv = 0;
   let netSenza = 0;
   let netCon = 0;
   for (let i = 0; i < 24; i++) {
     const j = dayStart + i;
     const price = priceForHour(tariff, h.localHour[j] ?? 0, h.weekday[j] ?? 0);
+    netNoPv += (h.loadKwh[j] ?? 0) * price; // no PV: whole load imported, nothing exported
     netSenza += (h.nb.importKwh[j] ?? 0) * price - (h.nb.exportKwh[j] ?? 0) * tariff.sellPrice;
     netCon += (h.wb.importKwh[j] ?? 0) * price - (h.wb.exportKwh[j] ?? 0) * tariff.sellPrice;
   }
 
   const kwh1 = (v: number): string => `${fmt(v, 1)} kWh`;
   const eur = (v: number): string => `${fmt(v, 2)} €`;
-  const cols = hasBattery ? DAY_COLS : [{ key: "fv", label: "FV" }];
-  const v2 = (senza: number, con: number): number[] => (hasBattery ? [senza, con] : [senza]);
+  // First column "senza FV" (reference); Δ = last two columns.
+  const cols = hasBattery
+    ? [{ key: "novf", label: "senza FV" }, { key: "senza", label: "senza batteria" }, { key: "con", label: "con batteria" }]
+    : [{ key: "novf", label: "senza FV" }, { key: "fv", label: "FV" }];
+  const v3 = (noPvV: number, senzaV: number, conV: number): number[] =>
+    hasBattery ? [noPvV, senzaV, conV] : [noPvV, senzaV];
   const dayRows: MetricRow[] = [
-    { key: "prod", label: "Produzione", info: "produzione", good: "higher", render: kwh1, values: v2(prod, prod) },
-    { key: "cons", label: "Consumo", info: "consumo", good: "none", render: kwh1, values: v2(cons, cons) },
-    { key: "self", label: "Autoconsumo", info: "autoconsumo", good: "higher", render: kwh1, values: v2(selfSenza, selfCon) },
-    { key: "imp", label: "Import", info: "import", good: "lower", render: kwh1, values: v2(impSenza, impCon) },
-    { key: "exp", label: "Export", info: "export", good: "higher", render: kwh1, values: v2(expSenza, expCon) },
-    { key: "clip", label: "Clipping", info: "clipping", good: "lower", render: kwh1, values: v2(clip, clip) },
+    { key: "prod", label: "Produzione", info: "produzione", good: "higher", render: kwh1, values: v3(0, prod, prod) },
+    { key: "cons", label: "Consumo", info: "consumo", good: "none", render: kwh1, values: v3(cons, cons, cons) },
+    { key: "self", label: "Autoconsumo", info: "autoconsumo", good: "higher", render: kwh1, values: v3(0, selfSenza, selfCon) },
+    { key: "imp", label: "Import", info: "import", good: "lower", render: kwh1, values: v3(cons, impSenza, impCon) },
+    { key: "exp", label: "Export", info: "export", good: "higher", render: kwh1, values: v3(0, expSenza, expCon) },
+    { key: "clip", label: "Clipping", info: "clipping", good: "lower", render: kwh1, values: v3(0, clip, clip) },
     ...(hasBattery
       ? [
-          { key: "cyc", label: "Cicli", info: "cicli", good: "none" as const, render: (v: number) => (v > 0 ? v.toFixed(2) : "—"), values: [0, cycCon] },
-          { key: "loss", label: "Perdita round-trip", info: "roundTripLoss", good: "lower" as const, render: kwh1, values: [0, lossCon] },
+          { key: "cyc", label: "Cicli", info: "cicli", good: "none" as const, render: (v: number) => (v > 0 ? v.toFixed(2) : "—"), values: [0, 0, cycCon] },
+          { key: "loss", label: "Perdita round-trip", info: "roundTripLoss", good: "lower" as const, render: kwh1, values: [0, 0, lossCon] },
         ]
       : []),
-    { key: "net", label: "Netto giorno", info: "nettoCosto", good: "lower", money: "net", render: eur, values: v2(netSenza, netCon) },
+    { key: "net", label: "Netto giorno", info: "nettoCosto", good: "lower", money: "net", render: eur, values: v3(netNoPv, netSenza, netCon) },
   ];
 
   return (
@@ -122,7 +123,7 @@ export function DailyExplorer({ viz, tariff, hasBattery }: { viz: Viz; tariff: T
 
       <section className="chart-card">
         <MetricsTable
-          title={hasBattery ? "Riepilogo giorno (Δ = effetto batteria)" : "Riepilogo giorno"}
+          title={hasBattery ? "Riepilogo giorno (Δ = effetto batteria)" : "Riepilogo giorno (Δ = FV vs senza FV)"}
           columns={cols}
           rows={dayRows}
         />

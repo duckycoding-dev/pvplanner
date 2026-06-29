@@ -9,10 +9,6 @@ import { MetricsTable, type MetricRow } from "./MetricsTable.tsx";
 import { InfoTip } from "./InfoTip.tsx";
 
 const eur = (v: number): string => `${fmt(v, 2)} €`;
-const COST_COLS = [
-  { key: "senza", label: "senza batteria" },
-  { key: "con", label: "con batteria" },
-];
 
 function KpiCard({
   label,
@@ -71,18 +67,24 @@ export function AnnualOverview({
   const nb = viz.annual.noBattery;
   const wb = viz.annual.withBattery;
   const d = viz.annual.delta;
+  const np = noPvCost(viz, tariff);
   const cs = scenarioCost(viz, "senza", tariff);
   const cc = scenarioCost(viz, "con", tariff);
   const capex = viz.meta.installationCostEur;
-  const payback = systemPaybackYears(capex, cc.annual.netCost, noPvCost(viz, tariff).annual.netCost, incentive);
+  const payback = systemPaybackYears(capex, cc.annual.netCost, np.annual.netCost, incentive);
   const paybackText = payback === null ? "oltre 40 anni" : `${payback.toFixed(1)} anni`;
 
-  const costCols = hasBattery ? COST_COLS : [{ key: "fv", label: "FV" }];
-  const v2 = (senza: number, con: number): number[] => (hasBattery ? [senza, con] : [senza]);
+  // First column is always "senza FV" (reference); Δ = last two columns:
+  // battery effect (con vs senza) when there is a battery, else FV vs senza FV.
+  const costCols = hasBattery
+    ? [{ key: "novf", label: "senza FV" }, { key: "senza", label: "senza batteria" }, { key: "con", label: "con batteria" }]
+    : [{ key: "novf", label: "senza FV" }, { key: "fv", label: "FV" }];
+  const v3 = (noPvV: number, senzaV: number, conV: number): number[] =>
+    hasBattery ? [noPvV, senzaV, conV] : [noPvV, senzaV];
   const costRows: MetricRow[] = [
-    { key: "buy", label: "Spesa acquisto", info: "costo", good: "lower", money: "pay", render: eur, values: v2(cs.annual.buyCost, cc.annual.buyCost) },
-    { key: "sell", label: "Ricavo vendita", info: "ricavo", good: "higher", money: "earn", render: eur, values: v2(cs.annual.sellRevenue, cc.annual.sellRevenue) },
-    { key: "net", label: "Costo netto/anno", info: "nettoCosto", good: "lower", money: "net", render: eur, values: v2(cs.annual.netCost, cc.annual.netCost) },
+    { key: "buy", label: "Spesa acquisto", info: "costo", good: "lower", money: "pay", render: eur, values: v3(np.annual.buyCost, cs.annual.buyCost, cc.annual.buyCost) },
+    { key: "sell", label: "Ricavo vendita", info: "ricavo", good: "higher", money: "earn", render: eur, values: v3(np.annual.sellRevenue, cs.annual.sellRevenue, cc.annual.sellRevenue) },
+    { key: "net", label: "Costo netto/anno", info: "nettoCosto", good: "lower", money: "net", render: eur, values: v3(np.annual.netCost, cs.annual.netCost, cc.annual.netCost) },
   ];
 
   const barData = [
@@ -152,7 +154,7 @@ export function AnnualOverview({
 
       <section className="chart-card">
         <MetricsTable
-          title={hasBattery ? "Costi energia (Δ = effetto batteria)" : "Costi energia"}
+          title={hasBattery ? "Costi energia (Δ = effetto batteria)" : "Costi energia (Δ = FV vs senza FV)"}
           columns={costCols}
           rows={costRows}
         />

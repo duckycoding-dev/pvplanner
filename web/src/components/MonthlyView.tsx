@@ -4,15 +4,11 @@ import type { Scenario, Viz } from "../types.ts";
 import type { Tariff } from "../../../src/core/economics/tariff.ts";
 import { fmt, MONTH_LABELS } from "../lib/format.ts";
 import { useLegendToggle } from "../lib/useLegendToggle.ts";
-import { scenarioCost } from "../lib/viewCosts.ts";
+import { noPvCost, scenarioCost } from "../lib/viewCosts.ts";
 import { MetricsTable, type MetricRow } from "./MetricsTable.tsx";
 import { InfoTip } from "./InfoTip.tsx";
 
 const eur = (v: number): string => `${fmt(v, 2)} €`;
-const COST_COLS = [
-  { key: "senza", label: "senza batteria" },
-  { key: "con", label: "con batteria" },
-];
 
 interface BarSpec {
   key: string;
@@ -52,14 +48,19 @@ export function MonthlyView({ viz, tariff, hasBattery }: { viz: Viz; tariff: Tar
   const netToggle = useLegendToggle();
   const [scenario, setScenario] = useState<Scenario>("con");
   const effScenario: Scenario = hasBattery ? scenario : "senza";
+  const np = noPvCost(viz, tariff);
   const cs = scenarioCost(viz, "senza", tariff);
   const cc = scenarioCost(viz, "con", tariff);
-  const costCols = hasBattery ? COST_COLS : [{ key: "fv", label: "FV" }];
-  const v2 = (senza: number, con: number): number[] => (hasBattery ? [senza, con] : [senza]);
+  // First column "senza FV" (reference); Δ = last two columns.
+  const costCols = hasBattery
+    ? [{ key: "novf", label: "senza FV" }, { key: "senza", label: "senza batteria" }, { key: "con", label: "con batteria" }]
+    : [{ key: "novf", label: "senza FV" }, { key: "fv", label: "FV" }];
+  const v3 = (noPvV: number, senzaV: number, conV: number): number[] =>
+    hasBattery ? [noPvV, senzaV, conV] : [noPvV, senzaV];
   const costRows: MetricRow[] = [
-    { key: "buy", label: "Spesa acquisto", info: "costo", good: "lower", money: "pay", render: eur, values: v2(cs.annual.buyCost, cc.annual.buyCost) },
-    { key: "sell", label: "Ricavo vendita", info: "ricavo", good: "higher", money: "earn", render: eur, values: v2(cs.annual.sellRevenue, cc.annual.sellRevenue) },
-    { key: "net", label: "Costo netto/anno", info: "nettoCosto", good: "lower", money: "net", render: eur, values: v2(cs.annual.netCost, cc.annual.netCost) },
+    { key: "buy", label: "Spesa acquisto", info: "costo", good: "lower", money: "pay", render: eur, values: v3(np.annual.buyCost, cs.annual.buyCost, cc.annual.buyCost) },
+    { key: "sell", label: "Ricavo vendita", info: "ricavo", good: "higher", money: "earn", render: eur, values: v3(np.annual.sellRevenue, cs.annual.sellRevenue, cc.annual.sellRevenue) },
+    { key: "net", label: "Costo netto/anno", info: "nettoCosto", good: "lower", money: "net", render: eur, values: v3(np.annual.netCost, cs.annual.netCost, cc.annual.netCost) },
   ];
   const monthlyNetRows: MetricRow[] = MONTH_LABELS.map((name, k) => ({
     key: `m${k}`,
@@ -67,7 +68,7 @@ export function MonthlyView({ viz, tariff, hasBattery }: { viz: Viz; tariff: Tar
     good: "lower",
     money: "net",
     render: eur,
-    values: v2(cs.monthly[k]?.netCost ?? 0, cc.monthly[k]?.netCost ?? 0),
+    values: v3(np.monthly[k]?.netCost ?? 0, cs.monthly[k]?.netCost ?? 0, cc.monthly[k]?.netCost ?? 0),
   }));
 
   const data = viz.monthly.map((m) => ({
@@ -86,7 +87,7 @@ export function MonthlyView({ viz, tariff, hasBattery }: { viz: Viz; tariff: Tar
     <div>
       <section className="chart-card">
         <MetricsTable
-          title={hasBattery ? "Costi energia (Δ = effetto batteria)" : "Costi energia"}
+          title={hasBattery ? "Costi energia (Δ = effetto batteria)" : "Costi energia (Δ = FV vs senza FV)"}
           columns={costCols}
           rows={costRows}
         />
