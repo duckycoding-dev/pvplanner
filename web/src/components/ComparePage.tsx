@@ -126,7 +126,15 @@ export function ComparePage({
         <MetricsTable title="Indicatori annui" columns={columns} rows={rows} />
       </section>
 
-      <CompareDayChart a={caseA.r} b={caseB.r} viz={viz} labelA="A (baseline)" labelB={labelB} />
+      <CompareDayChart
+        a={caseA.r}
+        b={caseB.r}
+        viz={viz}
+        labelA="A (baseline)"
+        labelB={labelB}
+        usableA={batteryUsableKwh(systemA)}
+        usableB={batteryUsableKwh(systemB)}
+      />
       <CompareMonthlyBars a={caseA.r} b={caseB.r} labelA="A (baseline)" labelB={labelB} />
       <CompareAnnualBars a={caseA.r} b={caseB.r} labelA="A (baseline)" labelB={labelB} />
     </div>

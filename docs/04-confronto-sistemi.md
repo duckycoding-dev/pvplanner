@@ -1,6 +1,6 @@
 ---
 title: Confronto tra sistemi (calcolo live)
-last_updated: 2026-06-26
+last_updated: 2026-06-29
 summary: Come si calcola il confronto fra due sistemi che differiscono solo per equipaggiamento (pannelli/W per falda, tetto inverter, batteria). Il ricalcolo avviene live nel browser riscalando la produzione PVGIS della baseline; non c'è uno script dedicato.
 status: draft
 legend:
@@ -94,6 +94,16 @@ Per ciascun sistema, dalle metriche annue (vedi `03-simulazione-batteria.md`):
 produzione pratica, clipping, autoconsumo, tasso di autoconsumo, autosufficienza, import, export,
 cicli batteria. La dashboard mostra `A | B | Δ` con `Δ = valore(B) − valore(A)` (per i tassi in punti
 percentuali).
+
+### Sottosezione giornaliera
+
+Per il giorno selezionato il confronto mostra: il grafico orario (consumo, produzione e copertura di
+A vs B), un grafico dedicato dello **stato di carica** in cui le linee orizzontali indicano la
+**capacità utile massima** di ciascuna batteria (come nella vista giorno-per-giorno mono-sistema; una
+sola linea quando A e B hanno la stessa capacità), e una **tabella delta** del bilancio energetico del
+giorno (produzione, clipping, autoconsumo, import, export, scarica batteria) con `Δ = valore(B) −
+valore(A)`. Le somme giornaliere sono ottenute sommando le serie orarie di `computeSystem` sulle 24
+ore del giorno; nessun nuovo calcolo, solo aggregazione.
 
 ## Garanzia di coerenza (test golden)
 
