@@ -47,6 +47,7 @@ const DEFS: RowDef[] = [
   { key: "imp", label: "Import da rete", info: "import", good: "lower", render: kwh, get: (s) => s.r.metrics.importKwh },
   { key: "exp", label: "Export in rete", info: "export", good: "higher", render: kwh, get: (s) => s.r.metrics.exportKwh },
   { key: "cyc", label: "Cicli batteria/anno", info: "cicli", good: "none", render: cyc, get: (s) => s.r.metrics.battery?.equivalentCycles ?? 0 },
+  { key: "loss", label: "Perdita round-trip", info: "roundTripLoss", good: "lower", render: kwh, get: (s) => s.r.metrics.battery?.roundTripLossKwh ?? 0 },
   { key: "buy", label: "Spesa acquisto", info: "costo", good: "lower", money: "pay", render: eur, get: (s) => s.c.annual.buyCost },
   { key: "sell", label: "Ricavo vendita", info: "ricavo", good: "higher", money: "earn", render: eur, get: (s) => s.c.annual.sellRevenue },
   { key: "net", label: "Costo netto/anno", info: "nettoCosto", good: "lower", money: "net", render: eur, get: (s) => s.c.annual.netCost },

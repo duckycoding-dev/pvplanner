@@ -27,6 +27,7 @@ interface DayTotals {
   self: number;
   imp: number;
   exp: number;
+  cha: number;
   dis: number;
 }
 
@@ -43,6 +44,7 @@ function dayTotals(r: SystemResult, start: number): DayTotals {
     self: sumDay(r.hourly.selfConsumedKwh, start),
     imp: sumDay(r.hourly.importKwh, start),
     exp: sumDay(r.hourly.exportKwh, start),
+    cha: sumDay(r.hourly.chargeKwh, start),
     dis: sumDay(r.hourly.dischargeKwh, start),
   };
 }
@@ -102,6 +104,7 @@ export function CompareDayChart({
     { key: "imp", label: "Import da rete", info: "import", good: "lower", render: kwh2, values: [ta.imp, tb.imp] },
     { key: "exp", label: "Export in rete", info: "export", good: "higher", render: kwh2, values: [ta.exp, tb.exp] },
     { key: "dis", label: "Scarica batteria", good: "none", render: kwh2, values: [ta.dis, tb.dis] },
+    { key: "loss", label: "Perdita round-trip", info: "roundTripLoss", good: "lower", render: kwh2, values: [ta.cha - ta.dis, tb.cha - tb.dis] },
   ];
 
   return (
