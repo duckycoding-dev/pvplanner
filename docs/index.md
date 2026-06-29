@@ -38,7 +38,8 @@ riassunto, stato, legenda simboli/unità, documenti collegati).
 - [`02-modello-produzione.md`](02-modello-produzione.md) — combine falde + clipping
 - [`03-simulazione-batteria.md`](03-simulazione-batteria.md) — bilancio orario + dispatch + confronto
 - [`04-confronto-sistemi.md`](04-confronto-sistemi.md) — confronto live di due sistemi (scaling + ricalcolo nel browser)
-- _(prossimi)_ `05-economia.md`, `06-consumi.md`
+- [`05-costi-fasce.md`](05-costi-fasce.md) — costi/ricavi energia per fasce orarie (acquisto, vendita, netto, risparmio batteria)
+- _(prossimi)_ `06-economia.md` (payback/NPV), `07-consumi.md`
 
 ## Esecuzione
 
@@ -50,8 +51,9 @@ bun test           # suite di test
 ```
 
 Dashboard (SPA Bun+React+Recharts), schede che leggono `web/viz.json`: panoramica annuale, mensile,
-giorno-per-giorno, **Configurazione** (definizione del Sistema B) e **Confronto** (A vs B, calcolato
-live nel browser), più il glossario. Spec di design:
-`docs/specs/2026-06-25-visualizzazione-dashboard-design.md` (dashboard) e
-`docs/specs/2026-06-26-confronto-sistemi-design.md` (confronto); calcoli del confronto in
-`04-confronto-sistemi.md`.
+giorno-per-giorno, **Confronto** (A vs B, live nel browser) e glossario. La configurazione (Sistema B +
+tariffa elettrica) sta in una **sidebar** globale collassabile; i costi a fasce orarie compaiono in
+tutte le view. Spec di design: `docs/specs/2026-06-25-visualizzazione-dashboard-design.md` (dashboard),
+`docs/specs/2026-06-26-confronto-sistemi-design.md` (confronto),
+`docs/specs/2026-06-29-config-sidebar-e-prezzi-fasce-design.md` (sidebar + prezzi); calcoli in
+`04-confronto-sistemi.md` e `05-costi-fasce.md`.
