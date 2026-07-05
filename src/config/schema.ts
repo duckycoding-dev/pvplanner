@@ -17,7 +17,7 @@ export interface PvgisConfig {
   mountingplace: string; // already a query value, e.g. "building"
   system_loss_percent: number; // -> loss
   use_horizon: boolean; // -> usehorizon
-  single_year: number; // year for seriescalc / MRcalc / generic
+  single_year: number; // year for seriescalc
   components: boolean; // seriescalc components flag
 }
 

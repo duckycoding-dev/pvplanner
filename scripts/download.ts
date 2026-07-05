@@ -19,7 +19,7 @@ function parseArgs(argv: string[]) {
       delayMs = Number(a.slice("--delay=".length));
     } else {
       console.error(`Unknown argument: ${a}`);
-      console.error("Usage: bun scripts/download.ts [--validate|--dry-run|--write] [--only=hourly,power,daily,monthly] [--delay=ms]");
+      console.error("Usage: bun scripts/download.ts [--validate|--dry-run|--write] [--only=hourly,power] [--delay=ms]");
       process.exit(2);
     }
   }

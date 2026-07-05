@@ -47,37 +47,6 @@ export function powerParams(cfg: ResolvedConfig, falda: ResolvedFalda): QueryPar
   };
 }
 
-/** DRcalc — average daily radiation profile for one month, local time. */
-export function dailyParams(cfg: ResolvedConfig, falda: ResolvedFalda, month: number): QueryParams {
-  return {
-    ...commonParams(cfg),
-    month: numParam(month),
-    angle: numParam(falda.tilt),
-    aspect: numParam(falda.azimuth),
-    global: "1",
-    clearsky: "1",
-    showtemperatures: "1",
-    localtime: "1",
-  };
-}
-
-/** MRcalc — monthly radiation on the south reference plane (aspect 0). */
-export function monthlyParams(cfg: ResolvedConfig): QueryParams {
-  const first = cfg.resolvedFalde[0];
-  if (first === undefined) throw new Error("monthlyParams: no falde resolved");
-  const year = numParam(cfg.pvgis.single_year);
-  return {
-    ...commonParams(cfg),
-    startyear: year,
-    endyear: year,
-    selectrad: "1",
-    angle: numParam(first.tilt),
-    // NB: MRcalc has no `aspect` param — the selected-inclination plane is South only.
-    d2g: "1",
-    avtemp: "1",
-  };
-}
-
 export function buildUrl(baseUrl: string, tool: string, params: QueryParams): string {
   return `${baseUrl}/${tool}?${new URLSearchParams(params).toString()}`;
 }

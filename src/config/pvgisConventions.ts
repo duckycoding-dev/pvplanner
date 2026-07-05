@@ -10,8 +10,6 @@
 export const PVGIS_TOOLS = {
   hourly: "seriescalc",
   power: "PVcalc",
-  daily: "DRcalc",
-  monthly: "MRcalc",
 } as const;
 
 export type PvgisToolKey = keyof typeof PVGIS_TOOLS;

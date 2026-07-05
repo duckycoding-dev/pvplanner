@@ -10,4 +10,3 @@ export function fromRoot(...segments: string[]): string {
 
 export const DATA_DIR = fromRoot("data");
 export const FALDE_DIR = fromRoot("data", "falde");
-export const GENERIC_DIR = fromRoot("data", "generic");

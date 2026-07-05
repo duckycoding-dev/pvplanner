@@ -74,22 +74,3 @@ export function powerParamsFromFile(file: unknown): QueryParams {
   };
 }
 
-export function dailyParamsFromFile(file: unknown): QueryParams {
-  const inputs = dig(file, ["inputs"]);
-  return {
-    ...commonFromInputs(inputs),
-    angle: numParam(num(inputs, ["plane", "fixed", "slope", "value"])),
-    aspect: numParam(num(inputs, ["plane", "fixed", "azimuth", "value"])),
-  };
-}
-
-export function monthlyParamsFromFile(file: unknown): QueryParams {
-  const inputs = dig(file, ["inputs"]);
-  return {
-    ...commonFromInputs(inputs),
-    angle: numParam(num(inputs, ["plane", "fixed_inclined", "slope", "value"])),
-    // MRcalc has no `aspect` param (South only); the file records azimuth 0 implicitly.
-    startyear: numParam(num(inputs, ["meteo_data", "year_min"])),
-    endyear: numParam(num(inputs, ["meteo_data", "year_max"])),
-  };
-}

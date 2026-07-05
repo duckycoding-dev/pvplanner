@@ -1,10 +1,9 @@
 import { mkdir } from "node:fs/promises";
 import { dirname } from "node:path";
 import { PVGIS_TOOLS, type PvgisToolKey } from "../config/pvgisConventions.ts";
-import { fromRoot } from "../paths.ts";
 import type { ResolvedConfig } from "../config/schema.ts";
 import { fetchJson, sleep } from "./pvgisClient.ts";
-import { buildUrl, dailyParams, hourlyParams, monthlyParams, powerParams } from "./urlBuilder.ts";
+import { buildUrl, hourlyParams, powerParams } from "./urlBuilder.ts";
 
 export interface DownloadJob {
   toolKey: PvgisToolKey;
@@ -34,25 +33,7 @@ export function buildJobs(cfg: ResolvedConfig): DownloadJob[] {
       url: buildUrl(base, PVGIS_TOOLS.power, powerParams(cfg, falda)),
       outPath: `${falda.dataDir}/power.json`,
     });
-    for (let month = 1; month <= 12; month++) {
-      const nn = String(month).padStart(2, "0");
-      jobs.push({
-        toolKey: "daily",
-        tool: PVGIS_TOOLS.daily,
-        label: `${falda.id} (az ${falda.azimuth}) daily_${nn}`,
-        url: buildUrl(base, PVGIS_TOOLS.daily, dailyParams(cfg, falda, month)),
-        outPath: `${falda.dataDir}/daily_${nn}.json`,
-      });
-    }
   }
-
-  jobs.push({
-    toolKey: "monthly",
-    tool: PVGIS_TOOLS.monthly,
-    label: "generic monthly (az 0 reference)",
-    url: buildUrl(base, PVGIS_TOOLS.monthly, monthlyParams(cfg)),
-    outPath: fromRoot("data", "generic", "monthly.json"),
-  });
 
   return jobs;
 }

@@ -75,14 +75,6 @@ function headline(job: DownloadJob, data: unknown): string {
     const ey = (outputs as { totals?: { fixed?: { E_y?: number } } })?.totals?.fixed?.E_y;
     if (typeof ey === "number") return `E_y = ${ey.toFixed(1)} kWh`;
   }
-  if (job.toolKey === "daily") {
-    const dp = (outputs as { daily_profile?: unknown[] })?.daily_profile;
-    if (Array.isArray(dp)) return `rows = ${dp.length}`;
-  }
-  if (job.toolKey === "monthly") {
-    const m = (outputs as { monthly?: unknown[] })?.monthly;
-    if (Array.isArray(m)) return `rows = ${m.length}`;
-  }
   return "";
 }
 
