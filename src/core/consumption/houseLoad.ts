@@ -1,5 +1,6 @@
 import type { ConsumptionSeries } from "../types.ts";
 import type { ConsumptionContext } from "./ConsumptionSource.ts";
+import { localHourWeekday } from "../time/localTime.ts";
 
 /**
  * Physically-grounded synthetic load for a heat-pump house with a thermal buffer.
@@ -12,8 +13,7 @@ import type { ConsumptionContext } from "./ConsumptionSource.ts";
  * in morning/evening blocks (tank-in-tank). Base load = appliances/lighting with a
  * weekday/weekend shape, with a daytime plateau for any work-from-home occupant.
  *
- * Pure: no fs/network/Date.now. Day-of-week and local hour are derived from the UTC
- * timestamps (CET≈UTC+1 for the daily shape; DST ignored — it only shapes weights).
+ * Pure: no fs/network/Date.now. Day-of-week and local hour are DST-correct for ctx.timeZone.
  */
 export interface HouseParams {
   heatedAreaM2: number;
@@ -69,13 +69,6 @@ const DHW_DAILY = [
   0.3, 0.25, 0.2, 0.2, 0.3, 0.7, 1.4, 1.5, 1.1, 0.6, 0.3, 0.15,
 ];
 
-function localHour(tsUtc: number): number {
-  return (new Date(tsUtc).getUTCHours() + 1 + 24) % 24; // CET ≈ UTC+1 (DST ignored)
-}
-function isWeekend(tsUtc: number): boolean {
-  const d = new Date(tsUtc).getUTCDay(); // 0 = Sunday, 6 = Saturday
-  return d === 0 || d === 6;
-}
 function sum(xs: ReadonlyArray<number>): number {
   let s = 0;
   for (const x of xs) s += x;
@@ -110,6 +103,8 @@ export function syntheticHouseLoad(ctx: ConsumptionContext, p: HouseParams): Con
   const n = ctx.timestampsUtc.length;
   const standby = 1 + p.standbyLossPct / 100;
 
+  const local = ctx.timestampsUtc.map((t) => localHourWeekday(t, ctx.timeZone));
+
   // COP(outdoor) curve: Carnot shape anchored to the datasheet point (copRef @ copRefOutdoorC).
   const tHotK = p.flowTempC + 3 + 273.15; // condenser ≈ flow + small approach
   const carnot = (toutC: number): number => {
@@ -141,14 +136,14 @@ export function syntheticHouseLoad(ctx: ConsumptionContext, p: HouseParams): Con
   // --- DHW: per-person thermal / DHW COP, morning+evening blocks ---
   const dhwElecTotal = (p.occupants * p.dhwKwhPerPersonY * standby) / p.dhwCop;
   const dhw = new Array<number>(n);
-  for (let i = 0; i < n; i++) dhw[i] = DHW_DAILY[localHour(ctx.timestampsUtc[i]!)]!;
+  for (let i = 0; i < n; i++) dhw[i] = DHW_DAILY[local[i]!.hour]!;
   scaleToTotal(dhw, dhwElecTotal);
 
   // --- Base load: weekday/weekend shape + work-from-home daytime plateau ---
   const base = new Array<number>(n);
   for (let i = 0; i < n; i++) {
-    const lh = localHour(ctx.timestampsUtc[i]!);
-    const weekend = isWeekend(ctx.timestampsUtc[i]!);
+    const lh = local[i]!.hour;
+    const weekend = local[i]!.weekday >= 5;
     base[i] = weekend ? BASE_WEEKEND[lh]! : BASE_WEEKDAY[lh]! + p.wfhOccupants * WFH_DAYTIME[lh]!;
   }
   scaleToTotal(base, p.baseLoadAnnualKwh);

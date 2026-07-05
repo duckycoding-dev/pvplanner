@@ -8,7 +8,7 @@ test("house V2 load: physical totals, winter-heavy, full length", async () => {
   const { hourly } = await analyzeProduction(cfg);
   const base = hourly[0]!;
   const p = { ...HOUSE_DEFAULTS, heatedAreaM2: 250, specificHeatDemandKwhM2y: 90, wfhOccupants: 1, flowTempC: 30 };
-  const series = syntheticHouseLoad({ timestampsUtc: base.timestampsUtc, months: base.months, t2m: base.t2m }, p);
+  const series = syntheticHouseLoad({ timestampsUtc: base.timestampsUtc, months: base.months, t2m: base.t2m, timeZone: "Europe/Rome" }, p);
 
   expect(series.loadKwh.length).toBe(base.timestampsUtc.length);
   expect(series.source).toBe("synthetic-house");
@@ -30,8 +30,27 @@ test("more insulation (lower specific demand) lowers the annual load", async () 
   const cfg = await loadConfig();
   const { hourly } = await analyzeProduction(cfg);
   const base = hourly[0]!;
-  const ctx = { timestampsUtc: base.timestampsUtc, months: base.months, t2m: base.t2m };
+  const ctx = { timestampsUtc: base.timestampsUtc, months: base.months, t2m: base.t2m, timeZone: "Europe/Rome" };
   const lo = syntheticHouseLoad(ctx, { ...HOUSE_DEFAULTS, specificHeatDemandKwhM2y: 60 });
   const hi = syntheticHouseLoad(ctx, { ...HOUSE_DEFAULTS, specificHeatDemandKwhM2y: 120 });
   expect(hi.annualKwh).toBeGreaterThan(lo.annualKwh);
+});
+
+test("DST: la sagoma del carico base segue l'ora locale estiva (UTC+2)", () => {
+  // 48 h a partire da lunedì 2023-07-03 00:00 UTC; solo carico base (niente PDC/ACS).
+  const n = 48;
+  const timestampsUtc = Array.from({ length: n }, (_, i) => Date.UTC(2023, 6, 3, 0) + i * 3_600_000);
+  const ctx = {
+    timestampsUtc,
+    months: new Array<number>(n).fill(7),
+    t2m: new Array<number>(n).fill(25), // > heatingBaseTempC → riscaldamento nullo
+    timeZone: "Europe/Rome",
+  };
+  const p = { ...HOUSE_DEFAULTS, specificHeatDemandKwhM2y: 0, dhwKwhPerPersonY: 0, wfhOccupants: 0 };
+  const series = syntheticHouseLoad(ctx, p);
+  // BASE_WEEKDAY ha il massimo (1.6) alle ore locali 18 e 19 → in CEST (UTC+2)
+  // il primo massimo del giorno cade all'indice UTC 16 (col vecchio UTC+1 sarebbe 17).
+  const day0 = series.loadKwh.slice(0, 24);
+  const argmax = day0.indexOf(Math.max(...day0));
+  expect(argmax).toBe(16);
 });

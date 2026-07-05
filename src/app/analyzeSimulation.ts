@@ -45,6 +45,7 @@ export async function analyzeSimulation(
     timestampsUtc: base.timestampsUtc,
     months: base.months,
     t2m: base.t2m,
+    timeZone: cfg.consumption.timezone ?? cfg.timezone,
     ...(cfg.consumption.annual_kwh_target === undefined
       ? {}
       : { annualKwhTarget: cfg.consumption.annual_kwh_target }),

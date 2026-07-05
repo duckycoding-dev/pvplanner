@@ -5,6 +5,7 @@ export interface ConsumptionContext {
   timestampsUtc: readonly number[];
   months: readonly number[];
   t2m: readonly number[]; // ambient temperature per hour [°C]
+  timeZone: string; // IANA zone for local-time shaping (e.g. "Europe/Rome")
   annualKwhTarget?: number;
 }
 
