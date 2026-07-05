@@ -8,7 +8,7 @@ import { DailyExplorer } from "./components/DailyExplorer.tsx";
 import { Glossary } from "./components/Glossary.tsx";
 import { ComparePage } from "./components/ComparePage.tsx";
 import { Sidebar } from "./components/Sidebar.tsx";
-import { type SystemConfigB, cloneFromBaseline, validateAgainstBaseline } from "./lib/systemConfig.ts";
+import { type SystemConfigB, cloneFromBaseline, parseSystemConfigB, validateAgainstBaseline } from "./lib/systemConfig.ts";
 import { deriveMonoViz } from "./lib/monoView.ts";
 import { defaultTariff, validateTariff } from "./lib/tariffPresets.ts";
 import { type Incentive, defaultIncentive } from "./lib/economics.ts";
@@ -31,7 +31,9 @@ function loadSystem(key: string, label: string): SystemConfigB {
   try {
     const raw = localStorage.getItem(key);
     if (raw !== null) {
-      const cfg = JSON.parse(raw) as SystemConfigB;
+      // parseSystemConfigB normalizes legacy payloads (e.g. missing `coupling` → "dc")
+      // and throws on malformed data, which the catch below turns into the baseline.
+      const cfg = parseSystemConfigB(raw);
       if (validateAgainstBaseline(cfg, viz) === null) return cfg;
     }
   } catch {
