@@ -8,25 +8,10 @@ import type { ResolvedConfig } from "../config/schema.ts";
 import { batteryUsableKwh, batteryUsablePercent, inverterBatteryPortKw } from "../products/specAccessors.ts";
 import type { ProductionAnalysis } from "../app/analyzeProduction.ts";
 import type { SimulationAnalysis } from "../app/analyzeSimulation.ts";
+import { localHourWeekday } from "../core/time/localTime.ts";
 
 function r3(n: number): number {
   return Math.round(n * 1000) / 1000;
-}
-
-const ROME = "Europe/Rome";
-const WEEKDAY_INDEX: Record<string, number> = { Mon: 0, Tue: 1, Wed: 2, Thu: 3, Fri: 4, Sat: 5, Sun: 6 };
-
-/** Local hour (0..23) and weekday (0=Mon..6=Sun) at a UTC instant, DST-correct for Europe/Rome. */
-function localHourWeekday(tsUtc: number): { hour: number; weekday: number } {
-  const parts = new Intl.DateTimeFormat("en-GB", {
-    timeZone: ROME,
-    hour: "2-digit",
-    hour12: false,
-    weekday: "short",
-  }).formatToParts(new Date(tsUtc));
-  const hour = Number(parts.find((p) => p.type === "hour")?.value ?? "0") % 24;
-  const weekday = WEEKDAY_INDEX[parts.find((p) => p.type === "weekday")?.value ?? "Mon"] ?? 0;
-  return { hour, weekday };
 }
 function arr3(xs: ReadonlyArray<number>): number[] {
   return xs.map(r3);
@@ -134,8 +119,8 @@ export async function writeVizJson(
     hourly: {
       timestampsUtc: [...base.timestampsUtc],
       months: [...base.months],
-      localHour: base.timestampsUtc.map((t) => localHourWeekday(t).hour),
-      weekday: base.timestampsUtc.map((t) => localHourWeekday(t).weekday),
+      localHour: base.timestampsUtc.map((t) => localHourWeekday(t, cfg.timezone).hour),
+      weekday: base.timestampsUtc.map((t) => localHourWeekday(t, cfg.timezone).weekday),
       falde: prod.hourly.map((f) => ({
         id: f.id,
         azimuth: f.azimuth,
