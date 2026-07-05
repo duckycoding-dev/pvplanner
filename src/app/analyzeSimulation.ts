@@ -1,4 +1,3 @@
-import { syntheticHeatPumpLoad } from "../core/consumption/syntheticSource.ts";
 import { HOUSE_DEFAULTS, type HouseParams, syntheticHouseLoad } from "../core/consumption/houseLoad.ts";
 import { buildBatteryConfig } from "../core/simulation/battery.ts";
 import { compareScenarios } from "../core/simulation/metrics.ts";
@@ -60,7 +59,7 @@ export async function analyzeSimulation(
   } else if (cfg.consumption.house !== undefined) {
     consumption = syntheticHouseLoad(ctx, houseParams(cfg.consumption.house));
   } else {
-    consumption = syntheticHeatPumpLoad(ctx);
+    throw new Error('consumption.source="synthetic" richiede il blocco consumption.house in config.json');
   }
 
   const production = prod.result.combined.hourly.practicalKwh;
