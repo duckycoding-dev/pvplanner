@@ -1,13 +1,13 @@
 ---
 title: Downloader PVGIS
-last_updated: 2026-06-25
+last_updated: 2026-07-05
 summary: Come il sistema scarica in modo riproducibile tutti i dati da PVGIS v5.3 — endpoint, mappa parametri output→query, set per tool, derivazione peakpower e validazione non distruttiva.
 status: draft
 legend:
   - "seriescalc: orario (PV + radiazione)"
   - "PVcalc: mensile + totali multi-anno"
-  - "DRcalc: profilo giornaliero medio (radiazione) per mese"
-  - "MRcalc: radiazione mensile su piano scelto"
+  - "DRcalc: profilo giornaliero medio (radiazione) per mese — rimosso 2026-07-04, mai consumato dall'analisi"
+  - "MRcalc: radiazione mensile su piano scelto — rimosso 2026-07-04, mai consumato dall'analisi"
   - "aspect: azimuth [°], 0=Sud, 90=Ovest, -90=Est"
   - "angle: inclinazione/slope [°]"
   - "peakpower: potenza di picco impianto/falda [kWp]"
@@ -22,16 +22,20 @@ libere** (uso non commerciale). Codice in `src/fetch/`, avvio da `scripts/downlo
 
 ## Base URL e tool
 
-`https://re.jrc.ec.europa.eu/api/v5_3/<tool>` (versione con underscore `v5_3`). Quattro tool:
+`https://re.jrc.ec.europa.eu/api/v5_3/<tool>` (versione con underscore `v5_3`). Due tool:
 
 | File generato | Tool | Contenuto |
 |---|---|---|
 | `data/falde/<az>/hourly.json` | `seriescalc` | 8760 valori orari di `P` (W) + componenti radiazione, T2m, vento (anno singolo) |
 | `data/falde/<az>/power.json` | `PVcalc` | medie mensili `E_m` + totali `E_y` (range DB 2005-2023) |
-| `data/falde/<az>/daily_01..12.json` | `DRcalc` | profilo giornaliero medio per mese (solo radiazione), ora locale |
-| `data/generic/monthly.json` | `MRcalc` | radiazione mensile piano Sud di riferimento (solo inclinazione: MRcalc non ha `aspect`) |
 
-Conteggio file = `n_falde × 14 + 1`.
+Conteggio file = `n_falde × 2`.
+
+> **Rimossi 2026-07-04:** `DRcalc` (`data/falde/<az>/daily_01..12.json`, profilo giornaliero medio
+> per mese) e `MRcalc` (`data/generic/monthly.json`, radiazione mensile piano Sud di riferimento).
+> Scaricati fin dall'inizio ma mai letti da nessun calcolo dell'analisi (~26 chiamate PVGIS in meno
+> per falda/progetto) — vedi `docs/index.md` per il changelog. Il codice e i dati corrispondenti
+> sono stati rimossi da `src/fetch/` e `data/`.
 
 ## Mappa parametri: output `inputs` → query
 
@@ -43,7 +47,7 @@ I nomi nel blocco `inputs` dei file scaricati **differiscono** dai nomi dei quer
 | `location.latitude` / `longitude` | `lat` / `lon` | — |
 | `meteo_data.radiation_db` | `raddatabase` | — |
 | `meteo_data.use_horizon` | `usehorizon` | bool → `1`/`0` |
-| `meteo_data.year_min` / `year_max` | `startyear` / `endyear` | solo seriescalc/MRcalc |
+| `meteo_data.year_min` / `year_max` | `startyear` / `endyear` | solo seriescalc |
 | `…fixed.slope.value` | `angle` | — |
 | `…fixed.azimuth.value` | `aspect` | — |
 | `pv_module.peak_power` | `peakpower` | **derivata** (vedi sotto) |
@@ -62,18 +66,12 @@ Comuni: `lat, lon, raddatabase, usehorizon, outputformat=json, browser=0`.
   angle, aspect, startyear=endyear=<anno>, components=1`
 - **PVcalc** (`power`): `+ peakpower, pvtechchoice, mountingplace, loss, fixed=1, angle, aspect`
   — **senza** `startyear/endyear` (→ range completo DB 2005-2023), senza `pvcalculation/components`
-- **DRcalc** (`daily`): `+ month=<1..12>, angle, aspect, global=1, showtemperatures=1, localtime=1`
-  — **senza** `peakpower` (solo radiazione)
-- **MRcalc** (`monthly` generic): `+ startyear=endyear=<anno>, selectrad=1, angle=<tilt>, d2g=1,
-  avtemp=1` — **MRcalc non accetta `aspect`**: il piano a inclinazione selezionata è solo Sud
-  (il file riporta `azimuth 0` implicito).
 
 ## Derivazione `peakpower`
 
 `peakpower_kw = panel_count × module.peak_power_wp / 1000`. Esempio: 11 × 465 / 1000 = **5.115 kWp**
 per falda. Non è mai salvata a mano: cambiare modulo o n° pannelli in `config.json` la ricalcola →
-ri-scaricando si ottengono dati con la potenza giusta. (`peakpower` riguarda solo seriescalc e PVcalc;
-DRcalc/MRcalc sono indipendenti dalla potenza.)
+ri-scaricando si ottengono dati con la potenza giusta.
 
 ## Esecuzione e validazione
 
@@ -84,7 +82,7 @@ DRcalc/MRcalc sono indipendenti dalla potenza.)
   PASS/FAIL con metrica headline (es. `ΣP` orario, `E_y` mensile) ed esce `0` solo se tutto PASS.
 - `--dry-run`: stampa solo URL e percorso di output.
 - `--write`: scarica e **sovrascrive** i file in `data/`.
-- `--only=hourly,power,daily,monthly` e `--delay=<ms>` (default 300 ms tra le richieste).
+- `--only=hourly,power` e `--delay=<ms>` (default 300 ms tra le richieste).
 
 Il client (`src/fetch/pvgisClient.ts`) è sequenziale, con retry su 429/5xx (backoff esponenziale,
 rispetta `Retry-After`) e User-Agent descrittivo.

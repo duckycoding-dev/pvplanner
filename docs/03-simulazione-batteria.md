@@ -1,6 +1,6 @@
 ---
 title: Simulazione batteria (bilancio orario + dispatch autoconsumo)
-last_updated: 2026-06-25
+last_updated: 2026-07-05
 summary: Bilancio energetico orario con e senza batteria (dispatch greedy di autoconsumo), metriche di confronto e profilo consumi pluggable. Niente € — solo energia.
 status: draft
 legend:
@@ -47,6 +47,29 @@ autoconsumo = A_d + d
 Carica e scarica sono esclusive nell'ora. **SoC** parte da `initialSoCFraction` e viene **iterato a
 convergenza** (l'anno è un anello: SoC fine → SoC inizio, finché |Δ| < 1e-3, max 6 passate) per
 togliere l'artefatto dell'inizializzazione.
+
+## Accoppiamento DC / AC
+
+La batteria può essere collegata in due punti diversi dell'impianto, e cambia
+cosa può caricarla:
+
+- **DC (inverter ibrido, default)** — la batteria sta sul bus continuo,
+  PRIMA della conversione AC. L'energia sopra il tetto AC dell'inverter
+  (clipping) può quindi caricarla invece di andare persa: nel dispatch la
+  carica attinge prima dal clipping dell'ora (`recoveredClipKwh`), poi dal
+  surplus esportabile. In compenso la scarica passa dallo stesso inverter del
+  FV: `scarica ≤ tetto AC − produzione pratica` in ogni ora. Nell'ora rara
+  con clipping e deficit insieme (carico sopra il tetto AC) la batteria
+  carica dal clipping e il deficit resta alla rete: l'inverter saturo non
+  può comunque scaricare.
+- **AC (inverter batteria separato)** — la batteria vede solo l'energia già
+  limitata dal tetto AC (comportamento pre-2026-07): niente recupero clipping,
+  scarica senza vincolo di headroom.
+
+Configurazione: `simulation.battery_coupling` in `config.json` (CLI) e campo
+"Accoppiamento batteria" nell'editor sistemi (web). Anche il round-trip è ora
+letto da `simulation.battery_round_trip` (default 0.9 = valore tipico AC-to-AC
+per sistemi LFP domestici: ≥96% DC × conversioni inverter).
 
 ## Metriche (`metrics.ts`)
 - autoconsumo `Σ(A_d + d)`; **tasso autoconsumo** = autoconsumo/`ΣG`; **autosufficienza** = autoconsumo/`ΣL`

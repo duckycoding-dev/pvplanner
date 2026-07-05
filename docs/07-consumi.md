@@ -1,6 +1,6 @@
 ---
 title: Consumi — profilo sintetico V2 (casa con pompa di calore + puffer)
-last_updated: 2026-06-29
+last_updated: 2026-07-05
 summary: Come si stima il profilo orario di consumo elettrico della casa partendo da pochi dati fisici (superficie, isolamento, occupanti, pompa di calore) e dalle temperature reali del sito. Profilo sintetico, non misurato; sostituibile in futuro con dati reali (CSV).
 status: draft
 legend:
@@ -45,8 +45,15 @@ dal tank-in-tank).
 Totale annuo per N occupanti, con **sagoma feriale vs weekend**; ogni occupante in **smart-working**
 aggiunge un **plateau diurno** nei giorni feriali (rilevante per l'autoconsumo PV).
 
-`L(t) = riscaldamento_smussato(t) + ACS(t) + base(t)`. Asse UTC, ora locale ≈ CET (UTC+1) solo per le
-sagome (DST ignorato: pesa solo sui pesi orari).
+`L(t) = riscaldamento_smussato(t) + ACS(t) + base(t)`. Asse UTC; l'ora locale usata per le sagome
+(picchi, blocchi ACS, plateau) è **DST-corretta** — vedi nota sotto.
+
+> **Fix DST (2026-07-04):** la sagomatura oraria (picchi base, blocchi ACS,
+> plateau smart-working) usa l'ora locale **DST-corretta** della timezone in
+> `consumption.timezone` (fallback: `timezone` di root), via
+> `src/core/time/localTime.ts` — la stessa usata dalle fasce tariffarie.
+> Prima usava UTC+1 fisso: in estate i picchi cadevano 1 h fuori fascia.
+> Anche il giorno feriale/weekend segue il giorno locale.
 
 ## Dati di questo impianto
 

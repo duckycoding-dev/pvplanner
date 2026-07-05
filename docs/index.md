@@ -1,6 +1,6 @@
 ---
 title: Indice e convenzioni generali
-last_updated: 2026-06-25
+last_updated: 2026-07-05
 summary: Punto d'ingresso alla documentazione dei calcoli; convenzioni di unità, asse temporale e fonti dati condivise da tutti i documenti.
 status: draft
 legend:
