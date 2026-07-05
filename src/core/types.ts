@@ -95,6 +95,7 @@ export interface ScenarioHourly {
   exportKwh: number[];
   chargeKwh: number[]; // 0 for no-battery
   dischargeKwh: number[]; // 0 for no-battery
+  recoveredClipKwh: number[]; // clipped energy charged on the DC bus (0 for AC/no-battery)
   socKwh: number[]; // 0 for no-battery
 }
 
@@ -110,6 +111,7 @@ export interface AnnualMetrics {
     throughputKwh: number; // Σ discharge
     equivalentCycles: number; // throughput / usable
     roundTripLossKwh: number; // Σ charge − Σ discharge
+    recoveredClipKwh: number; // Σ clipped energy recovered into the battery (DC coupling)
     usableKwh: number;
   };
 }

@@ -36,6 +36,7 @@ export function annualMetrics(h: ScenarioHourly, batt?: BatteryConfig): AnnualMe
       throughputKwh,
       equivalentCycles: batt.usableKwh > 0 ? throughputKwh / batt.usableKwh : 0,
       roundTripLossKwh: chargeKwh - throughputKwh,
+      recoveredClipKwh: sum(h.recoveredClipKwh),
       usableKwh: batt.usableKwh,
     };
   }

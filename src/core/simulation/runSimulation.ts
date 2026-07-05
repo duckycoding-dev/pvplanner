@@ -6,6 +6,13 @@ import { annualMetrics, monthlyScenario } from "./metrics.ts";
 const MAX_SOC_PASSES = 6;
 const SOC_TOLERANCE = 1e-3;
 
+export interface DcCouplingInput {
+  /** Hourly clipped energy available to charge on the DC bus (same axis as production). */
+  clippingLossKwh: readonly number[];
+  /** Inverter AC output cap (kW), shared by PV output and battery discharge. */
+  acCapKw: number;
+}
+
 function emptyHourly(n: number): ScenarioHourly {
   return {
     productionKwh: new Array<number>(n).fill(0),
@@ -15,6 +22,7 @@ function emptyHourly(n: number): ScenarioHourly {
     exportKwh: new Array<number>(n).fill(0),
     chargeKwh: new Array<number>(n).fill(0),
     dischargeKwh: new Array<number>(n).fill(0),
+    recoveredClipKwh: new Array<number>(n).fill(0),
     socKwh: new Array<number>(n).fill(0),
   };
 }
@@ -45,6 +53,7 @@ function simulatePass(
   load: ReadonlyArray<number>,
   batt: BatteryConfig,
   startSoc: number,
+  dc?: DcCouplingInput,
 ): { hourly: ScenarioHourly; endSoc: number } {
   const n = production.length;
   const h = emptyHourly(n);
@@ -53,7 +62,15 @@ function simulatePass(
     const g = production[i] ?? 0;
     const l = load[i] ?? 0;
     const bal = hourBalance(g, l);
-    const d = dispatchHour(bal.surplus, bal.deficit, soc, batt);
+    const d = dispatchHour(
+      bal.surplus,
+      bal.deficit,
+      soc,
+      batt,
+      dc === undefined
+        ? undefined
+        : { clipAvailKwh: dc.clippingLossKwh[i] ?? 0, dischargeHeadroomKw: Math.max(0, dc.acCapKw - g) },
+    );
     soc = d.newSoc;
     h.productionKwh[i] = g;
     h.loadKwh[i] = l;
@@ -62,6 +79,7 @@ function simulatePass(
     h.importKwh[i] = d.importKwh;
     h.chargeKwh[i] = d.charge;
     h.dischargeKwh[i] = d.discharge;
+    h.recoveredClipKwh[i] = d.recoveredClipKwh;
     h.socKwh[i] = soc;
   }
   return { hourly: h, endSoc: soc };
@@ -73,14 +91,15 @@ export function runWithBattery(
   load: ReadonlyArray<number>,
   months: ReadonlyArray<number>,
   batt: BatteryConfig,
+  dc?: DcCouplingInput,
 ): ScenarioResult {
   let start = batt.usableKwh * batt.initialSoCFraction;
-  let last = simulatePass(production, load, batt, start);
+  let last = simulatePass(production, load, batt, start, dc);
   let passes = 1;
   if (batt.socConvergence) {
     while (passes < MAX_SOC_PASSES && Math.abs(last.endSoc - start) >= SOC_TOLERANCE) {
       start = last.endSoc;
-      last = simulatePass(production, load, batt, start);
+      last = simulatePass(production, load, batt, start, dc);
       passes++;
     }
   }

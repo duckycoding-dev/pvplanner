@@ -61,3 +61,31 @@ test("real pipeline: round-trip closure Σdischarge ≈ Σcharge × RT", async (
   const charge = b.roundTripLossKwh + b.throughputKwh;
   expect(b.throughputKwh / charge).toBeCloseTo(0.9, 2); // RT = 0.90 at SoC convergence
 });
+
+test("DC coupling: il clipping recuperato carica la batteria e torna nelle metriche", () => {
+  // practical già clippato a 5; nell'ora 1 il clip è 3 (teorica 8, cap 5)
+  const prod = [0, 5, 0];
+  const clip = [0, 3, 0];
+  const load = [2, 0, 2];
+  const months = [1, 1, 1];
+  const batt = buildBatteryConfig({ usableKwh: 10, pMaxKw: 10, roundTrip: 1, socConvergence: false });
+  const r = runWithBattery(prod, load, months, batt, { clippingLossKwh: clip, acCapKw: 5 });
+
+  const h = r.hourly;
+  expect(h.chargeKwh[1]).toBeCloseTo(8, 9); // 5 surplus + 3 clip
+  expect(h.recoveredClipKwh[1]).toBeCloseTo(3, 9);
+  expect(h.exportKwh[1]).toBeCloseTo(0, 9);
+  expect(h.dischargeKwh[2]).toBeCloseTo(2, 9);
+  expect(r.metrics.battery!.recoveredClipKwh).toBeCloseTo(3, 9);
+
+  // conservazione: g + recuperato = diretto + carica + export
+  const g = 5, recovered = 3, direct = 0, chargeTot = 8, exportTot = 0;
+  expect(g + recovered).toBeCloseTo(direct + chargeTot + exportTot, 9);
+});
+
+test("AC coupling (nessun blocco dc): recoveredClipKwh resta 0", () => {
+  const batt = buildBatteryConfig({ usableKwh: 10, pMaxKw: 5, roundTrip: 1, socConvergence: false });
+  const r = runWithBattery([0, 5, 0], [2, 0, 2], [1, 1, 1], batt);
+  expect(r.metrics.battery!.recoveredClipKwh).toBe(0);
+  expect(r.hourly.recoveredClipKwh.every((v) => v === 0)).toBe(true);
+});
