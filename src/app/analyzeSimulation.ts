@@ -68,9 +68,17 @@ export async function analyzeSimulation(
   const batt = buildBatteryConfig({
     usableKwh: batteryUsableKwh(cfg.battery),
     pMaxKw: inverterBatteryPortKw(cfg.inverter),
+    ...(cfg.simulation?.battery_round_trip === undefined
+      ? {}
+      : { roundTrip: cfg.simulation.battery_round_trip }),
   });
+  const coupling = cfg.simulation?.battery_coupling ?? "dc";
+  const dc =
+    coupling === "dc"
+      ? { clippingLossKwh: prod.result.combined.hourly.clippingLossKwh, acCapKw: prod.result.acCapKw }
+      : undefined;
 
   const without = runNoBattery(production, consumption.loadKwh, months);
-  const withB = runWithBattery(production, consumption.loadKwh, months, batt);
+  const withB = runWithBattery(production, consumption.loadKwh, months, batt, dc);
   return { comparison: compareScenarios(without, withB), consumption };
 }

@@ -26,6 +26,8 @@ export interface ComputeSystemInput {
   roundTrip: number;
   /** Battery charge/discharge power cap (kW). */
   pMaxKw: number;
+  /** Battery coupling: "dc" (hybrid, clip can charge) or "ac". Default "dc". */
+  coupling?: "dc" | "ac";
   /** Shared household load (kWh per hour). */
   loadKwh: readonly number[];
   /** Per-row month 1..12, aligned with the hourly axis. */
@@ -133,9 +135,13 @@ export function computeSystem(input: ComputeSystemInput): SystemResult {
   const production = combineAndClip(scaled, acCapKw, months);
   const practical = production.hourly.practicalKwh;
 
+  const dc =
+    (input.coupling ?? "dc") === "dc"
+      ? { clippingLossKwh: production.hourly.clippingLossKwh, acCapKw }
+      : undefined;
   const res =
     batteryUsableKwh > 0
-      ? runWithBattery(practical, loadKwh, months, buildBatteryConfig({ usableKwh: batteryUsableKwh, pMaxKw, roundTrip }))
+      ? runWithBattery(practical, loadKwh, months, buildBatteryConfig({ usableKwh: batteryUsableKwh, pMaxKw, roundTrip }), dc)
       : runNoBattery(practical, loadKwh, months);
 
   return {

@@ -75,7 +75,8 @@ export async function writeVizJson(
       ),
       batteryUsablePct: batteryUsablePercent(cfg.battery),
       batteryPortKw: inverterBatteryPortKw(cfg.inverter),
-      batteryRoundTrip: DEFAULT_ROUND_TRIP,
+      batteryRoundTrip: cfg.simulation?.battery_round_trip ?? DEFAULT_ROUND_TRIP,
+      batteryCoupling: cfg.simulation?.battery_coupling ?? "dc",
       consumptionAnnualKwh: r3(sim.consumption.annualKwh),
       installationCostEur: cfg.economics?.installation_cost_eur ?? 0,
       incentive: cfg.economics?.incentive ?? { mode: "percent", value: 0, years: 1 },
@@ -106,6 +107,7 @@ export async function writeVizJson(
           throughputKwh: r3(wb.metrics.battery?.throughputKwh ?? 0),
           equivalentCycles: r3(wb.metrics.battery?.equivalentCycles ?? 0),
           roundTripLossKwh: r3(wb.metrics.battery?.roundTripLossKwh ?? 0),
+          recoveredClipKwh: r3(wb.metrics.battery?.recoveredClipKwh ?? 0),
         },
       },
       delta: {

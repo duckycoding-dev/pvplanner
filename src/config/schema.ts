@@ -82,6 +82,14 @@ export interface EconomicsConfig {
   incentive: IncentiveConfig;
 }
 
+/** Simulation-wide knobs not tied to a product datasheet. */
+export interface SimulationConfig {
+  /** Battery coupling: "dc" = hybrid inverter (clip can charge), "ac" = separate battery inverter. */
+  battery_coupling?: "dc" | "ac";
+  /** AC-to-AC round-trip efficiency (0..1]. */
+  battery_round_trip?: number;
+}
+
 export interface SystemConfig {
   location: LocationConfig;
   timezone: string;
@@ -89,6 +97,7 @@ export interface SystemConfig {
   products: ProductsConfig;
   falde: FaldaConfig[];
   consumption: ConsumptionConfig;
+  simulation?: SimulationConfig;
   economics?: EconomicsConfig;
 }
 
@@ -225,6 +234,22 @@ export function validateSystemConfig(raw: unknown): SystemConfig {
     ...(house === undefined ? {} : { house }),
   };
 
+  let simulation: SimulationConfig | undefined;
+  if (root["simulation"] !== undefined) {
+    const s = asObject(root["simulation"], "simulation");
+    simulation = {};
+    if (s["battery_coupling"] !== undefined) {
+      const c = asString(s["battery_coupling"], "simulation.battery_coupling");
+      if (c !== "dc" && c !== "ac") throw new Error('config: simulation.battery_coupling must be "dc" or "ac"');
+      simulation.battery_coupling = c;
+    }
+    if (s["battery_round_trip"] !== undefined) {
+      const rt = asNumber(s["battery_round_trip"], "simulation.battery_round_trip");
+      if (rt <= 0 || rt > 1) throw new Error("config: simulation.battery_round_trip must be in (0, 1]");
+      simulation.battery_round_trip = rt;
+    }
+  }
+
   let economics: EconomicsConfig | undefined;
   if (root["economics"] !== undefined) {
     const e = asObject(root["economics"], "economics");
@@ -250,6 +275,7 @@ export function validateSystemConfig(raw: unknown): SystemConfig {
     products,
     falde,
     consumption,
+    ...(simulation === undefined ? {} : { simulation }),
     ...(economics === undefined ? {} : { economics }),
   };
 }

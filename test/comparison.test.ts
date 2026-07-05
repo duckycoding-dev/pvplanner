@@ -85,6 +85,25 @@ test("computeSystem with a battery shifts surplus to a later deficit", () => {
   expect(r.metrics.battery!.throughputKwh).toBeCloseTo(5, 9);
 });
 
+test("coupling DC vs AC: il DC recupera clipping in batteria", () => {
+  const base: FaldaBaseline[] = [{ peakKwp: 1, productionKwh: [0, 10, 0] }];
+  const common = {
+    faldeBase: base,
+    newPeakKwp: [1],
+    acCapKw: 5, // teorica [0,10,0] → practical [0,5,0], clip [0,5,0]
+    batteryUsableKwh: 20,
+    roundTrip: 1,
+    pMaxKw: 20,
+    loadKwh: [3, 0, 3],
+    months: [1, 1, 1],
+  };
+  const dc = computeSystem({ ...common, coupling: "dc" });
+  const ac = computeSystem({ ...common, coupling: "ac" });
+  expect(dc.metrics.battery!.recoveredClipKwh).toBeCloseTo(5, 9); // 5 surplus + 5 clip caricati
+  expect(ac.metrics.battery!.recoveredClipKwh).toBe(0);
+  expect(dc.metrics.battery!.throughputKwh).toBeGreaterThanOrEqual(ac.metrics.battery!.throughputKwh);
+});
+
 test("golden: computeSystem reproduces the baseline with-battery metrics", async () => {
   const cfg = await loadConfig();
   const prod = await analyzeProduction(cfg);
@@ -100,7 +119,8 @@ test("golden: computeSystem reproduces the baseline with-battery metrics", async
     newPeakKwp: prod.hourly.map((f) => f.peakKwp), // baseline → factor 1.0
     acCapKw: prod.result.acCapKw,
     batteryUsableKwh: batteryUsableKwh(cfg.battery),
-    roundTrip: DEFAULT_ROUND_TRIP,
+    roundTrip: cfg.simulation?.battery_round_trip ?? DEFAULT_ROUND_TRIP,
+    coupling: cfg.simulation?.battery_coupling ?? "dc",
     pMaxKw: inverterBatteryPortKw(cfg.inverter),
     loadKwh: sim.consumption.loadKwh,
     months: prod.hourly[0]!.months,

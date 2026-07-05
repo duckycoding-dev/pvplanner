@@ -22,3 +22,9 @@ test("module nameplate is 465 Wp", async () => {
   const cfg = await loadConfig();
   expect(cfg.module.peak_power_wp).toBe(465);
 });
+
+test("blocco simulation: coupling e round-trip letti da config", async () => {
+  const cfg = await loadConfig();
+  expect(cfg.simulation?.battery_coupling).toBe("dc");
+  expect(cfg.simulation?.battery_round_trip).toBeCloseTo(0.9, 9);
+});
