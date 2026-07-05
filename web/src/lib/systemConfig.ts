@@ -15,6 +15,7 @@ export interface SystemConfigB {
   batteryTotalKwh: number; // nominal total capacity; 0 = no battery
   batteryUsablePct: number; // usable fraction of total [%], 0..100 (DoD / usable per datasheet)
   roundTrip: number; // AC-to-AC round-trip efficiency, 0..1
+  coupling: "dc" | "ac"; // "dc" = inverter ibrido (il clipping può caricare), "ac" = batteria con inverter separato
   installationCostEur: number; // CAPEX of this system
 }
 
@@ -39,6 +40,7 @@ export function cloneFromBaseline(viz: Viz, label = "Sistema B"): SystemConfigB 
     batteryTotalKwh: viz.meta.batteryTotalKwh,
     batteryUsablePct: viz.meta.batteryUsablePct,
     roundTrip: viz.meta.batteryRoundTrip,
+    coupling: viz.meta.batteryCoupling,
     installationCostEur: viz.meta.installationCostEur,
   };
 }
@@ -50,6 +52,7 @@ export function equalsSystems(a: SystemConfigB, b: SystemConfigB): boolean {
     a.batteryTotalKwh !== b.batteryTotalKwh ||
     a.batteryUsablePct !== b.batteryUsablePct ||
     a.roundTrip !== b.roundTrip ||
+    a.coupling !== b.coupling ||
     a.installationCostEur !== b.installationCostEur ||
     a.falde.length !== b.falde.length
   ) {
@@ -126,6 +129,7 @@ export function parseSystemConfigB(text: string): SystemConfigB {
     batteryTotalKwh: reqNumber(total, "batteryTotalKwh"),
     batteryUsablePct: reqNumber(pct, "batteryUsablePct"),
     roundTrip: reqNumber(o["roundTrip"], "roundTrip"),
+    coupling: o["coupling"] === "ac" ? "ac" : "dc",
     installationCostEur: typeof o["installationCostEur"] === "number" ? o["installationCostEur"] : 0,
   };
 }

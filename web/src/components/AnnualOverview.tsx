@@ -150,6 +150,14 @@ export function AnnualOverview({
             con={`${fmt(wb.battery.roundTripLossKwh)} kWh`}
           />
         )}
+        {hasBattery && wb.battery.recoveredClipKwh > 0 && (
+          <KpiCard
+            label="Clipping recuperato"
+            info="clippingRecuperato"
+            senza="—"
+            con={`${fmt(wb.battery.recoveredClipKwh)} kWh`}
+          />
+        )}
       </section>
 
       <section className="chart-card">

@@ -53,6 +53,7 @@ export interface Viz {
     batteryUsablePct: number;
     batteryPortKw: number;
     batteryRoundTrip: number;
+    batteryCoupling: "dc" | "ac";
     consumptionAnnualKwh: number;
     installationCostEur: number;
     incentive: { mode: "percent" | "fixed"; value: number; years: number };
@@ -72,7 +73,7 @@ export interface Viz {
     };
     noBattery: ScenarioMetrics;
     withBattery: ScenarioMetrics & {
-      battery: { throughputKwh: number; equivalentCycles: number; roundTripLossKwh: number };
+      battery: { throughputKwh: number; equivalentCycles: number; roundTripLossKwh: number; recoveredClipKwh: number };
     };
     delta: {
       selfConsumedKwh: number;

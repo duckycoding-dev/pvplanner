@@ -5,6 +5,7 @@ import {
   batteryUsableKwh,
   cloneFromBaseline,
   equalsBaseline,
+  equalsSystems,
   noPvConfig,
   parseSystemConfigB,
   serialize,
@@ -93,4 +94,17 @@ test("validateAgainstBaseline accepts the clone and rejects different geometry",
   expect(validateAgainstBaseline(missingFalda, viz)).toContain("Geometria diversa");
 
   expect(validateAgainstBaseline({ ...cfg, batteryUsablePct: 150 }, viz)).toContain("0–100");
+});
+
+test("coupling: default dc per file vecchi, ac se esplicito, incluso in equals", () => {
+  const legacy = parseSystemConfigB(
+    JSON.stringify({
+      falde: [{ id: "est", azimuth: -45, panelCount: 11, wp: 465 }],
+      acCapKw: 6, batteryTotalKwh: 10, batteryUsablePct: 100, roundTrip: 0.9,
+    }),
+  );
+  expect(legacy.coupling).toBe("dc");
+  const ac = parseSystemConfigB(JSON.stringify({ ...JSON.parse(serialize(legacy)), coupling: "ac" }));
+  expect(ac.coupling).toBe("ac");
+  expect(equalsSystems(legacy, ac)).toBe(false);
 });

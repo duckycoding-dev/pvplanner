@@ -20,6 +20,7 @@ export function runSystem(cfg: SystemConfigB, viz: Viz): SystemResult {
     acCapKw: cfg.acCapKw,
     batteryUsableKwh: batteryUsableKwh(cfg),
     roundTrip: cfg.roundTrip,
+    coupling: cfg.coupling,
     pMaxKw: viz.meta.batteryPortKw,
     loadKwh: viz.hourly.loadKwh,
     months: viz.hourly.months,

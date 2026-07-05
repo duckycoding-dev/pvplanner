@@ -68,6 +68,15 @@ export const GLOSSARY: Record<string, GlossaryEntry> = {
     desc: "Energia persa nel ciclo carica→scarica della batteria (rendimento ~90%): parte dell'energia immagazzinata non torna indietro.",
     formula: "= Σ carica − Σ scarica",
   },
+  accoppiamento: {
+    term: "Accoppiamento batteria (DC/AC)",
+    desc: "Dove è collegata la batteria. DC = sul bus continuo di un inverter ibrido: l'energia sopra il tetto AC può comunque caricarla (clipping recuperato), ma la scarica condivide il tetto AC col FV. AC = batteria con inverter proprio, a valle: vede solo l'energia già limitata dal tetto AC.",
+  },
+  clippingRecuperato: {
+    term: "Clipping recuperato",
+    desc: "Energia sopra il tetto AC dell'inverter che con accoppiamento DC finisce in batteria invece di andare persa. Con accoppiamento AC è sempre 0.",
+    formula: "recuperato = Σ min(clipping orario, spazio in batteria)",
+  },
   coperto: {
     term: "Coperto da PV (+batteria)",
     desc: "Consumo coperto ora per ora dal FV (ed eventualmente dalla batteria). Dove questa curva sta sotto la linea del consumo, la differenza è prelevata dalla rete.",

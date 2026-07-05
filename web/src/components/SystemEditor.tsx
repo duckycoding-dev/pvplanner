@@ -123,6 +123,16 @@ export function SystemEditor({
         step={0.01}
         onChange={(v) => setSystem({ ...system, roundTrip: v })}
       />
+      <label className="text-field">
+        Accoppiamento batteria
+        <select
+          value={system.coupling}
+          onChange={(e) => setSystem({ ...system, coupling: e.target.value === "ac" ? "ac" : "dc" })}
+        >
+          <option value="dc">DC (inverter ibrido)</option>
+          <option value="ac">AC (inverter batteria separato)</option>
+        </select>
+      </label>
       <NumberField
         label="Costo installazione"
         unit="€"

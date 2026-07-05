@@ -35,7 +35,7 @@ export function deriveMonoViz(viz: Viz, systemA: SystemConfigB): MonoView {
   const prod = resCon.production;
   const nb = resSenza.metrics;
   const wb = resCon.metrics;
-  const bat = wb.battery ?? { throughputKwh: 0, equivalentCycles: 0, roundTripLossKwh: 0 };
+  const bat = wb.battery ?? { throughputKwh: 0, equivalentCycles: 0, roundTripLossKwh: 0, recoveredClipKwh: 0 };
 
   const baseKwp = viz.meta.falde.reduce((s, f) => s + f.peakKwp, 0);
   const aKwp = totalPeakKwp(systemA);
@@ -49,6 +49,7 @@ export function deriveMonoViz(viz: Viz, systemA: SystemConfigB): MonoView {
       batteryTotalKwh: systemA.batteryTotalKwh,
       batteryUsablePct: systemA.batteryUsablePct,
       batteryRoundTrip: systemA.roundTrip,
+      batteryCoupling: systemA.coupling,
       installationCostEur: systemA.installationCostEur,
       falde: systemA.falde.map((f) => ({
         id: f.id,
@@ -75,6 +76,7 @@ export function deriveMonoViz(viz: Viz, systemA: SystemConfigB): MonoView {
           throughputKwh: bat.throughputKwh,
           equivalentCycles: bat.equivalentCycles,
           roundTripLossKwh: bat.roundTripLossKwh,
+          recoveredClipKwh: bat.recoveredClipKwh,
         },
       },
       delta: {
