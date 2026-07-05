@@ -1,6 +1,6 @@
 ---
 title: Simulazione batteria (bilancio orario + dispatch autoconsumo)
-last_updated: 2026-07-05
+last_updated: 2026-07-06
 summary: Bilancio energetico orario con e senza batteria (dispatch greedy di autoconsumo), metriche di confronto e profilo consumi pluggable. Niente € — solo energia.
 status: draft
 legend:
@@ -73,6 +73,9 @@ per sistemi LFP domestici: ≥96% DC × conversioni inverter).
 
 ## Metriche (`metrics.ts`)
 - autoconsumo `Σ(A_d + d)`; **tasso autoconsumo** = autoconsumo/`ΣG`; **autosufficienza** = autoconsumo/`ΣL`
+  - con accoppiamento DC il tasso di autoconsumo può superare il 100%: la scarica alimentata dal
+    clipping recuperato entra nell'autoconsumo (numeratore) ma `ΣG` (denominatore) resta la
+    produzione pratica post-clipping, che non include quell'energia.
 - import `ΣD'`; export `ΣS'`; throughput batteria `Σd`; cicli equiv. = `Σd/C`
 - perdita round-trip = `Σc − Σd` (= `Σc·(1−RT)` a SoC chiuso)
 - **delta** = con − senza (punti % di autosufficienza, kWh di import evitato, ecc.)

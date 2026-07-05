@@ -1,13 +1,13 @@
 ---
 title: Modello di produzione (combine falde + clipping)
-last_updated: 2026-06-25
+last_updated: 2026-07-06
 summary: Come si calcola la produzione dell'impianto a partire dalla P oraria PVGIS — somma delle falde, applicazione del tetto AC dell'inverter (clipping), aggregati annuali/mensili e riferimento multi-anno.
 status: draft
 legend:
   - "P(t): potenza oraria PVGIS per falda [W] → kWh/h dividendo per 1000"
   - "G_teo(t): produzione combinata teorica = somma falde [kWh]"
   - "G_pra(t): produzione pratica dopo tetto AC [kWh]"
-  - "clip(t): energia persa per clipping = G_teo − G_pra [kWh]"
+  - "clip(t): energia persa per clipping = G_teo − G_pra [kWh] — persa, salvo la parte recuperata in batteria con accoppiamento DC, vedi 03-simulazione-batteria.md"
   - "cap: tetto di uscita AC dell'inverter [kW] (= kWh/h con Δt=1h)"
 related:
   - index.md

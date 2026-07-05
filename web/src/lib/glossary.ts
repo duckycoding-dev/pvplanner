@@ -18,7 +18,7 @@ export const GLOSSARY: Record<string, GlossaryEntry> = {
   },
   clipping: {
     term: "Clipping",
-    desc: "Energia persa perché la produzione istantanea combinata supera il tetto AC dell'inverter (6 kW). Succede solo nelle ore di forte sole (primavera/estate).",
+    desc: "Energia persa perché la produzione istantanea combinata supera il tetto AC dell'inverter (6 kW). Succede solo nelle ore di forte sole (primavera/estate). Con accoppiamento DC, parte di questa energia può invece caricare la batteria (vedi Clipping recuperato).",
     formula: "clipping = produzione teorica − produzione pratica",
   },
   tettoAC: {
@@ -40,7 +40,7 @@ export const GLOSSARY: Record<string, GlossaryEntry> = {
   },
   tassoAutoconsumo: {
     term: "Tasso di autoconsumo",
-    desc: "Quota della produzione che viene autoconsumata. È basso quando l'impianto produce molto più di quanto la casa consuma (il resto va in rete).",
+    desc: "Quota della produzione che viene autoconsumata. È basso quando l'impianto produce molto più di quanto la casa consuma (il resto va in rete). Con accoppiamento DC può superare il 100%: la scarica alimentata dal clipping recuperato conta nell'autoconsumo ma il denominatore resta la produzione pratica (post-clipping).",
     formula: "autoconsumo / produzione",
   },
   autosufficienza: {

@@ -13,6 +13,7 @@ import { localHourWeekday } from "../core/time/localTime.ts";
 function r3(n: number): number {
   return Math.round(n * 1000) / 1000;
 }
+
 function arr3(xs: ReadonlyArray<number>): number[] {
   return xs.map(r3);
 }
