@@ -21,6 +21,17 @@
 - Dipendenze da verificare: Fase 1 (`StoredSetup`, `datasetStore`, wizard, `functions/api/pvgis.ts`, `web/serve.ts`) e Fase 2 (`ConsumptionSpec`, editor consumi). Adatta i dettagli al codice reale; il codice vince sul piano, annota le divergenze.
 - L'estrazione i18n (Task 2) è il grosso del lavoro meccanico: procedi file-per-file con la checklist, commit ogni 3-4 componenti per review-abilità.
 
+### Stato reale a fine Fase 2 (verificato, da tenere presente)
+
+- `bun test`: 195 pass / 0 fail su 37 file (con `config.json` presente; su clone fresco i golden personali sono skippati). Squash su main: `b1cc13e`.
+- **Ordine wizard cambiato**: `["Località","Tetto","Scarico","Consumi"]` — i consumi (step 4, saltabile) vengono DOPO il fetch perché l'editor ha bisogno dell'asse orario e di `hourlyT2m`. Il flusso share (Task 3) precompila e salta allo step 3.
+- `SetupWizard.finish()`: QUALUNQUE chiusura (Fine/✕/Esc/backdrop) con dataset costruito chiama `onComplete` — il dataset è già salvato in IndexedDB da `StepFetch`. Non reintrodurre chiusure che bypassano l'adozione.
+- `StoredSetup.consumption?: { spec: ConsumptionSpec; result: CanonicalConsumption }` (opzionale, nessun bump di versione). Per `SharedConfig` basta `setup.consumption.spec` filtrato su monthly/parametric; alla ricezione ricostruisci con `expandMonthlyTemplate` (`src/core/consumption/monthlyTemplate.ts`) o `parametricConsumption` (`web/src/lib/parametricConsumption.ts`) e applica con `applyConsumption` (`web/src/lib/applyConsumption.ts`, puro: salva il chiamante).
+- **i18n, superficie nuova dalla Fase 2**: `web/src/components/consumption/*` (5 componenti, molte stringhe lunghe: `FieldSpec.desc` del parametrico, `SHAPE_TIP` del template), `StepConsumption`, sezione Consumi in `Sidebar`. ATTENZIONE: anche i parser core (`src/core/consumption/parseCsv.ts`, `parseEDistribuzione.ts`, `align.ts`, `canonical.ts`) producono warning/errori italiani mostrati in UI — stessa scelta dei `validate*`: valuta chiavi-dal-core tradotte al render, oppure documenta l'eccezione (i warning finiscono anche nei metadati salvati).
+- `InfoTip` ora accetta voce inline (`entry={term,desc}`) oltre alla chiave glossario `k`, e monta il portal nel `<dialog>` contenitore (top layer) con clamp nella viewport: il glossario bilingue (Task 1) deve coprire anche le voci inline sparse nei componenti consumi.
+- `PARAMETRIC_DISCLAIMER` (`web/src/lib/parametricConsumption.ts`) è obbligatorio e va tradotto mantenendo l'obbligo in entrambe le lingue. Nota: `viz.meta.consumptionNote` (mostrata nel footer) viene *baked* nel dataset alla lingua d'inserimento e non cambia col toggle — decisione da prendere ed esplicitare (accettabile lasciarla; annotalo).
+- `examples/` contiene 2 CSV sintetici (generico + e-distribuzione wide) con test di caricabilità (`test/exampleCsv.test.ts`): se il build di produzione copia asset, NON servono nel bundle.
+
 ---
 
 ### Task 1: Infrastruttura i18n
@@ -83,7 +94,7 @@ export async function decodeShare(hash: string): Promise<SharedConfig>; // throw
 // Export file = JSON.stringify(SharedConfig) leggibile; import = parse + validate (riusa validateWizardInputs ecc.)
 ```
 
-Flusso condivisione: bottone "Condividi setup" → dialog con avviso vincolante ("Il link contiene la posizione dell'impianto e la configurazione. I consumi da CSV non sono inclusi.") → copia `location.origin + location.pathname + "#s=" + encoded`. Boot in `App.tsx`: se `location.hash` inizia con `#s=` → `decodeShare` → dialog "Configurazione condivisa: scaricare i dati PVGIS per questa località? (N chiamate)" → sì: apre il wizard precompilato direttamente allo step 4 (fetch) e all'arrivo applica anche consumi/sistemi/tariffa; no/errore decode: rimuove l'hash e prosegue normale.
+Flusso condivisione: bottone "Condividi setup" → dialog con avviso vincolante ("Il link contiene la posizione dell'impianto e la configurazione. I consumi da CSV non sono inclusi.") → copia `location.origin + location.pathname + "#s=" + encoded`. Boot in `App.tsx`: se `location.hash` inizia con `#s=` → `decodeShare` → dialog "Configurazione condivisa: scaricare i dati PVGIS per questa località? (N chiamate)" → sì: apre il wizard precompilato direttamente allo step **Scarico** (dopo la Fase 2 è lo step 3; i consumi sono lo step 4) e all'arrivo applica anche consumi/sistemi/tariffa — per i consumi condivisi (monthly/parametric) ricostruisci il risultato con i produttori puri (`expandMonthlyTemplate` / `parametricConsumption`) e applica con `applyConsumption`; no/errore decode: rimuove l'hash e prosegue normale.
 
 - [ ] **Step 1: test** — round-trip encode/decode (con consumption monthly, parametric, assente); hash corrotto → throw; base64url senza `+/=`; dimensione encoded per un setup 3-falde < 2000 caratteri; import file JSON round-trip; CSV mai incluso (type-level + test runtime che uno spec csv viene scartato).
 - [ ] **Step 2: implementa** (nota Bun: `CompressionStream` disponibile ≥ 1.1; se il runtime test non lo supporta, implementa con fallback `node:zlib` SOLO nel path di test via injection — annota nel report). Commit `feat(web): export/import setup + condivisione via URL (hash compresso)`.
