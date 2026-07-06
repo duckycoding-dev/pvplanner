@@ -15,9 +15,19 @@ function commonParams(cfg: ResolvedConfig): QueryParams {
   };
 }
 
-/** seriescalc — hourly PV power + radiation components, single year. */
-export function hourlyParams(cfg: ResolvedConfig, falda: ResolvedFalda): QueryParams {
-  const year = numParam(cfg.pvgis.single_year);
+/**
+ * seriescalc — hourly PV power + radiation components.
+ * Defaults to a single year (`cfg.pvgis.single_year`); pass `years` to request a
+ * consecutive multi-year range (the wizard does this; the CLI omits it, keeping
+ * the emitted URL identical to before).
+ */
+export function hourlyParams(
+  cfg: ResolvedConfig,
+  falda: ResolvedFalda,
+  years?: { from: number; to: number },
+): QueryParams {
+  const from = years?.from ?? cfg.pvgis.single_year;
+  const to = years?.to ?? cfg.pvgis.single_year;
   return {
     ...commonParams(cfg),
     pvcalculation: "1",
@@ -27,8 +37,8 @@ export function hourlyParams(cfg: ResolvedConfig, falda: ResolvedFalda): QueryPa
     loss: numParam(cfg.pvgis.system_loss_percent),
     angle: numParam(falda.tilt),
     aspect: numParam(falda.azimuth),
-    startyear: year,
-    endyear: year,
+    startyear: numParam(from),
+    endyear: numParam(to),
     components: boolFlag(cfg.pvgis.components),
   };
 }

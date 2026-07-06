@@ -46,6 +46,8 @@ export interface Hourly {
 export interface Viz {
   meta: {
     year: number;
+    yearLabel: string;
+    timeZone: string;
     hoursInYear: number;
     acCapKw: number;
     batteryUsableKwh: number;

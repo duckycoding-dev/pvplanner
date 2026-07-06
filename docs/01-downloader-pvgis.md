@@ -1,6 +1,6 @@
 ---
 title: Downloader PVGIS
-last_updated: 2026-07-05
+last_updated: 2026-07-06
 summary: Come il sistema scarica in modo riproducibile tutti i dati da PVGIS v5.3 — endpoint, mappa parametri output→query, set per tool, derivazione peakpower e validazione non distruttiva.
 status: draft
 legend:
@@ -13,6 +13,7 @@ legend:
   - "peakpower: potenza di picco impianto/falda [kWp]"
 related:
   - index.md
+  - 08-wizard-setup.md
 ---
 
 # Downloader PVGIS
@@ -83,9 +84,38 @@ ri-scaricando si ottengono dati con la potenza giusta.
 - `--dry-run`: stampa solo URL e percorso di output.
 - `--write`: scarica e **sovrascrive** i file in `data/`.
 - `--only=hourly,power` e `--delay=<ms>` (default 300 ms tra le richieste).
+- `--config=PATH`: usa un config diverso da `config.json` (stesso flag su `scripts/run-analysis.ts`).
 
 Il client (`src/fetch/pvgisClient.ts`) è sequenziale, con retry su 429/5xx (backoff esponenziale,
 rispetta `Retry-After`) e User-Agent descrittivo.
+
+## Configurazione: campi principali
+
+Il sistema è descritto da un file JSON (JSON non ammette commenti, quindi i campi sono documentati
+qui). `config.json` è **personale e fuori da git**; su un clone fresco `loadConfig` ripiega su
+`config.demo.json` (dataset demo Roma) con un warning. `config.example.json` è una copia del demo da
+cui partire per il proprio setup.
+
+| Campo | Tipo | Note |
+|---|---|---|
+| `location.latitude` / `longitude` | number | Coordinate impianto. `elevation` opzionale. |
+| `timezone` | string | Es. `Europe/Rome`. |
+| `pvgis.base_url` | string | Base URL API v5.3. |
+| `pvgis.radiation_db` | string | DB radiazione, es. `PVGIS-SARAH3` → `raddatabase`. |
+| `pvgis.pvtechchoice` / `mountingplace` | string | Valori di query già pronti (`crystSi2025`, `building`). |
+| `pvgis.system_loss_percent` | number | Perdite di sistema → `loss`. |
+| `pvgis.use_horizon` | boolean | `usehorizon`. |
+| `pvgis.single_year` | number | Anno per `seriescalc`. |
+| `pvgis.components` | boolean | Flag componenti radiazione. |
+| `pvgis.data_root` | string? | **Opzionale**, default `data/falde`. Root delle cartelle per-falda (`<data_root>/<azimuth>/`). Il demo usa `data/demo`. |
+| `products.module` / `inverter` / `battery` | string | Path ai datasheet JSON in `system_technical_data/`. `peakpower` per falda deriva dal Wp del modulo. |
+| `falde[]` | array | `id`, `azimuth` (0=S, 90=O, -90=E), `tilt`, `panel_count`. Almeno una. |
+| `consumption.source` | `"synthetic"` \| `"csv"` | Sintetico = modello casa; csv = profilo importato. |
+| `consumption.house` | object? | Parametri casa/pompa di calore (tutti opzionali, hanno default). |
+| `simulation.battery_coupling` | `"dc"` \| `"ac"` | Accoppiamento batteria. |
+| `simulation.battery_round_trip` | number | Efficienza AC↔AC in (0,1]. |
+| `economics.installation_cost_eur` | number | CAPEX di riferimento. |
+| `economics.incentive` | object | `mode` (`percent`/`fixed`), `value`, `years`. |
 
 ## Valori di riferimento (golden) per la validazione
 
@@ -95,3 +125,20 @@ rispetta `Retry-After`) e User-Agent descrittivo.
 
 > Nota campo: in `power.json`, `outputs.totals.fixed.l_spec` è una **stringa** (es. `"1.12"`) — va
 > convertita a numero a valle.
+
+## Uso dal browser: proxy PVGIS
+
+Questo downloader è la via **CLI/fs** (script Bun che scrivono in `data/`). La stessa PVGIS è
+raggiungibile anche dalla **SPA**, dove l'utente configura l'impianto e scarica i dati dal browser
+(vedi `08-wizard-setup.md`). Le due vie **condividono il parser** dei file `seriescalc`
+(`src/core/pvgis/parseHourly.ts`, puro): i loader fs in `src/io/` e la pipeline browser
+(`web/src/lib/buildDataset.ts`) lo chiamano entrambi, così un file scaricato da CLI e uno scaricato dal
+browser vengono interpretati in modo identico.
+
+La costruzione dell'URL, invece, differisce: il downloader CLI usa `src/fetch/urlBuilder.ts` (URL
+diretto verso PVGIS, chiamata server-side); il browser costruisce un URL **same-origin** verso il proxy
+`/api/pvgis` (in `buildDataset.ts`). Il proxy serve perché **PVGIS non emette header CORS**, quindi il
+browser non può chiamarla direttamente. Handler unico in `src/server/pvgisProxy.ts` (whitelist di tool e
+parametri, timeout 30 s, 502 su errore, nessun log di coordinate), montato sia dal dev server Bun
+(`web/serve.ts`, `bun run web`) sia come Cloudflare Pages Function (`functions/api/pvgis.ts`). Dal
+browser si usa solo `seriescalc` (produzione oraria): niente `PVcalc`, quindi nessun totale multi-anno.

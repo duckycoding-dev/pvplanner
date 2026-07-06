@@ -1,5 +1,6 @@
 import { expect, test } from "bun:test";
 import { loadConfig } from "../src/config/loadConfig.ts";
+import { hasPersonalConfig } from "./helpers/personalConfig.ts";
 import { readJson } from "../src/io/readJson.ts";
 import { buildUrl, hourlyParams, powerParams, type QueryParams } from "../src/fetch/urlBuilder.ts";
 import {
@@ -30,7 +31,9 @@ test("power params round-trip against existing files", async () => {
   }
 });
 
-test("hourly params have the expected fixed values (est, az -45)", async () => {
+// Golden calibrati sul dataset personale (falda "est", az -45, peakpower 5.115):
+// skippati su clone fresco / fallback demo, dove config.json non esiste.
+test.skipIf(!hasPersonalConfig)("hourly params have the expected fixed values (est, az -45)", async () => {
   const cfg = await loadConfig();
   const est = cfg.resolvedFalde.find((f) => f.id === "est")!;
   const p = hourlyParams(cfg, est);
@@ -46,7 +49,7 @@ test("hourly params have the expected fixed values (est, az -45)", async () => {
   expect(p.endyear).toBe("2023");
 });
 
-test("power carries its tool-specific flags", async () => {
+test.skipIf(!hasPersonalConfig)("power carries its tool-specific flags", async () => {
   const cfg = await loadConfig();
   const est = cfg.resolvedFalde.find((f) => f.id === "est")!;
   const pw = powerParams(cfg, est);

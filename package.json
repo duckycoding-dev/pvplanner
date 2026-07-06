@@ -6,7 +6,7 @@
   "scripts": {
     "download": "bun scripts/download.ts",
     "analysis": "bun scripts/run-analysis.ts",
-    "web": "PORT=2345 bun ./web/index.html",
+    "web": "PORT=2345 bun web/serve.ts",
     "test": "bun test"
   },
   "devDependencies": {

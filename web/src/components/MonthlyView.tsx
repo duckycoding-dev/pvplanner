@@ -7,6 +7,7 @@ import { useLegendToggle } from "../lib/useLegendToggle.ts";
 import { noPvCost, scenarioCost } from "../lib/viewCosts.ts";
 import { MetricsTable, type MetricRow } from "./MetricsTable.tsx";
 import { InfoTip } from "./InfoTip.tsx";
+import { ConsumptionLockedBox } from "./ConsumptionLockedBox.tsx";
 
 const eur = (v: number): string => `${fmt(v, 2)} €`;
 
@@ -43,7 +44,17 @@ const SCENARIOS: { key: Scenario; label: string }[] = [
   { key: "entrambi", label: "entrambi" },
 ];
 
-export function MonthlyView({ viz, tariff, hasBattery }: { viz: Viz; tariff: Tariff; hasBattery: boolean }) {
+export function MonthlyView({
+  viz,
+  tariff,
+  hasBattery,
+  hasConsumption,
+}: {
+  viz: Viz;
+  tariff: Tariff;
+  hasBattery: boolean;
+  hasConsumption: boolean;
+}) {
   const prodToggle = useLegendToggle();
   const netToggle = useLegendToggle();
   const [scenario, setScenario] = useState<Scenario>("con");
@@ -85,17 +96,21 @@ export function MonthlyView({ viz, tariff, hasBattery }: { viz: Viz; tariff: Tar
 
   return (
     <div>
-      <section className="chart-card">
-        <MetricsTable
-          title={hasBattery ? "Costi energia (Δ = effetto batteria)" : "Costi energia (Δ = FV vs senza FV)"}
-          columns={costCols}
-          rows={costRows}
-        />
-      </section>
+      {hasConsumption && (
+        <>
+          <section className="chart-card">
+            <MetricsTable
+              title={hasBattery ? "Costi energia (Δ = effetto batteria)" : "Costi energia (Δ = FV vs senza FV)"}
+              columns={costCols}
+              rows={costRows}
+            />
+          </section>
 
-      <section className="chart-card">
-        <MetricsTable title="Costo netto per mese" columns={costCols} rows={monthlyNetRows} />
-      </section>
+          <section className="chart-card">
+            <MetricsTable title="Costo netto per mese" columns={costCols} rows={monthlyNetRows} />
+          </section>
+        </>
+      )}
 
       <section className="chart-card">
         <div className="section-head">
@@ -117,35 +132,39 @@ export function MonthlyView({ viz, tariff, hasBattery }: { viz: Viz; tariff: Tar
         </ResponsiveContainer>
       </section>
 
-      <section className="chart-card">
-        <div className="section-head">
-          <h3>
-            Autoconsumo e rete per mese
-            <InfoTip k="autoconsumo" />
-          </h3>
-          {hasBattery && (
-            <span className="seg">
-              {SCENARIOS.map((s) => (
-                <button key={s.key} className={scenario === s.key ? "active" : ""} onClick={() => setScenario(s.key)}>
-                  {s.label}
-                </button>
+      {!hasConsumption && <ConsumptionLockedBox />}
+
+      {hasConsumption && (
+        <section className="chart-card">
+          <div className="section-head">
+            <h3>
+              Autoconsumo e rete per mese
+              <InfoTip k="autoconsumo" />
+            </h3>
+            {hasBattery && (
+              <span className="seg">
+                {SCENARIOS.map((s) => (
+                  <button key={s.key} className={scenario === s.key ? "active" : ""} onClick={() => setScenario(s.key)}>
+                    {s.label}
+                  </button>
+                ))}
+              </span>
+            )}
+          </div>
+          <ResponsiveContainer width="100%" height={320}>
+            <BarChart data={data}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="name" />
+              <YAxis label={{ value: "kWh", angle: -90, position: "insideLeft" }} />
+              <Tooltip formatter={(v: number) => `${fmt(v)} kWh`} />
+              <Legend onClick={netToggle.onClick} wrapperStyle={{ cursor: "pointer" }} />
+              {NET_BARS[effScenario].map((b) => (
+                <Bar key={b.key} dataKey={b.key} name={b.name} fill={b.fill} hide={netToggle.isHidden(b.key)} />
               ))}
-            </span>
-          )}
-        </div>
-        <ResponsiveContainer width="100%" height={320}>
-          <BarChart data={data}>
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="name" />
-            <YAxis label={{ value: "kWh", angle: -90, position: "insideLeft" }} />
-            <Tooltip formatter={(v: number) => `${fmt(v)} kWh`} />
-            <Legend onClick={netToggle.onClick} wrapperStyle={{ cursor: "pointer" }} />
-            {NET_BARS[effScenario].map((b) => (
-              <Bar key={b.key} dataKey={b.key} name={b.name} fill={b.fill} hide={netToggle.isHidden(b.key)} />
-            ))}
-          </BarChart>
-        </ResponsiveContainer>
-      </section>
+            </BarChart>
+          </ResponsiveContainer>
+        </section>
+      )}
     </div>
   );
 }

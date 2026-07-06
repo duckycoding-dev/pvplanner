@@ -1,6 +1,6 @@
 ---
 title: Indice e convenzioni generali
-last_updated: 2026-07-05
+last_updated: 2026-07-06
 summary: Punto d'ingresso alla documentazione dei calcoli; convenzioni di unità, asse temporale e fonti dati condivise da tutti i documenti.
 status: draft
 legend:
@@ -41,6 +41,7 @@ riassunto, stato, legenda simboli/unità, documenti collegati).
 - [`05-costi-fasce.md`](05-costi-fasce.md) — costi/ricavi energia per fasce orarie (acquisto, vendita, netto, risparmio batteria)
 - [`06-economia.md`](06-economia.md) — costo installazione, incentivi e tempo di rientro (payback)
 - [`07-consumi.md`](07-consumi.md) — profilo di consumo sintetico V2 (PDC + puffer, da dati casa + T2m sito)
+- [`08-wizard-setup.md`](08-wizard-setup.md) — wizard di setup + pipeline browser (fetch PVGIS via proxy, anno tipico, IndexedDB, modalità solo-produzione, demo)
 - _(prossimi)_ dataset consumi reali (CSV), NPV/TIR + sensibilità
 
 ## Esecuzione
@@ -48,9 +49,13 @@ riassunto, stato, legenda simboli/unità, documenti collegati).
 ```sh
 bun run download   # (opzionale) valida/riscarica i dati PVGIS
 bun run analysis   # calcola tutto → scrive output/*.{json,csv} e web/viz.json
-bun run web        # dashboard su http://localhost:2345  (richiede prima `analysis`)
+bun run web        # dev server Bun (web/serve.ts) su http://localhost:2345 — serve la SPA + proxy /api/pvgis
 bun test           # suite di test
 ```
+
+La SPA gira anche **senza `analysis`**: allo start ripiega sul dataset demo (`web/viz.demo.json`,
+committato) e chiunque può configurare il proprio impianto e scaricare i dati PVGIS dal browser — il
+dev server espone il proxy `/api/pvgis`. Dettagli in `08-wizard-setup.md`.
 
 Dashboard (SPA Bun+React+Recharts): panoramica annuale, mensile, giorno-per-giorno, **Confronto**
 (A vs B) e glossario, **tutto calcolato live nel browser**. Le viste mono seguono il **Sistema A**,

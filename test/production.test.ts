@@ -1,10 +1,13 @@
 import { expect, test } from "bun:test";
 import { loadConfig } from "../src/config/loadConfig.ts";
 import { analyzeProduction } from "../src/app/analyzeProduction.ts";
+import { hasPersonalConfig } from "./helpers/personalConfig.ts";
 
 const sum = (xs: number[]): number => xs.reduce((s, x) => s + x, 0);
 
-test("production model reproduces golden 2023 figures", async () => {
+// Golden calibrati sul dataset personale (falde est/ovest, data/falde/):
+// skippati su clone fresco / fallback demo, dove config.json non esiste.
+test.skipIf(!hasPersonalConfig)("production model reproduces golden 2023 figures", async () => {
   const cfg = await loadConfig();
   const { result } = await analyzeProduction(cfg);
 
@@ -43,7 +46,7 @@ test("per-falda annual equals sum of its monthly", async () => {
   }
 });
 
-test("multi-year reference = sum of per-falda E_y", async () => {
+test.skipIf(!hasPersonalConfig)("multi-year reference = sum of per-falda E_y", async () => {
   const cfg = await loadConfig();
   const { result } = await analyzeProduction(cfg);
   expect(result.combined.multiyear.annualKwh).toBeCloseTo(6507.54 + 6563.24, 1);

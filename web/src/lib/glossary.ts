@@ -119,4 +119,32 @@ export const GLOSSARY: Record<string, GlossaryEntry> = {
     desc: "Anni perché il risparmio annuo in bolletta (rispetto al non avere impianto) ripaghi il costo di installazione, tenendo conto degli incentivi. Stima semplice: non considera inflazione dei prezzi né degrado dei pannelli.",
     formula: "−costo + Σ (risparmio annuo + quota incentivo) ≥ 0",
   },
+  azimuthFalda: {
+    term: "Azimuth (orientamento falda)",
+    desc: "Direzione verso cui è rivolta la falda del tetto, in gradi. Convenzione PVGIS: 0 = Sud, −90 = Est, +90 = Ovest, ±180 = Nord. È il verso ottimale della produzione: il Sud (0) massimizza la resa annua alle nostre latitudini.",
+  },
+  inclinazione: {
+    term: "Inclinazione (tilt)",
+    desc: "Pendenza della falda rispetto al piano orizzontale, in gradi: 0 = pannelli piatti (orizzontali), 90 = pannelli verticali. Alle nostre latitudini l'ottimo annuo è intorno a 30–35°.",
+  },
+  posa: {
+    term: "Posa (montaggio)",
+    desc: "Come sono installati i pannelli. «Su edificio»: aderenti al tetto, meno raffreddati dall'aria (PVGIS usa un modello termico più caldo). «A terra (struttura libera)»: ventilati su entrambi i lati, quindi un filo più efficienti.",
+  },
+  perditeSistema: {
+    term: "Perdite di sistema",
+    desc: "Perdite complessive tra il modulo e il contatore, in percentuale: cavi, inverter, sporco sui pannelli, disallineamenti. PVGIS usa un valore unico; il default 14% è la stima tipica per un impianto residenziale.",
+  },
+  dbRadiazione: {
+    term: "Database di radiazione",
+    desc: "Fonte dei dati di irraggiamento solare usati da PVGIS. SARAH3: da satellite, più accurato in Europa. ERA5: rianalisi meteo globale, copre anche zone senza vista satellitare. A parità di anni danno stime vicine ma non identiche.",
+  },
+  mediaMultiAnno: {
+    term: "Media multi-anno (anno tipico)",
+    desc: "Quando si scelgono più anni, PVGIS fornisce una serie per ciascuno e l'app le fonde in un unico «anno tipico»: per ogni ora dell'anno si fa la media dei valori sui vari anni (il 29 febbraio viene scartato). Attenua le annate anomale.",
+  },
+  orizzonte: {
+    term: "Orizzonte",
+    desc: "Ombreggiamento dovuto al profilo del terreno intorno al sito (colline, montagne). Se attivo, PVGIS abbassa la produzione nelle ore in cui il sole è dietro un rilievo. Consigliato attivo per località non pianeggianti.",
+  },
 };

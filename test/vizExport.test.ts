@@ -4,9 +4,13 @@ import { join } from "node:path";
 import { loadConfig } from "../src/config/loadConfig.ts";
 import { analyzeProduction } from "../src/app/analyzeProduction.ts";
 import { analyzeSimulation } from "../src/app/analyzeSimulation.ts";
-import { writeVizJson } from "../src/export/writeVizJson.ts";
+import { buildVizMeta, writeVizJson } from "../src/export/writeVizJson.ts";
+import { buildVizObject } from "../src/core/viz/buildViz.ts";
+import { hasPersonalConfig } from "./helpers/personalConfig.ts";
 
-test("writeVizJson emits a viz.json matching the analysis", async () => {
+// Golden calibrato sul dataset personale (2 falde × 11 pannelli, 12892.55 kWh):
+// skippato su clone fresco / fallback demo, dove config.json non esiste.
+test.skipIf(!hasPersonalConfig)("writeVizJson emits a viz.json matching the analysis", async () => {
   const cfg = await loadConfig();
   const prod = await analyzeProduction(cfg);
   const sim = await analyzeSimulation(cfg, prod);
@@ -69,4 +73,61 @@ test("writeVizJson emits a viz.json matching the analysis", async () => {
   // per-falda hourly must sum to the combined theoretical (before clipping)
   const sumFalde = v.hourly.falde.reduce((s, f) => s + f.productionKwh.reduce((a, b) => a + b, 0), 0);
   expect(sumFalde).toBeCloseTo(v.annual.production.theoreticalKwh, 0);
+});
+
+test("buildVizObject reproduces exactly what writeVizJson writes (golden, same pipeline)", async () => {
+  const cfg = await loadConfig();
+  const prod = await analyzeProduction(cfg);
+  const sim = await analyzeSimulation(cfg, prod);
+
+  // The CLI writer output = source of truth for the golden.
+  const out = join(tmpdir(), `viz-golden-${process.pid}.json`);
+  await writeVizJson(prod, sim, cfg, out);
+  const written = (await Bun.file(out).json()) as unknown;
+
+  // The pure builder, fed the exact same meta the writer derives from cfg.
+  const built = buildVizObject(prod, sim, buildVizMeta(prod, sim, cfg));
+  // JSON round-trip normalizes readonly arrays and rounding to plain values.
+  expect(JSON.parse(JSON.stringify(built))).toEqual(written);
+
+  // New meta fields must be present and correct.
+  expect(built.meta.yearLabel).toBe(String(prod.result.year));
+  expect(built.meta.timeZone).toBe(cfg.timezone);
+  expect(built.meta.consumptionSource).toBe(sim.consumption.source);
+});
+
+test("buildVizObject handles sim === null (production-only dataset): zeros with coherent shapes", async () => {
+  const cfg = await loadConfig();
+  const prod = await analyzeProduction(cfg);
+  const hours = prod.result.hoursInYear;
+
+  const meta = buildVizMeta(prod, null, cfg);
+  const v = buildVizObject(prod, null, meta);
+
+  // Consumption/battery collapse to zero.
+  expect(v.meta.consumptionAnnualKwh).toBe(0);
+  expect(v.meta.batteryUsableKwh).toBe(0);
+  expect(v.annual.noBattery.selfConsumedKwh).toBe(0);
+  expect(v.annual.withBattery.selfConsumedKwh).toBe(0);
+  expect(v.annual.withBattery.battery.throughputKwh).toBe(0);
+  expect(v.annual.delta.selfConsumedKwh).toBe(0);
+
+  // Production stays real.
+  expect(v.annual.production.theoreticalKwh).toBeGreaterThan(0);
+  expect(v.hourly.productionPracticalKwh.length).toBe(hours);
+  expect(v.hourly.falde.length).toBe(prod.hourly.length);
+
+  // Consumption/scenario hourly arrays are zero-filled but shape-coherent.
+  expect(v.hourly.loadKwh.length).toBe(hours);
+  expect(v.hourly.loadKwh.every((x) => x === 0)).toBe(true);
+  expect(v.hourly.nb.importKwh.length).toBe(hours);
+  expect(v.hourly.nb.importKwh.every((x) => x === 0)).toBe(true);
+  expect(v.hourly.wb.socKwh.length).toBe(hours);
+  expect(v.hourly.wb.socKwh.every((x) => x === 0)).toBe(true);
+  expect(v.hourly.wb.dischargeKwh.every((x) => x === 0)).toBe(true);
+
+  // Monthly production stays real, nb/wb blocks zeroed.
+  expect(v.monthly.length).toBe(12);
+  expect(v.monthly[0]!.prodTheoreticalKwh).toBeGreaterThanOrEqual(0);
+  expect(v.monthly.every((m) => m.nb.importKwh === 0 && m.wb.dischargeKwh === 0)).toBe(true);
 });

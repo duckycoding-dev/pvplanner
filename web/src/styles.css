@@ -119,6 +119,28 @@ header .sub { margin: 0; color: var(--muted); font-size: 13px; }
 .note { color: var(--muted); }
 footer { margin-top: 24px; color: var(--muted); font-size: 12px; border-top: 1px solid var(--border); padding-top: 12px; }
 
+/* --- solo-produzione: box "sblocca analisi" --- */
+.locked-box p { margin: 0; font-size: 14px; }
+.locked-box .muted { color: var(--muted); font-size: 12px; }
+
+/* --- banner dati demo --- */
+.demo-banner {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 10px;
+  background: #fff7ed; border: 1px solid #fed7aa; color: #7c2d12;
+  border-radius: 10px; padding: 10px 14px; margin-bottom: 14px; font-size: 13px;
+}
+.demo-banner button {
+  border: 1px solid var(--accent); background: var(--accent); color: #fff;
+  border-radius: 7px; padding: 6px 12px; cursor: pointer; font-size: 13px;
+}
+.demo-banner button:hover { filter: brightness(0.95); }
+
+/* --- splash di boot --- */
+.boot-splash {
+  display: flex; align-items: center; justify-content: center;
+  min-height: 100vh; color: var(--muted); font-size: 15px;
+}
+
 /* --- layout: left rail + dialog menu --- */
 .layout { display: block; padding-left: 48px; }
 .main { max-width: 1120px; margin: 0 auto; padding: 20px 18px 60px; }
@@ -227,6 +249,60 @@ footer { margin-top: 24px; color: var(--muted); font-size: 12px; border-top: 1px
 .metrics-hidden { margin-top: 8px; font-size: 12px; color: var(--muted); display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
 .metrics-hidden .chip { border: 1px solid var(--border); background: var(--card); border-radius: 12px; padding: 2px 8px; cursor: pointer; font-size: 11px; color: var(--muted); }
 .metrics-hidden .chip:hover { border-color: var(--accent); color: var(--accent); }
+
+/* --- setup wizard (Fase 1) --- */
+.wizard-steps { display: flex; gap: 6px; padding: 12px 16px 0; flex-wrap: wrap; }
+.wizard-steps .wizard-step { flex: 1; min-width: 90px; text-align: center; font-size: 12px; color: var(--muted);
+  border-bottom: 2px solid var(--border); padding: 6px 4px; }
+.wizard-steps .wizard-step.active { color: var(--text); border-bottom-color: var(--accent); font-weight: 600; }
+.wizard-steps .wizard-step.done { color: var(--accent); border-bottom-color: var(--accent); }
+.wizard-body { padding: 14px 16px 20px; display: flex; flex-direction: column; gap: 14px; }
+.wizard-body h4 { margin: 0; font-size: 14px; }
+.wizard-body p.note, .wizard-hint, .wizard-attribution { font-size: 12px; color: var(--muted); margin: 0; }
+.wizard-hint { display: block; }
+.wizard-search { display: flex; gap: 6px; align-items: flex-end; }
+.wizard-search .text-field { flex: 1; }
+.wizard-search button { border: 1px solid var(--border); background: var(--card); border-radius: 7px;
+  padding: 6px 12px; cursor: pointer; font-size: 13px; color: var(--text); white-space: nowrap; }
+.wizard-search button:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); }
+.wizard-search button:disabled { opacity: 0.5; cursor: default; }
+.wizard-results { list-style: none; margin: 0; padding: 0; border: 1px solid var(--border); border-radius: 8px;
+  max-height: 180px; overflow-y: auto; }
+.wizard-results li { padding: 8px 10px; cursor: pointer; font-size: 13px; border-bottom: 1px solid var(--border); }
+.wizard-results li:last-child { border-bottom: none; }
+.wizard-results li:hover { background: rgba(59, 130, 246, 0.06); color: var(--accent); }
+.wizard-toggle { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text); cursor: pointer; }
+.wizard-falda-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.wizard-falda-id { width: 110px; border: 1px solid var(--border); border-radius: 6px; padding: 3px 6px; font-size: 12px; }
+.wizard-falda-del { border: none; background: none; cursor: pointer; color: var(--muted); font-size: 14px; }
+.wizard-falda-del:hover { color: #dc2626; }
+.wizard-add { border: 1px dashed var(--border); background: var(--card); border-radius: 8px; padding: 8px 12px;
+  cursor: pointer; font-size: 13px; color: var(--text); }
+.wizard-add:hover { border-color: var(--accent); color: var(--accent); }
+.wizard-fetch-item { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border: 1px solid var(--border);
+  border-radius: 8px; font-size: 13px; }
+.wizard-fetch-item .wizard-fetch-id { font-weight: 600; }
+.wizard-fetch-item .wizard-fetch-state { margin-left: auto; color: var(--muted); font-size: 12px; }
+.wizard-fetch-item .wizard-fetch-state.ok { color: #16a34a; }
+.wizard-fetch-item .wizard-fetch-state.error { color: #dc2626; }
+.wizard-fetch-item .wizard-fetch-state.running { color: var(--accent); }
+.wizard-retry { border: 1px solid var(--border); background: var(--card); border-radius: 7px; padding: 3px 8px;
+  cursor: pointer; font-size: 12px; color: var(--text); }
+.wizard-retry:hover { border-color: var(--accent); color: var(--accent); }
+.wizard-file { display: flex; align-items: center; gap: 8px; font-size: 12px; }
+.wizard-file .wizard-file-name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.wizard-primary { border: 1px solid var(--accent); background: var(--accent); color: #fff; border-radius: 7px;
+  padding: 8px 14px; cursor: pointer; font-size: 14px; font-weight: 600; }
+.wizard-primary:disabled { opacity: 0.5; cursor: default; }
+.wizard-nav { display: flex; justify-content: space-between; gap: 8px; padding: 12px 16px; border-top: 1px solid var(--border);
+  position: sticky; bottom: 0; background: var(--card); }
+.wizard-nav button { border: 1px solid var(--border); background: var(--card); border-radius: 7px; padding: 8px 14px;
+  cursor: pointer; font-size: 14px; color: var(--text); }
+.wizard-nav button:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); }
+.wizard-nav button:disabled { opacity: 0.5; cursor: default; }
+.wizard-error { margin: 0; padding: 0 16px; }
+.wizard-nav .wizard-next { border-color: var(--accent); background: var(--accent); color: #fff; }
+.wizard-nav .wizard-next:hover:not(:disabled) { color: #fff; opacity: 0.9; }
 
 /* --- comparison KPI table (Confronto page) --- */
 .kpi-table { width: 100%; border-collapse: collapse; font-size: 14px; }

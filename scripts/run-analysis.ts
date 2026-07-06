@@ -6,7 +6,9 @@ import { writeProductionOutputs } from "../src/export/writeProductionOutputs.ts"
 import { writeSimulationOutputs } from "../src/export/writeSimulationOutputs.ts";
 import { writeVizJson } from "../src/export/writeVizJson.ts";
 
-const cfg = await loadConfig();
+const configArg = process.argv.slice(2).find((a) => a.startsWith("--config="));
+const configPath = configArg ? configArg.slice("--config=".length) : undefined;
+const cfg = configPath ? await loadConfig(configPath) : await loadConfig();
 const analysis = await analyzeProduction(cfg);
 const { result } = analysis;
 const a = result.combined.annual;

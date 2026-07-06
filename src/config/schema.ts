@@ -19,6 +19,8 @@ export interface PvgisConfig {
   use_horizon: boolean; // -> usehorizon
   single_year: number; // year for seriescalc
   components: boolean; // seriescalc components flag
+  /** Root dir (relative to project) holding per-falda data subfolders. Default "data/falde". */
+  data_root?: string;
 }
 
 export interface ProductsConfig {
@@ -172,6 +174,9 @@ export function validateSystemConfig(raw: unknown): SystemConfig {
     use_horizon: asBoolean(pvgisObj["use_horizon"], "pvgis.use_horizon"),
     single_year: asNumber(pvgisObj["single_year"], "pvgis.single_year"),
     components: asBoolean(pvgisObj["components"], "pvgis.components"),
+    ...(pvgisObj["data_root"] === undefined
+      ? {}
+      : { data_root: asString(pvgisObj["data_root"], "pvgis.data_root") }),
   };
 
   const prodObj = asObject(root["products"], "products");

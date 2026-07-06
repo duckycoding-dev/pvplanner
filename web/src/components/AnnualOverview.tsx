@@ -7,6 +7,7 @@ import { noPvCost, scenarioCost } from "../lib/viewCosts.ts";
 import { type Incentive, incentiveTotalEur, systemPaybackYears } from "../lib/economics.ts";
 import { MetricsTable, type MetricRow } from "./MetricsTable.tsx";
 import { InfoTip } from "./InfoTip.tsx";
+import { ConsumptionLockedBox } from "./ConsumptionLockedBox.tsx";
 
 const eur = (v: number): string => `${fmt(v, 2)} €`;
 
@@ -56,11 +57,13 @@ export function AnnualOverview({
   tariff,
   incentive,
   hasBattery,
+  hasConsumption,
 }: {
   viz: Viz;
   tariff: Tariff;
   incentive: Incentive;
   hasBattery: boolean;
+  hasConsumption: boolean;
 }) {
   const { onClick, isHidden } = useLegendToggle();
   const p = viz.annual.production;
@@ -112,6 +115,10 @@ export function AnnualOverview({
         </div>
       </section>
 
+      {!hasConsumption && <ConsumptionLockedBox />}
+
+      {hasConsumption && (
+        <>
       <section className="cards">
         <KpiCard
           label="Tasso autoconsumo"
@@ -194,6 +201,8 @@ export function AnnualOverview({
           </BarChart>
         </ResponsiveContainer>
       </section>
+        </>
+      )}
     </div>
   );
 }

@@ -8,6 +8,7 @@ import { PowerChart } from "./PowerChart.tsx";
 import { BatteryChart } from "./BatteryChart.tsx";
 import { MetricsTable, type MetricRow } from "./MetricsTable.tsx";
 import { InfoTip } from "./InfoTip.tsx";
+import { ConsumptionLockedBox } from "./ConsumptionLockedBox.tsx";
 
 const SCENARIOS: { key: Scenario; label: string }[] = [
   { key: "con", label: "con batteria" },
@@ -17,13 +18,24 @@ const SCENARIOS: { key: Scenario; label: string }[] = [
 
 const DAY_MS = 86_400_000;
 
-export function DailyExplorer({ viz, tariff, hasBattery }: { viz: Viz; tariff: Tariff; hasBattery: boolean }) {
+export function DailyExplorer({
+  viz,
+  tariff,
+  hasBattery,
+  hasConsumption,
+}: {
+  viz: Viz;
+  tariff: Tariff;
+  hasBattery: boolean;
+  hasConsumption: boolean;
+}) {
   const h = viz.hourly;
   const total = dayCount(h);
   const picks = useMemo(() => quickPickDays(h), [h]);
   const [dayIndex, setDayIndex] = useState<number>(picks.maxClipping);
   const [scenario, setScenario] = useState<Scenario>("con");
-  const effScenario: Scenario = hasBattery ? scenario : "senza";
+  // Senza consumi le viste con/senza batteria non hanno significato: forziamo "senza".
+  const effScenario: Scenario = hasBattery && hasConsumption ? scenario : "senza";
 
   const pts = useMemo(() => sliceDay(h, dayIndex), [h, dayIndex]);
   const firstTs = h.timestampsUtc[0] ?? 0;
@@ -110,7 +122,7 @@ export function DailyExplorer({ viz, tariff, hasBattery }: { viz: Viz; tariff: T
           <button onClick={() => setDayIndex(picks.maxProduction)}>max produzione</button>
           <button onClick={() => setDayIndex(picks.minProduction)}>min produzione</button>
         </div>
-        {hasBattery && (
+        {hasBattery && hasConsumption && (
           <div className="scenario">
             {SCENARIOS.map((s) => (
               <button key={s.key} className={scenario === s.key ? "active" : ""} onClick={() => setScenario(s.key)}>
@@ -121,13 +133,15 @@ export function DailyExplorer({ viz, tariff, hasBattery }: { viz: Viz; tariff: T
         )}
       </div>
 
-      <section className="chart-card">
-        <MetricsTable
-          title={hasBattery ? "Riepilogo giorno (Δ = effetto batteria)" : "Riepilogo giorno (Δ = FV vs senza FV)"}
-          columns={cols}
-          rows={dayRows}
-        />
-      </section>
+      {hasConsumption && (
+        <section className="chart-card">
+          <MetricsTable
+            title={hasBattery ? "Riepilogo giorno (Δ = effetto batteria)" : "Riepilogo giorno (Δ = FV vs senza FV)"}
+            columns={cols}
+            rows={dayRows}
+          />
+        </section>
+      )}
 
       <div className="chart-card">
         <div className="section-head">
@@ -136,10 +150,12 @@ export function DailyExplorer({ viz, tariff, hasBattery }: { viz: Viz; tariff: T
             <InfoTip k="coperto" />
           </h3>
         </div>
-        <PowerChart data={pts} scenario={scenario} acCapKw={viz.meta.acCapKw} />
+        <PowerChart data={pts} scenario={hasConsumption ? scenario : "senza"} acCapKw={viz.meta.acCapKw} />
       </div>
 
-      {!hasBattery ? (
+      {!hasConsumption ? (
+        <ConsumptionLockedBox />
+      ) : !hasBattery ? (
         <p className="note">Sistema A senza batteria: nessun accumulo.</p>
       ) : !isNb ? (
         <div className="chart-card">

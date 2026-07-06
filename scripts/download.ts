@@ -11,23 +11,26 @@ function parseArgs(argv: string[]) {
   const flags = new Set<string>();
   let only: Set<string> | undefined;
   let delayMs: number | undefined;
+  let configPath: string | undefined;
   for (const a of argv) {
     if (a === "--validate" || a === "--dry-run" || a === "--write") flags.add(a);
     else if (a.startsWith("--only=")) {
       only = new Set(a.slice("--only=".length).split(",").map((s) => s.trim()).filter(Boolean));
     } else if (a.startsWith("--delay=")) {
       delayMs = Number(a.slice("--delay=".length));
+    } else if (a.startsWith("--config=")) {
+      configPath = a.slice("--config=".length);
     } else {
       console.error(`Unknown argument: ${a}`);
-      console.error("Usage: bun scripts/download.ts [--validate|--dry-run|--write] [--only=hourly,power] [--delay=ms]");
+      console.error("Usage: bun scripts/download.ts [--validate|--dry-run|--write] [--only=hourly,power] [--delay=ms] [--config=PATH]");
       process.exit(2);
     }
   }
-  return { flags, only, delayMs };
+  return { flags, only, delayMs, configPath };
 }
 
-const { flags, only, delayMs } = parseArgs(process.argv.slice(2));
-const cfg = await loadConfig();
+const { flags, only, delayMs, configPath } = parseArgs(process.argv.slice(2));
+const cfg = configPath ? await loadConfig(configPath) : await loadConfig();
 
 const mode = flags.has("--write") ? "write" : flags.has("--dry-run") ? "dry-run" : "validate";
 

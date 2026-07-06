@@ -1,0 +1,37 @@
+{
+  "location": { "latitude": 41.902, "longitude": 12.496, "elevation": 21.0 },
+  "timezone": "Europe/Rome",
+  "pvgis": {
+    "base_url": "https://re.jrc.ec.europa.eu/api/v5_3",
+    "radiation_db": "PVGIS-SARAH3",
+    "pvtechchoice": "crystSi2025",
+    "mountingplace": "building",
+    "system_loss_percent": 14,
+    "use_horizon": true,
+    "single_year": 2023,
+    "components": true,
+    "data_root": "data/demo"
+  },
+  "products": {
+    "module": "system_technical_data/module_trina_vertex_s_plus_465W.json",
+    "inverter": "system_technical_data/inverter_viessmann_hybrid_6.0-B1.json",
+    "battery": "system_technical_data/battery_byd_battery_box_hvs_10.2.json"
+  },
+  "falde": [{ "id": "sud", "azimuth": 0, "tilt": 25, "panel_count": 10 }],
+  "consumption": {
+    "source": "synthetic",
+    "timezone": "Europe/Rome",
+    "house": {
+      "heated_area_m2": 150,
+      "specific_heat_demand_kwh_m2y": 70,
+      "occupants": 2,
+      "heat_pump_scop": 4.5,
+      "base_load_annual_kwh": 2500
+    }
+  },
+  "simulation": { "battery_coupling": "dc", "battery_round_trip": 0.9 },
+  "economics": {
+    "installation_cost_eur": 8000,
+    "incentive": { "mode": "percent", "value": 50, "years": 10 }
+  }
+}

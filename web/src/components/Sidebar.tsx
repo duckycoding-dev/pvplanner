@@ -23,6 +23,7 @@ export function Sidebar({
   setIncentive,
   open,
   setOpen,
+  onOpenWizard,
 }: {
   viz: Viz;
   systemA: SystemConfigB;
@@ -35,6 +36,8 @@ export function Sidebar({
   setIncentive: (i: Incentive) => void;
   open: boolean;
   setOpen: (v: boolean) => void;
+  /** Apre il wizard di setup dati PVGIS (montato in App). */
+  onOpenWizard: () => void;
 }) {
   const [openTariff, setOpenTariff] = useState(true);
   const [openA, setOpenA] = useState(true);
@@ -72,6 +75,17 @@ export function Sidebar({
           </button>
         </div>
         <div className="sidebar-body">
+          <section className="sidebar-section">
+            <button
+              className="section-toggle"
+              onClick={() => {
+                setOpen(false); // chiudi il menu: il wizard è un dialog a sé
+                onOpenWizard();
+              }}
+            >
+              ⚙ Setup dati PVGIS…
+            </button>
+          </section>
           <section className="sidebar-section">
             <button className="section-toggle" onClick={() => setOpenTariff((o) => !o)}>
               {openTariff ? "▾" : "▸"} Tariffa

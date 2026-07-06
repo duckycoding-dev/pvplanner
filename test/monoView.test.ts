@@ -1,9 +1,19 @@
 import { expect, test } from "bun:test";
 import { deriveMonoViz } from "../web/src/lib/monoView.ts";
 import { cloneFromBaseline } from "../web/src/lib/systemConfig.ts";
+import { hasConsumption } from "../web/src/lib/vizFlags.ts";
 import type { Viz } from "../web/src/types.ts";
 
 const viz = (await Bun.file("web/viz.json").json()) as Viz;
+
+/** A copy of the baseline viz with no consumption: source "none" and all loads zeroed. */
+function noConsumptionViz(): Viz {
+  const clone = structuredClone(viz);
+  clone.meta.consumptionSource = "none";
+  clone.meta.consumptionAnnualKwh = 0;
+  clone.hourly.loadKwh = clone.hourly.loadKwh.map(() => 0);
+  return clone;
+}
 
 test("deriveMonoViz reproduces the baked scenarios when A = baseline", () => {
   const { vizA, hasBattery } = deriveMonoViz(viz, cloneFromBaseline(viz, "Sistema A"));
@@ -51,4 +61,47 @@ test("scaling A's panels scales production and multiyear linearly", () => {
   const { vizA } = deriveMonoViz(viz, doubled);
   expect(vizA.annual.production.theoreticalKwh).toBeCloseTo(viz.annual.production.theoreticalKwh * 2, 0);
   expect(vizA.annual.production.multiyearKwh).toBeCloseTo(viz.annual.production.multiyearKwh * 2, 0);
+});
+
+test("no-consumption viz: deriveMonoViz has no NaN, zero self/import metrics, real production", () => {
+  const noCons = noConsumptionViz();
+  const { vizA } = deriveMonoViz(noCons, cloneFromBaseline(noCons, "Sistema A"));
+
+  // Production is unaffected by consumption and must stay real (non-zero, no NaN).
+  expect(Number.isFinite(vizA.annual.production.practicalKwh)).toBe(true);
+  expect(vizA.annual.production.practicalKwh).toBeGreaterThan(0);
+  expect(vizA.annual.production.theoreticalKwh).toBeCloseTo(viz.annual.production.theoreticalKwh, 0);
+
+  const nb = vizA.annual.noBattery;
+  const wb = vizA.annual.withBattery;
+  // No load ⇒ nothing self-consumed or imported; all production is exported.
+  expect(nb.selfConsumedKwh).toBe(0);
+  expect(nb.importKwh).toBe(0);
+  expect(wb.selfConsumedKwh).toBe(0);
+  expect(wb.importKwh).toBe(0);
+  // selfSufficiency is 0 (not NaN) when consumption is 0 — guarded by ternario in annualMetrics.
+  expect(nb.selfSufficiency).toBe(0);
+  expect(wb.selfSufficiency).toBe(0);
+  expect(Number.isNaN(nb.selfConsumptionRate)).toBe(false);
+  expect(Number.isNaN(wb.selfConsumptionRate)).toBe(false);
+
+  // No NaN anywhere in the derived numeric fields we surface.
+  for (const v of [nb.exportKwh, wb.exportKwh, vizA.annual.delta.selfConsumedKwh, vizA.annual.delta.selfSufficiencyPoints]) {
+    expect(Number.isNaN(v)).toBe(false);
+  }
+});
+
+test("hasConsumption: none → false, valid source with kWh>0 → true, valid source with kWh=0 → false", () => {
+  const none = noConsumptionViz();
+  expect(hasConsumption(none)).toBe(false);
+
+  const valid = structuredClone(viz);
+  valid.meta.consumptionSource = "synthetic-house";
+  valid.meta.consumptionAnnualKwh = 8354.711;
+  expect(hasConsumption(valid)).toBe(true);
+
+  const zeroKwh = structuredClone(viz);
+  zeroKwh.meta.consumptionSource = "synthetic-house";
+  zeroKwh.meta.consumptionAnnualKwh = 0;
+  expect(hasConsumption(zeroKwh)).toBe(false);
 });
