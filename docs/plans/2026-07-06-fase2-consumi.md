@@ -22,6 +22,17 @@
 - I riferimenti a file della Fase 1 sono per nome/contratto, non per riga: **verifica le firme reali** prima di consumarle; se divergono dal piano, adatta questo piano al codice reale (il codice vince) e annotalo nel report.
 - Il dataset **demo** (viz.demo.json) ha consumi baked ma non ha `hourlyT2m` → sul demo il metodo parametrico mostra: "Disponibile dopo il setup della tua località (serve la temperatura del sito)". Gli altri due metodi funzionano anche sul demo? NO — il demo è read-only concettualmente: l'editor consumi su demo mostra invito a fare il setup. Solo dataset da wizard sono editabili.
 
+### Stato reale a fine Fase 1 (verificato, da tenere presente)
+
+- `parseStoredSetup` (setupTypes.ts) valida `version === 1` e i campi principali: aggiungendo `consumption?` a `StoredSetup` mantienilo **opzionale** nel parse (i setup salvati in Fase 1 non lo hanno; non serve bump di versione).
+- `writeVizJson.ts` espone anche `buildVizMeta(prod, sim, cfg)` che deriva il `VizMetaInput` dal config CLI — riusala come riferimento per costruire meta coerenti.
+- `web/src/lib/buildDataset.ts` costruisce l'URL del proxy inline (`seriescalcUrl`), NON usa `src/fetch/urlBuilder.ts`: parser condiviso, URL builder separati.
+- Golden test calibrati sul dataset personale sono skippati quando `config.json` è assente (`test/helpers/personalConfig.ts`, `test.skipIf`); `loadConfig` senza `config.json` fa fallback su `config.demo.json` con warn. Su clone fresco: 149 pass + 8 skip.
+- Il demo usa moduli da **465 Wp** (unico datasheet committato, `peak_power_wp` deriva dal datasheet).
+- In `App.tsx` `tariff` e `incentive` sono seedati da `demoViz` al primo load e NON vengono reseedati al completamento del wizard (solo Sistema A/B lo sono): la Fase 2, riattivando l'economia sui dataset wizard, deve valutare se/quando reseedarli.
+- `StepFetch`: "Riprova" rilancia l'intera pipeline (buildDataset non espone i JSON già scaricati).
+- `deriveMonoViz` è già blindato per viz senza consumi (test in `monoView.test.ts`: zero NaN, metriche a zero).
+
 ---
 
 ### Task 1: Forma canonica + tipi + expander template mensili
