@@ -14,7 +14,7 @@ import type { StoredSetup } from "./lib/setupTypes.ts";
 import { type SystemConfigB, cloneFromBaseline, parseSystemConfigB, validateAgainstBaseline } from "./lib/systemConfig.ts";
 import { deriveMonoViz } from "./lib/monoView.ts";
 import { hasConsumption } from "./lib/vizFlags.ts";
-import { loadSetup } from "./lib/datasetStore.ts";
+import { loadSetup, saveSetup } from "./lib/datasetStore.ts";
 import { defaultTariff, validateTariff } from "./lib/tariffPresets.ts";
 import { type Incentive, defaultIncentive } from "./lib/economics.ts";
 
@@ -121,6 +121,13 @@ export function App() {
     setSystemB(cloneFromBaseline(setup.viz, "Sistema B"));
   };
 
+  // Consumi applicati (da wizard o sezione «Consumi»): salva e adotta il nuovo dataset.
+  // La geometria non cambia → i sistemi A/B restano validi; vizA si ri-deriva via useMemo.
+  const onConsumptionApplied = (next: StoredSetup): void => {
+    void saveSetup(next);
+    setDataset(next);
+  };
+
   // Mono views (annual/monthly/daily) follow System A, recomputed live.
   const { vizA, hasBattery } = useMemo(() => deriveMonoViz(activeViz, systemA), [activeViz, systemA]);
 
@@ -195,6 +202,8 @@ export function App() {
         open={menuOpen}
         setOpen={setMenuOpen}
         onOpenWizard={() => setWizardOpen(true)}
+        dataset={dataset}
+        onConsumptionApplied={onConsumptionApplied}
       />
 
       <SetupWizard open={wizardOpen} setOpen={setWizardOpen} initialInputs={null} onComplete={onSetupComplete} />

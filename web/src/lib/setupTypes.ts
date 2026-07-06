@@ -1,4 +1,7 @@
 import { ALLOWED_YEARS } from "../../../src/core/pvgis/allowedYears.ts";
+import type { CanonicalConsumption } from "../../../src/core/consumption/canonical.ts";
+import type { MonthlyTemplate } from "../../../src/core/consumption/monthlyTemplate.ts";
+import type { HouseParams } from "../../../src/core/consumption/houseLoad.ts";
 import type { Viz } from "../types.ts";
 
 /** Inputs raccolti dal wizard di setup (Fase 1). */
@@ -21,7 +24,16 @@ export interface StoredSetup {
   /** Serie T2m oraria del sito (asse = viz.hourly.timestampsUtc, da falda[0]).
    *  NON è nel viz: serve alla Fase 2 (modello consumi parametrico). */
   hourlyT2m: number[];
+  /** Consumi applicati al dataset (Fase 2). Opzionale: i setup di Fase 1 non lo hanno.
+   *  Il CSV grezzo NON si salva: solo la spec del metodo + il risultato canonico. */
+  consumption?: { spec: ConsumptionSpec; result: CanonicalConsumption };
 }
+
+/** Come sono stati inseriti i consumi. Il risultato canonico è salvato a parte in `consumption.result`. */
+export type ConsumptionSpec =
+  | { method: "csv"; filename: string } // il CSV grezzo NON si salva: solo il risultato
+  | { method: "monthly"; template: MonthlyTemplate }
+  | { method: "parametric"; house: HouseParams };
 
 /**
  * Valida gli input del wizard. Ritorna un messaggio d'errore (italiano) sul primo
@@ -117,11 +129,16 @@ export function parseStoredSetup(json: string): StoredSetup {
   if (!Array.isArray(o["hourlyT2m"])) {
     throw new Error("Setup non valido: 'hourlyT2m' deve essere un array.");
   }
-  return {
+  const setup: StoredSetup = {
     version: 1,
     savedAt: o["savedAt"],
     inputs: o["inputs"] as WizardInputs,
     viz: o["viz"] as Viz,
     hourlyT2m: o["hourlyT2m"] as number[],
   };
+  // consumption è opzionale (assente nei setup di Fase 1): non validato in profondità.
+  if (typeof o["consumption"] === "object" && o["consumption"] !== null) {
+    setup.consumption = o["consumption"] as StoredSetup["consumption"];
+  }
+  return setup;
 }

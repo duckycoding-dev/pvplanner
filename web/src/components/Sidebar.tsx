@@ -3,9 +3,11 @@ import type { Viz } from "../types.ts";
 import type { SystemConfigB } from "../lib/systemConfig.ts";
 import type { Tariff } from "../../../src/core/economics/tariff.ts";
 import type { Incentive } from "../lib/economics.ts";
+import type { StoredSetup } from "../lib/setupTypes.ts";
 import { TariffEditor } from "./TariffEditor.tsx";
 import { SystemEditor } from "./SystemEditor.tsx";
 import { IncentiveEditor } from "./IncentiveEditor.tsx";
+import { ConsumptionEditor } from "./consumption/ConsumptionEditor.tsx";
 
 /**
  * Fixed left rail with a single toggle that opens the configuration as a native
@@ -24,6 +26,8 @@ export function Sidebar({
   open,
   setOpen,
   onOpenWizard,
+  dataset,
+  onConsumptionApplied,
 }: {
   viz: Viz;
   systemA: SystemConfigB;
@@ -38,11 +42,16 @@ export function Sidebar({
   setOpen: (v: boolean) => void;
   /** Apre il wizard di setup dati PVGIS (montato in App). */
   onOpenWizard: () => void;
+  /** Dataset attivo dell'utente (null = demo/nessun setup → editor consumi non disponibile). */
+  dataset: StoredSetup | null;
+  /** Consumi applicati dall'editor: il chiamante salva e aggiorna lo stato. */
+  onConsumptionApplied: (next: StoredSetup) => void;
 }) {
   const [openTariff, setOpenTariff] = useState(true);
   const [openA, setOpenA] = useState(true);
   const [openB, setOpenB] = useState(false);
   const [openInc, setOpenInc] = useState(false);
+  const [openCons, setOpenCons] = useState(false);
   const ref = useRef<HTMLDialogElement>(null);
 
   useEffect(() => {
@@ -85,6 +94,28 @@ export function Sidebar({
             >
               ⚙ Setup dati PVGIS…
             </button>
+          </section>
+          <section className="sidebar-section">
+            <button className="section-toggle" onClick={() => setOpenCons((o) => !o)}>
+              {openCons ? "▾" : "▸"} Consumi <span className="hint">(sblocca economia/batteria)</span>
+            </button>
+            {openCons &&
+              (dataset !== null ? (
+                <ConsumptionEditor setup={dataset} onApply={onConsumptionApplied} />
+              ) : (
+                <p className="note">
+                  I consumi si aggiungono sul dataset della tua località.{" "}
+                  <button
+                    className="section-toggle"
+                    onClick={() => {
+                      setOpen(false);
+                      onOpenWizard();
+                    }}
+                  >
+                    Esegui il setup…
+                  </button>
+                </p>
+              ))}
           </section>
           <section className="sidebar-section">
             <button className="section-toggle" onClick={() => setOpenTariff((o) => !o)}>

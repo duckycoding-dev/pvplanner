@@ -89,6 +89,23 @@ export const GLOSSARY: Record<string, GlossaryEntry> = {
     term: "Consumo",
     desc: "Consumo elettrico della casa. Profilo SINTETICO stimato dai dati reali della casa (PDC + puffer, ACS, base) sulle temperature orarie reali del sito — non sono misure. Da sostituire con dati misurati quando disponibili. Dettagli: docs/07-consumi.md.",
   },
+  copertura: {
+    term: "Copertura (CSV)",
+    desc: "Percentuale di ore dell'anno per cui il CSV caricato contiene un dato reale. Le ore mancanti vengono stimate dal profilo medio dei dati presenti (stesso mese, stesso tipo di giorno, stessa ora). Sotto il 50% il file viene rifiutato.",
+    formula: "copertura = ore con dato reale / 8760 × 100",
+  },
+  curvaDiCarico: {
+    term: "Curva di carico",
+    desc: "Serie oraria (o quartoraria) dei consumi elettrici reali, scaricabile dal portale del distributore (es. e-distribuzione). È il dato più accurato da caricare come CSV.",
+  },
+  stimaParametrica: {
+    term: "Stima parametrica",
+    desc: "Consumo orario stimato da un modello fisico deterministico a partire dai parametri della casa (superficie, isolamento, pompa di calore, occupanti) e dalle temperature reali del sito. NON è un dato misurato: usala come ordine di grandezza.",
+  },
+  templateMensili: {
+    term: "Template mensili",
+    desc: "Metodo di inserimento consumi in cui, per ogni mese, si indica il consumo medio giornaliero e una sagoma tipica del giorno (mattina/sera, diurno, notturno…); l'app li distribuisce sulle 8760 ore preservando il totale mensile.",
+  },
   delta: {
     term: "Δ (differenza B − A)",
     desc: "Variazione dell'indicatore passando dal sistema A (baseline) al sistema B. Per i tassi è espressa in punti percentuali.",

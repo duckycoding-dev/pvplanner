@@ -40,9 +40,9 @@ riassunto, stato, legenda simboli/unità, documenti collegati).
 - [`04-confronto-sistemi.md`](04-confronto-sistemi.md) — confronto live di due sistemi (scaling + ricalcolo nel browser)
 - [`05-costi-fasce.md`](05-costi-fasce.md) — costi/ricavi energia per fasce orarie (acquisto, vendita, netto, risparmio batteria)
 - [`06-economia.md`](06-economia.md) — costo installazione, incentivi e tempo di rientro (payback)
-- [`07-consumi.md`](07-consumi.md) — profilo di consumo sintetico V2 (PDC + puffer, da dati casa + T2m sito)
-- [`08-wizard-setup.md`](08-wizard-setup.md) — wizard di setup + pipeline browser (fetch PVGIS via proxy, anno tipico, IndexedDB, modalità solo-produzione, demo)
-- _(prossimi)_ dataset consumi reali (CSV), NPV/TIR + sensibilità
+- [`07-consumi.md`](07-consumi.md) — consumi: tre metodi di inserimento (CSV reale, template mensili, stima parametrica) + forma canonica + modello fisico
+- [`08-wizard-setup.md`](08-wizard-setup.md) — wizard di setup + pipeline browser (fetch PVGIS via proxy, anno tipico, IndexedDB, editor consumi, modalità solo-produzione, demo)
+- _(prossimi)_ NPV/TIR + sensibilità
 
 ## Esecuzione
 

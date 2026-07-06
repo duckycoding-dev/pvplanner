@@ -38,11 +38,17 @@ validazione live:
 2. **Tetto** (`StepRoof.tsx`) — **falde ripetibili** (azimuth, inclinazione, n° pannelli, Wp), più i
    parametri comuni: posa (`building`/`free`), perdite di sistema %, database di radiazione,
    intervallo anni. Cambiando database gli anni vengono riportati dentro l'intervallo consentito.
-3. **Consumi** (`StepConsumption.tsx`) — **segnaposto della Fase 1**: spiega che l'inserimento dei
-   consumi (CSV, template mensili, stima parametrica) arriva nella versione successiva e che il setup
-   prosegue in modalità solo-produzione.
-4. **Scarico** (`StepFetch.tsx`) — fetch dei dati PVGIS falda per falda con stato per-falda; al
-   termine costruisce e salva lo `StoredSetup` e chiama `onComplete`.
+3. **Scarico** (`StepFetch.tsx`) — fetch dei dati PVGIS falda per falda con stato per-falda; al
+   termine costruisce e salva lo `StoredSetup` e **avanza allo step Consumi**.
+4. **Consumi** (`StepConsumption.tsx`) — ospita l'**editor consumi** (Fase 2: CSV, template mensili,
+   stima parametrica) sul dataset appena scaricato. È **saltabile**: si può concludere senza consumi
+   (dataset solo-produzione) e aggiungerli dopo dalla sezione «Consumi» del menu di configurazione.
+
+> **Nota sull'ordine (Fase 2):** i consumi seguono lo **Scarico**, non lo precedono come nella Fase 1.
+> Motivo: l'editor ha bisogno dell'**asse orario** e della **temperatura reale del sito** (`hourlyT2m`),
+> disponibili solo dopo il download PVGIS — in particolare la stima parametrica. La stessa
+> `ConsumptionEditor` è riusata nel wizard e nella sidebar; il dettaglio dei tre metodi è in
+> `07-consumi.md`.
 
 Gli input raccolti hanno il tipo `WizardInputs` (`web/src/lib/setupTypes.ts`) e sono validati da
 `validateWizardInputs`, che ritorna il **primo** messaggio d'errore (in italiano) o `null`. I controlli:
@@ -123,10 +129,13 @@ Formato `StoredSetup` (`setupTypes.ts`):
 | `savedAt` | number | Timestamp epoch ms del salvataggio. |
 | `inputs` | `WizardInputs` | Gli input del wizard (riprefillano il wizard a riapertura). |
 | `viz` | `Viz` | L'oggetto viz completo (output nostro, non validato in profondità). |
-| `hourlyT2m` | `number[]` | Serie T2m oraria del sito (asse = `viz.hourly.timestampsUtc`, da falda[0]). **Non** è nel viz: serve al modello consumi della Fase 2. |
+| `hourlyT2m` | `number[]` | Serie T2m oraria del sito (asse = `viz.hourly.timestampsUtc`, da falda[0]). **Non** è nel viz: serve al modello consumi parametrico (Fase 2). |
+| `consumption?` | `{ spec, result }` | **Opzionale** (Fase 2): come sono stati inseriti i consumi (`ConsumptionSpec`) + il risultato canonico. Assente nei setup di Fase 1. Il CSV grezzo non si salva. |
 
 `parseStoredSetup` verifica i campi principali (version === 1, `savedAt` numero, `inputs`/`viz`
-oggetti, `hourlyT2m` array) e lancia con messaggio chiaro se il record è malformato.
+oggetti, `hourlyT2m` array) e lancia con messaggio chiaro se il record è malformato. Il campo
+`consumption` è opzionale e passa senza validazione profonda (i setup di Fase 1 non lo hanno → nessun
+bump di versione).
 
 ## Anno tipico da range multi-anno
 
@@ -151,9 +160,11 @@ aggiornabile a mano quando PVGIS estende la copertura.
 
 ## Modalità solo-produzione
 
-Un setup dal wizard **non ha ancora consumi** (Fase 2), quindi la dashboard gira in modalità
-solo-produzione. Il gate è `hasConsumption(viz)` (`web/src/lib/vizFlags.ts`): `true` solo se
-`meta.consumptionSource !== "none"` **e** `meta.consumptionAnnualKwh > 0`.
+Un setup dal wizard senza consumi applicati gira in modalità solo-produzione finché non se ne
+aggiungono (dallo step Consumi del wizard o dalla sezione «Consumi» del menu). Il gate è
+`hasConsumption(viz)` (`web/src/lib/vizFlags.ts`): `true` solo se `meta.consumptionSource !== "none"`
+**e** `meta.consumptionAnnualKwh > 0`. Applicare i consumi (`applyConsumption` → `saveSetup` → stato App)
+lo sblocca da solo.
 
 Quando è `false`:
 

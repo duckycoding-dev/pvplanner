@@ -1,7 +1,7 @@
 ---
-title: Consumi — profilo sintetico V2 (casa con pompa di calore + puffer)
-last_updated: 2026-07-05
-summary: Come si stima il profilo orario di consumo elettrico della casa partendo da pochi dati fisici (superficie, isolamento, occupanti, pompa di calore) e dalle temperature reali del sito. Profilo sintetico, non misurato; sostituibile in futuro con dati reali (CSV).
+title: Consumi — tre metodi di inserimento (CSV reale, template mensili, stima parametrica)
+last_updated: 2026-07-06
+summary: I tre modi per dare i consumi elettrici della casa — CSV reale (curva di carico), template mensili, stima parametrica fisica — che convergono nella forma canonica (8760 kWh/ora) che sblocca economia/batteria. Include il modello fisico sintetico (PDC + puffer) usato dalla stima parametrica.
 status: draft
 legend:
   - "HDH: gradi-ora di riscaldamento = Σ max(0, T_base − T2m) [K·h]"
@@ -10,19 +10,104 @@ legend:
   - "SCOP: COP stagionale medio (riscaldamento)"
   - "ACS: acqua calda sanitaria"
   - "puffer: accumulo termico inerziale del circuito di riscaldamento"
+  - "forma canonica: array 8760 kWh/ora (asse = viz.hourly.timestampsUtc) + metadati (fonte, copertura)"
+  - "curva di carico: export orario/quartorario dei consumi reali dal portale del distributore"
+  - "copertura: % di ore con dato reale nel CSV (le mancanti sono stimate dal profilo medio)"
 related:
   - 03-simulazione-batteria.md
   - 05-costi-fasce.md
+  - 08-wizard-setup.md
 ---
 
-# Consumi — profilo sintetico V2
+# Consumi — tre metodi di inserimento
 
-Il consumo elettrico orario `L(t)` è la base di tutta l'analisi batteria/economia. Non avendo ancora
-misure reali, si **stima fisicamente** da pochi parametri della casa + le **temperature reali del sito**.
-È un profilo **sintetico** (non misurato), tarabile in `config.json` e sostituibile in futuro con un
-CSV reale. Funzione pura: `src/core/consumption/houseLoad.ts` (`syntheticHouseLoad`).
+Il consumo elettrico orario `L(t)` è la base di tutta l'analisi batteria/economia: senza consumi la
+dashboard resta in modalità **solo-produzione**. La Fase 2 offre **tre modi** per fornirlo, tutti puri
+in `src/core/consumption/` e tutti convergenti nella stessa **forma canonica** — l'array di 8760 kWh/ora
+(stesso asse di `viz.hourly.timestampsUtc`) più i metadati (fonte, etichetta, kWh/anno, copertura,
+eventuale disclaimer). L'editor UI applica il risultato al dataset e sblocca economia/batteria.
 
-## Tre componenti
+## Forma canonica e intercambiabilità
+
+`CanonicalConsumption` (`canonical.ts`) è il contratto comune: `{ hourlyKwh: number[]; meta: { source,
+label, annualKwh, coveragePct, disclaimer? } }`. `validateCanonical(c, expectedLength)` verifica
+lunghezza, valori finiti e non negativi. `applyConsumption` (`web/src/lib/applyConsumption.ts`)
+sostituisce `viz.hourly.loadKwh` col nuovo array, aggiorna i metadati consumo
+(`consumptionSource/AnnualKwh/Note`) e **ricalcola i blocchi baked** nb/wb (annual/monthly/hourly) via
+`deriveMonoViz(viz, cloneFromBaseline(viz))` — così l'invariante golder regge: ri-derivare dal viz
+riproduce esattamente i blocchi (stesso golden della Fase 0). Il CSV **grezzo non si salva**: nello `StoredSetup` finiscono solo la
+`ConsumptionSpec` (metodo + input) e il risultato canonico.
+
+I tre metodi sono **intercambiabili**: applicandone uno nuovo si rimpiazza il precedente. Il demo
+(`viz.demo.json`) è concettualmente read-only: l'editor consumi è disponibile solo sui dataset creati
+dal wizard.
+
+## Metodo A — CSV reale (curva di carico)
+
+La via più accurata: la **curva di carico** oraria/quartoraria scaricata dal portale del distributore
+(es. e-distribuzione) o un CSV generico a due colonne. Il flusso UI prova prima il detector
+e-distribuzione, poi il parser generico: `detectEDistribuzione(text) ? parseEDistribuzione : parseConsumptionCsv`.
+
+**Parser generico** (`parseCsv.ts`) — regole vincolanti:
+
+1. **Dialetto.** Delimitatore auto: se la prima riga contiene `;` il separatore è `;` e la **virgola è
+   decimale** (uso italiano tipico); altrimenti `,` con punto decimale. Il conteggio puro `;` vs `,`
+   non basta (la virgola decimale nel valore lo falsa), quindi la presenza di `;` è dirimente. Header
+   opzionale: se la prima riga ha un valore non numerico o un timestamp illeggibile viene saltata.
+2. **Colonne.** Due: `timestamp, kWh`. Timestamp accettati: ISO `YYYY-MM-DD[T ]HH:mm(:ss)?` oppure
+   `DD/MM/YYYY HH:mm`. Interpretati come **ora locale** del setup.
+3. **Risoluzione.** Righe a 15 min sommate nell'ora; righe orarie prese così.
+4. **Allineamento calendario.** L'anno dei dati può differire dall'anno PVGIS → si allinea per **chiave
+   calendario LOCALE `MM-DD-HH`** (mese, giorno e ora locali), sia sull'asse del dataset sia sulle righe
+   utente. Così l'anno è irrilevante. *(Deviazione dal piano: il piano suggeriva mese/giorno da `Date`
+   UTC + ora locale; qui la chiave è interamente locale — più semplice e internamente consistente,
+   nessuna conversione locale→UTC dei timestamp utente.)* Il **29 febbraio** nei dati utente è scartato
+   con warning.
+5. **DST.** Nell'ora duplicata di fine ora legale due indici dell'asse condividono la stessa chiave: il
+   valore va sul **primo**, il secondo resta buco. L'ora inesistente di inizio ora legale è un buco.
+6. **Buchi.** Riempiti con la **media stesso-mese / stesso-tipo-giorno (feriale|weekend) / stessa-ora**
+   dai dati presenti; se manca il campione per tipo giorno → media mese/ora; se ancora vuota → 0 con
+   warning. `coveragePct` = ore con dato reale / 8760 × 100, arrotondata a 1 decimale.
+7. **Soglia.** Copertura < 50% → **errore** (il file copre troppe poche ore).
+
+**Parser e-distribuzione** (`parseEDistribuzione.ts`). `detectEDistribuzione` è conservativo: richiede
+`POD` (case-insensitive) + almeno uno tra `curva`, l'intestazione `Giorno`, o ≥24 token orari `HH:mm`;
+un CSV generico non lo attiva mai. Gestisce il **formato wide** (data + 96 colonne quarto-orarie, sommate
+in 24 ore) e il **formato lungo** `Data;Ora;Consumo`. Riusa l'infrastruttura di allineamento condivisa
+(`align.ts`, `alignToAxis`). **Assunzioni** sul formato reale (da verificare su un export vero): CSV
+`;`-separated, decimale con virgola, header con `POD`. Le celle **vuote** sono dati mancanti (buchi),
+non zeri; nel formato wide i quarti sono letti per **posizione di colonna**, così un buco non fa
+scalare le ore successive.
+
+In `examples/` ci sono due file sintetici pronti da caricare per provare il flusso — uno per parser:
+`consumi-esempio-orario.csv` (generico, `timestamp,kWh`) e `consumi-esempio-edistribuzione.csv`
+(wide, 96 quarti). Un test (`test/exampleCsv.test.ts`) garantisce che restino caricabili.
+
+## Metodo B — Template mensili
+
+Per chi non ha il CSV: `monthlyTemplate.ts`. Per ogni mese si dà **kWh/giorno** e una **sagoma del
+giorno** (preset `flat`, `morningEvening`, `daytimeWfh`, `nightHeavy`, o 24 valori custom), più un
+**fattore weekend**. `expandMonthlyTemplate` distribuisce, per ogni ora, `sagoma[ora locale] ×
+(weekendFactor nei giorni locali di weekend)`, poi **rinormalizza ogni mese** perché il totale resti
+`kWh/giorno × giorni del mese` (giorni = ore del mese / 24 sull'asse UTC), **indipendentemente** dal
+fattore weekend. Le sagome preset `morningEvening`/`daytimeWfh` riusano i profili di `houseLoad.ts`
+(copiati, moduli indipendenti); `nightHeavy` = 1.6 (0–7) / 0.8 (8–17) / 1.2 (18–23).
+
+## Metodo C — Stima parametrica (modello fisico)
+
+Il modello fisico deterministico descritto sotto, esposto come adapter
+`web/src/lib/parametricConsumption.ts` (`parametricConsumption(house, setup)`): usa `syntheticHouseLoad`
+sulle **temperature reali del sito** (`setup.hourlyT2m`, non nel viz). **Nessuna generazione LLM a
+runtime**: solo il modello fisico. Richiede la T2m del sito → sul demo / senza setup è **disabilitato**
+con spiegazione. **Disclaimer obbligatorio**, sempre visibile nel form e nei metadati in dashboard:
+
+> *Stima approssimativa calcolata dai parametri inseriti: non sono dati reali, usala come ordine di grandezza.*
+
+Il modello (funzione pura `src/core/consumption/houseLoad.ts`, `syntheticHouseLoad`) stima il profilo da
+pochi parametri della casa + le temperature reali del sito. È un profilo **sintetico** (non misurato),
+tarabile anche in `config.json` per la CLI.
+
+## Tre componenti del modello fisico
 
 ### 1. Riscaldamento (PDC, elettrico)
 - **Fabbisogno termico annuo** = `superficie_riscaldata × domanda_specifica` (+ perdite di accumulo).
@@ -95,6 +180,19 @@ la batteria; import 5.512 → 3.504 kWh/anno.
 - Nessun degrado/inflazione (vedi `06-economia.md`).
 
 ## Implementazione
+Forma canonica e metodi (Fase 2, puri in `src/core/consumption/`):
+- `canonical.ts`: `CanonicalConsumption`, `validateCanonical`.
+- `monthlyTemplate.ts`: `DAY_SHAPES`, `MonthlyTemplate`, `expandMonthlyTemplate` (metodo B).
+- `parseCsv.ts` + `align.ts`: parser CSV generico + allineamento condiviso (metodo A).
+- `parseEDistribuzione.ts`: detector + parser curva di carico (metodo A).
+- `web/src/lib/parametricConsumption.ts`: adapter del modello fisico (metodo C, disclaimer obbligatorio).
+- `web/src/lib/applyConsumption.ts`: applica al dataset + ricalcolo baked.
+- UI: `web/src/components/consumption/` (editor a tre tab + anteprime), montato nel wizard (step Consumi,
+  dopo lo Scarico) e nella sezione «Consumi» del menu di configurazione.
+- Test: `canonical.test.ts`, `monthlyTemplate.test.ts`, `parseConsumptionCsv.test.ts`,
+  `parseEDistribuzione.test.ts`, `parametricAdapter.test.ts`, `applyConsumption.test.ts`.
+
+Modello fisico (metodo C):
 - `src/core/consumption/houseLoad.ts` (puro): `HouseParams`, `HOUSE_DEFAULTS`, `syntheticHouseLoad`.
 - `src/config/schema.ts`: `HouseConfig` + parsing di `consumption.house`.
 - `src/app/analyzeSimulation.ts`: se `consumption.house` è presente usa il V2 (mappa config → `HouseParams`).

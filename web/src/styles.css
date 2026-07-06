@@ -224,7 +224,10 @@ footer { margin-top: 24px; color: var(--muted); font-size: 12px; border-top: 1px
   position: fixed;
   bottom: auto;
   display: block;
-  transform: translate(-50%, calc(-100% - 8px));
+  /* left/top sono le coordinate FINALI calcolate da InfoTip (misura + clamp nella
+     viewport): il transform va azzerato ESPLICITAMENTE, altrimenti eredita il
+     translateX(-50%) della classe base .info-bubble. */
+  transform: none;
   z-index: 1000;
   pointer-events: none;
 }
@@ -311,3 +314,24 @@ footer { margin-top: 24px; color: var(--muted); font-size: 12px; border-top: 1px
 .kpi-table thead th { color: var(--muted); font-weight: 600; }
 .kpi-table td.pos { color: #16a34a; }
 .kpi-table td.neg { color: #dc2626; }
+
+/* --- editor consumi (wizard step 4 + sezione sidebar) --- */
+.consumption-editor { display: flex; flex-direction: column; gap: 10px; }
+.consumption-tabs { display: flex; flex-wrap: wrap; gap: 4px; }
+.consumption-tabs button { border: 1px solid var(--border); background: var(--card); border-radius: 7px;
+  padding: 4px 10px; cursor: pointer; font-size: 13px; color: var(--muted); }
+.consumption-tabs button.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+.consumption-method { display: flex; flex-direction: column; gap: 8px; }
+.consumption-disclaimer { border: 1px solid #f59e0b; background: rgba(245, 158, 11, 0.08);
+  color: var(--text); border-radius: 8px; padding: 8px 10px; font-size: 12px; }
+.consumption-adv-toggle { font-size: 12px; color: var(--muted); display: flex; align-items: center; gap: 6px; }
+.consumption-months { width: 100%; border-collapse: collapse; font-size: 13px; }
+.consumption-months th, .consumption-months td { text-align: left; padding: 3px 6px; border-bottom: 1px solid var(--border); }
+.consumption-months th { color: var(--muted); font-weight: 600; }
+.consumption-months input[type="number"] { width: 72px; border: 1px solid var(--border); border-radius: 6px; padding: 2px 6px; }
+.consumption-months select { border: 1px solid var(--border); border-radius: 6px; padding: 2px 4px; }
+.consumption-custom { width: 100%; margin-top: 4px; border: 1px solid var(--border); border-radius: 6px; padding: 2px 6px; font-size: 11px; }
+.consumption-warnings ul { margin: 4px 0 0; padding-left: 18px; }
+.consumption-preview { display: flex; flex-direction: column; gap: 2px; }
+.consumption-applied { color: #16a34a; }
+.consumption-current { border: 1px solid var(--border); background: var(--card); border-radius: 7px; padding: 4px 8px; margin: 0; }
