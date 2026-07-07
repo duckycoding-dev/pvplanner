@@ -3,5 +3,8 @@ output/
 dist/
 web/viz.json
 config.json
+# Dati PVGIS della località personale (i golden girano solo dove esiste config.json)
+data/falde/
+data/generic/
 *.log
 .DS_Store
