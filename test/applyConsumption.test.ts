@@ -6,7 +6,10 @@ import type { CanonicalConsumption } from "../src/core/consumption/canonical.ts"
 import type { ConsumptionSpec, StoredSetup } from "../web/src/lib/setupTypes.ts";
 import type { Viz } from "../web/src/types.ts";
 
-const baseViz = (await Bun.file("web/viz.json").json()) as Viz;
+// web/viz.json (personale, gitignored) se esiste, altrimenti il demo tracciato:
+// questi test sono di auto-consistenza, valgono su qualunque baseline.
+const vizFile = Bun.file("web/viz.json");
+const baseViz = (await ((await vizFile.exists()) ? vizFile : Bun.file("web/viz.demo.json")).json()) as Viz;
 
 function makeSetup(): StoredSetup {
   const viz = structuredClone(baseViz);

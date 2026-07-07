@@ -4,7 +4,10 @@ import { cloneFromBaseline } from "../web/src/lib/systemConfig.ts";
 import { hasConsumption } from "../web/src/lib/vizFlags.ts";
 import type { Viz } from "../web/src/types.ts";
 
-const viz = (await Bun.file("web/viz.json").json()) as Viz;
+// web/viz.json (personale, gitignored) se esiste, altrimenti il demo tracciato:
+// questi test sono di auto-consistenza, valgono su qualunque baseline.
+const vizFile = Bun.file("web/viz.json");
+const viz = (await ((await vizFile.exists()) ? vizFile : Bun.file("web/viz.demo.json")).json()) as Viz;
 
 /** A copy of the baseline viz with no consumption: source "none" and all loads zeroed. */
 function noConsumptionViz(): Viz {
