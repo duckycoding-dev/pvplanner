@@ -21,6 +21,9 @@ body {
 header h1 { margin: 0 0 4px; font-size: 22px; }
 header h1 .year { color: var(--muted); font-weight: 400; }
 header .sub { margin: 0; color: var(--muted); font-size: 13px; }
+.header-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+.lang-toggle { flex: none; }
+.lang-toggle button { font-size: 12px; }
 
 .tabs { display: flex; flex-wrap: wrap; gap: 6px; margin: 18px 0; border-bottom: 1px solid var(--border); }
 .tabs button {
@@ -214,6 +217,27 @@ footer { margin-top: 24px; color: var(--muted); font-size: 12px; border-top: 1px
 .dropzone { border: 2px dashed var(--border); border-radius: 10px; padding: 26px 16px; text-align: center; color: var(--muted); }
 .dropzone.drag { border-color: var(--accent); background: rgba(59, 130, 246, 0.06); color: var(--accent); }
 .file-pick { color: var(--accent); cursor: pointer; text-decoration: underline; }
+.file-pick.button-like { display: block; text-align: center; text-decoration: none; color: var(--text);
+  border: 1px solid var(--border); border-radius: 7px; padding: 6px 10px; font-size: 12px; }
+.file-pick.button-like:hover { border-color: var(--accent); color: var(--accent); }
+.share-actions { margin-top: 8px; }
+.share-warning { color: var(--text); }
+.share-url { width: 100%; box-sizing: border-box; resize: vertical; font-family: ui-monospace, monospace;
+  font-size: 12px; border: 1px solid var(--border); border-radius: 7px; padding: 8px; background: #fff; }
+
+.app-footer { margin-top: 40px; padding-top: 16px; border-top: 1px solid var(--border);
+  color: var(--muted); font-size: 12px; display: grid; gap: 4px; }
+.app-footer .footer-note { margin: 0; }
+.app-footer .footer-attr, .app-footer .footer-disclaimer { margin: 0; }
+.footer-links { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 6px; }
+.footer-links a, .link-button { color: var(--accent); text-decoration: none; font-size: 12px; }
+.footer-links a:hover, .link-button:hover { text-decoration: underline; }
+.link-button { background: none; border: none; padding: 0; cursor: pointer; font: inherit; }
+.about-modal { width: 560px; max-height: 82vh; overflow-y: auto; }
+.about-modal section { display: grid; gap: 4px; }
+.about-modal h4 { margin: 6px 0 2px; }
+.about-modal p { margin: 0; color: var(--text); font-size: 14px; line-height: 1.5; }
+.about-steps { margin: 0; padding-left: 20px; display: grid; gap: 4px; font-size: 14px; line-height: 1.5; }
 .err { color: #dc2626; font-size: 13px; margin: 10px 0 0; }
 
 /* --- metrics table (cost recaps + comparison) --- */

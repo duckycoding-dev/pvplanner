@@ -7,6 +7,8 @@
     "download": "bun scripts/download.ts",
     "analysis": "bun scripts/run-analysis.ts",
     "web": "PORT=2345 bun web/serve.ts",
+    "build": "bun scripts/build-web.ts",
+    "preview": "bun scripts/preview-dist.ts",
     "test": "bun test"
   },
   "devDependencies": {

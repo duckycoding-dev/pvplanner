@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import type { WizardInputs } from "../../lib/setupTypes.ts";
 import { NumberField } from "../NumberField.tsx";
+import { useT } from "../../i18n/useT.tsx";
 
 interface NominatimResult {
   lat: string;
@@ -19,9 +20,11 @@ export function StepLocation({
   inputs: WizardInputs;
   patch: (p: Partial<WizardInputs>) => void;
 }) {
+  const { t } = useT();
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<NominatimResult[]>([]);
   const [searching, setSearching] = useState(false);
+  // Il messaggio è memorizzato come CHIAVE i18n e tradotto al render.
   const [searchError, setSearchError] = useState<string | null>(null);
 
   // ~600 fusi orari: calcolati una sola volta.
@@ -43,9 +46,9 @@ export function StepLocation({
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = (await res.json()) as NominatimResult[];
       setResults(data);
-      if (data.length === 0) setSearchError("Nessun risultato.");
+      if (data.length === 0) setSearchError("wizard.location.noResults");
     } catch {
-      setSearchError("Ricerca non riuscita. Riprova tra qualche secondo.");
+      setSearchError("wizard.location.searchError");
     } finally {
       setSearching(false);
     }
@@ -59,14 +62,14 @@ export function StepLocation({
 
   return (
     <div className="wizard-body">
-      <h4>Località</h4>
+      <h4>{t("wizard.location.title")}</h4>
 
       <div className="wizard-search">
         <label className="text-field">
-          Cerca un luogo
+          {t("wizard.location.searchLabel")}
           <input
             value={query}
-            placeholder="es. Roma, Via Nazionale 1"
+            placeholder={t("wizard.location.searchPlaceholder")}
             onChange={(e) => setQuery(e.target.value)}
             onKeyDown={(e) => {
               if (e.key === "Enter") {
@@ -77,10 +80,10 @@ export function StepLocation({
           />
         </label>
         <button onClick={() => void search()} disabled={searching || query.trim() === ""}>
-          {searching ? "Cerco…" : "Cerca"}
+          {searching ? t("wizard.location.searching") : t("wizard.location.search")}
         </button>
       </div>
-      {searchError !== null && <p className="err">{searchError}</p>}
+      {searchError !== null && <p className="err">{t(searchError)}</p>}
       {results.length > 0 && (
         <ul className="wizard-results">
           {results.map((r, i) => (
@@ -90,16 +93,16 @@ export function StepLocation({
           ))}
         </ul>
       )}
-      <p className="wizard-attribution">© OpenStreetMap contributors</p>
+      <p className="wizard-attribution">{t("wizard.location.attribution")}</p>
 
       {inputs.location.label !== "" && (
         <p className="note">
-          Selezionata: <b>{inputs.location.label}</b>
+          {t("wizard.location.selected")} <b>{inputs.location.label}</b>
         </p>
       )}
 
       <NumberField
-        label="Latitudine"
+        label={t("wizard.location.lat")}
         value={inputs.location.latitude}
         min={-90}
         max={90}
@@ -107,7 +110,7 @@ export function StepLocation({
         onChange={(v) => setLocation({ latitude: v })}
       />
       <NumberField
-        label="Longitudine"
+        label={t("wizard.location.lon")}
         value={inputs.location.longitude}
         min={-180}
         max={180}
@@ -116,7 +119,7 @@ export function StepLocation({
       />
 
       <label className="text-field">
-        Fuso orario
+        {t("wizard.location.timezone")}
         <select value={inputs.timeZone} onChange={(e) => patch({ timeZone: e.target.value })}>
           {zones.map((z) => (
             <option key={z} value={z}>
@@ -132,7 +135,7 @@ export function StepLocation({
           checked={inputs.useHorizon}
           onChange={(e) => patch({ useHorizon: e.target.checked })}
         />
-        Considera l'orizzonte (ombreggiamento del terreno)
+        {t("wizard.location.horizon")}
       </label>
     </div>
   );

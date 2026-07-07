@@ -89,12 +89,12 @@ test("validateAgainstBaseline accepts the clone and rejects different geometry",
   expect(validateAgainstBaseline(cfg, viz)).toBeNull();
 
   const wrongAzimuth: SystemConfigB = { ...cfg, falde: cfg.falde.map((f) => (f.id === "est" ? { ...f, azimuth: 0 } : f)) };
-  expect(validateAgainstBaseline(wrongAzimuth, viz)).toContain("azimuth");
+  expect(validateAgainstBaseline(wrongAzimuth, viz)).toBe("validate.system.faldaAzimuth");
 
   const missingFalda: SystemConfigB = { ...cfg, falde: [cfg.falde[0]!] };
-  expect(validateAgainstBaseline(missingFalda, viz)).toContain("Geometria diversa");
+  expect(validateAgainstBaseline(missingFalda, viz)).toBe("validate.system.geometryMismatch");
 
-  expect(validateAgainstBaseline({ ...cfg, batteryUsablePct: 150 }, viz)).toContain("0–100");
+  expect(validateAgainstBaseline({ ...cfg, batteryUsablePct: 150 }, viz)).toBe("validate.system.batteryUsablePct");
 });
 
 test("coupling: default dc per file vecchi, ac se esplicito, incluso in equals", () => {

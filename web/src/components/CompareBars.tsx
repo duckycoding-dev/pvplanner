@@ -1,16 +1,17 @@
 import { useState } from "react";
 import { Bar, BarChart, CartesianGrid, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import type { SystemResult } from "../../../src/core/comparison/computeSystem.ts";
-import { fmt, MONTH_LABELS } from "../lib/format.ts";
+import { fmt } from "../lib/format.ts";
 import { useLegendToggle } from "../lib/useLegendToggle.ts";
+import { useMonthLabels, useT } from "../i18n/useT.tsx";
 
 type Metric = "produzione" | "autoconsumo" | "import" | "export";
 
-const METRICS: { key: Metric; label: string }[] = [
-  { key: "produzione", label: "produzione" },
-  { key: "autoconsumo", label: "autoconsumo" },
-  { key: "import", label: "import" },
-  { key: "export", label: "export" },
+const METRICS: { key: Metric; labelKey: string }[] = [
+  { key: "produzione", labelKey: "chart.production" },
+  { key: "autoconsumo", labelKey: "chart.selfConsumption" },
+  { key: "import", labelKey: "chart.import" },
+  { key: "export", labelKey: "chart.export" },
 ];
 
 function monthlyValue(r: SystemResult, metric: Metric, k: number): number {
@@ -37,13 +38,12 @@ interface Props {
 }
 
 export function CompareAnnualBars({ a, b, labelA, labelB }: Props) {
+  const { t } = useT();
   const { onClick, isHidden } = useLegendToggle();
-  const data = METRICS.map((m) => ({ metric: m.label, A: annualValue(a, m.key), B: annualValue(b, m.key) }));
+  const data = METRICS.map((m) => ({ metric: t(m.labelKey), A: annualValue(a, m.key), B: annualValue(b, m.key) }));
   return (
     <section className="chart-card">
-      <h3>
-        Annuale: {labelA} vs {labelB}
-      </h3>
+      <h3>{t("compare.annualTitle", { a: labelA, b: labelB })}</h3>
       <ResponsiveContainer width="100%" height={300}>
         <BarChart data={data}>
           <CartesianGrid strokeDasharray="3 3" />
@@ -60,19 +60,19 @@ export function CompareAnnualBars({ a, b, labelA, labelB }: Props) {
 }
 
 export function CompareMonthlyBars({ a, b, labelA, labelB }: Props) {
+  const { t } = useT();
+  const monthLabels = useMonthLabels();
   const { onClick, isHidden } = useLegendToggle();
   const [metric, setMetric] = useState<Metric>("produzione");
-  const data = MONTH_LABELS.map((name, k) => ({ name, A: monthlyValue(a, metric, k), B: monthlyValue(b, metric, k) }));
+  const data = monthLabels.map((name, k) => ({ name, A: monthlyValue(a, metric, k), B: monthlyValue(b, metric, k) }));
   return (
     <section className="chart-card">
       <div className="section-head">
-        <h3>
-          Mensile: {labelA} vs {labelB}
-        </h3>
+        <h3>{t("compare.monthlyTitle", { a: labelA, b: labelB })}</h3>
         <span className="seg">
           {METRICS.map((m) => (
             <button key={m.key} className={metric === m.key ? "active" : ""} onClick={() => setMetric(m.key)}>
-              {m.label}
+              {t(m.labelKey)}
             </button>
           ))}
         </span>

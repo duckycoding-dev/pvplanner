@@ -13,6 +13,7 @@ import {
 import type { DayPoint } from "../lib/sliceDay.ts";
 import type { Scenario } from "../types.ts";
 import { useLegendToggle } from "../lib/useLegendToggle.ts";
+import { useT } from "../i18n/useT.tsx";
 
 interface Props {
   data: DayPoint[];
@@ -21,6 +22,7 @@ interface Props {
 }
 
 export function PowerChart({ data, scenario, acCapKw }: Props) {
+  const { t } = useT();
   const { onClick, isHidden } = useLegendToggle();
   const showWb = scenario === "con" || scenario === "entrambi";
   const showNb = scenario === "senza" || scenario === "entrambi";
@@ -31,7 +33,7 @@ export function PowerChart({ data, scenario, acCapKw }: Props) {
         <CartesianGrid strokeDasharray="3 3" />
         <XAxis dataKey="hour" tickFormatter={(h: number) => String(h)} />
         <YAxis label={{ value: "kW", angle: -90, position: "insideLeft" }} />
-        <Tooltip formatter={(v: number) => v.toFixed(2)} labelFormatter={(h) => `ore ${h}`} />
+        <Tooltip formatter={(v: number) => v.toFixed(2)} labelFormatter={(h) => t("chart.hour", { h: String(h) })} />
         <Legend onClick={onClick} wrapperStyle={{ cursor: "pointer" }} />
 
         {/* Coverage: PV (+battery) to load — gap under the load line is grid import */}
@@ -39,7 +41,7 @@ export function PowerChart({ data, scenario, acCapKw }: Props) {
           <Area
             type="monotone"
             dataKey="wbSelf"
-            name="coperto PV+batteria"
+            name={t("power.coveredPvBattery")}
             fill="#93c5fd"
             stroke="#3b82f6"
             fillOpacity={0.45}
@@ -52,7 +54,7 @@ export function PowerChart({ data, scenario, acCapKw }: Props) {
             <Line
               type="monotone"
               dataKey="nbSelf"
-              name="coperto solo PV"
+              name={t("power.coveredPvOnly")}
               stroke="#1e40af"
               strokeDasharray="4 2"
               dot={false}
@@ -63,7 +65,7 @@ export function PowerChart({ data, scenario, acCapKw }: Props) {
             <Area
               type="monotone"
               dataKey="nbSelf"
-              name="coperto solo PV"
+              name={t("power.coveredPvOnly")}
               fill="#93c5fd"
               stroke="#3b82f6"
               fillOpacity={0.45}
@@ -75,7 +77,7 @@ export function PowerChart({ data, scenario, acCapKw }: Props) {
         <Line
           type="monotone"
           dataKey="prodPractical"
-          name="produzione"
+          name={t("chart.production")}
           stroke="#16a34a"
           strokeWidth={2}
           dot={false}
@@ -85,7 +87,7 @@ export function PowerChart({ data, scenario, acCapKw }: Props) {
         <Line
           type="monotone"
           dataKey="prodTheoretical"
-          name="produzione teorica"
+          name={t("power.productionTheoretical")}
           stroke="#16a34a"
           strokeDasharray="5 3"
           dot={false}
@@ -95,7 +97,7 @@ export function PowerChart({ data, scenario, acCapKw }: Props) {
         <Line
           type="monotone"
           dataKey="load"
-          name="consumo (sint.)"
+          name={t("power.consumptionSynthetic")}
           stroke="#dc2626"
           strokeWidth={2}
           dot={false}
@@ -106,7 +108,7 @@ export function PowerChart({ data, scenario, acCapKw }: Props) {
           y={acCapKw}
           stroke="#6b7280"
           strokeDasharray="6 3"
-          label={{ value: `tetto AC ${acCapKw} kW`, position: "right", fontSize: 11, fill: "#6b7280" }}
+          label={{ value: t("power.acCeiling", { kw: acCapKw }), position: "right", fontSize: 11, fill: "#6b7280" }}
         />
       </ComposedChart>
     </ResponsiveContainer>

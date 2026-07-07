@@ -86,13 +86,15 @@ export function noPvConfig(viz: Viz): SystemConfigB {
   };
 }
 
-function reqNumber(v: unknown, ctx: string): number {
-  if (typeof v !== "number" || Number.isNaN(v)) throw new Error(`Config non valida: ${ctx} deve essere un numero.`);
+// I messaggi thrown sono CHIAVI i18n: ImportModal le traduce con `t()` al render.
+// I dettagli dinamici (path del campo) sono omessi per restare traducibili.
+function reqNumber(v: unknown): number {
+  if (typeof v !== "number" || Number.isNaN(v)) throw new Error("import.system.field");
   return v;
 }
 
-function reqString(v: unknown, ctx: string): string {
-  if (typeof v !== "string" || v.length === 0) throw new Error(`Config non valida: ${ctx} deve essere una stringa.`);
+function reqString(v: unknown): string {
+  if (typeof v !== "string" || v.length === 0) throw new Error("import.system.field");
   return v;
 }
 
@@ -101,19 +103,19 @@ export function parseSystemConfigB(text: string): SystemConfigB {
   try {
     raw = JSON.parse(text);
   } catch {
-    throw new Error("File non valido: JSON non leggibile.");
+    throw new Error("import.jsonUnreadable");
   }
-  if (typeof raw !== "object" || raw === null) throw new Error("Config non valida: atteso un oggetto.");
+  if (typeof raw !== "object" || raw === null) throw new Error("import.system.notObject");
   const o = raw as Record<string, unknown>;
   const faldeRaw = o["falde"];
-  if (!Array.isArray(faldeRaw)) throw new Error("Config non valida: 'falde' mancante.");
-  const falde: FaldaConfigB[] = faldeRaw.map((f, i) => {
+  if (!Array.isArray(faldeRaw)) throw new Error("import.system.faldeMissing");
+  const falde: FaldaConfigB[] = faldeRaw.map((f) => {
     const fo = (f ?? {}) as Record<string, unknown>;
     return {
-      id: reqString(fo["id"], `falde[${i}].id`),
-      azimuth: reqNumber(fo["azimuth"], `falde[${i}].azimuth`),
-      panelCount: reqNumber(fo["panelCount"], `falde[${i}].panelCount`),
-      wp: reqNumber(fo["wp"], `falde[${i}].wp`),
+      id: reqString(fo["id"]),
+      azimuth: reqNumber(fo["azimuth"]),
+      panelCount: reqNumber(fo["panelCount"]),
+      wp: reqNumber(fo["wp"]),
     };
   });
   // Backwards-compatible: an older `batteryUsableKwh` field is read as total at 100% usable.
@@ -125,34 +127,38 @@ export function parseSystemConfigB(text: string): SystemConfigB {
   return {
     label: typeof o["label"] === "string" ? o["label"] : "Sistema B",
     falde,
-    acCapKw: reqNumber(o["acCapKw"], "acCapKw"),
-    batteryTotalKwh: reqNumber(total, "batteryTotalKwh"),
-    batteryUsablePct: reqNumber(pct, "batteryUsablePct"),
-    roundTrip: reqNumber(o["roundTrip"], "roundTrip"),
+    acCapKw: reqNumber(o["acCapKw"]),
+    batteryTotalKwh: reqNumber(total),
+    batteryUsablePct: reqNumber(pct),
+    roundTrip: reqNumber(o["roundTrip"]),
     coupling: o["coupling"] === "ac" ? "ac" : "dc",
     installationCostEur: typeof o["installationCostEur"] === "number" ? o["installationCostEur"] : 0,
   };
 }
 
-/** Returns null if cfg is compatible with the baseline geometry, else an error message. */
+/**
+ * Ritorna null se cfg è compatibile con la geometria baseline, altrimenti una CHIAVE
+ * i18n (tradotta dal chiamante con `t()`). I dettagli dinamici (id falda, valori) sono
+ * omessi per restare traducibili senza interpolazione.
+ */
 export function validateAgainstBaseline(cfg: SystemConfigB, viz: Viz): string | null {
   const baseIds = viz.meta.falde.map((f) => f.id).slice().sort();
   const cfgIds = cfg.falde.map((f) => f.id).slice().sort();
   if (baseIds.length !== cfgIds.length || baseIds.some((id, i) => id !== cfgIds[i])) {
-    return "Geometria diversa dalla baseline (falde non corrispondenti): import non supportato.";
+    return "validate.system.geometryMismatch";
   }
   for (const bf of viz.meta.falde) {
     const cf = cfg.falde.find((x) => x.id === bf.id);
-    if (cf === undefined) return `Falda "${bf.id}" assente.`;
+    if (cf === undefined) return "validate.system.faldaMissing";
     if (cf.azimuth !== bf.azimuth) {
-      return `Falda "${bf.id}": azimuth ${cf.azimuth} ≠ baseline ${bf.azimuth} (geometria non modificabile).`;
+      return "validate.system.faldaAzimuth";
     }
-    if (cf.panelCount < 0 || cf.wp <= 0) return `Falda "${bf.id}": pannelli/W non validi.`;
+    if (cf.panelCount < 0 || cf.wp <= 0) return "validate.system.faldaPanels";
   }
-  if (cfg.acCapKw <= 0) return "Tetto AC deve essere > 0.";
-  if (cfg.batteryTotalKwh < 0) return "Capacità batteria non valida.";
-  if (cfg.batteryUsablePct < 0 || cfg.batteryUsablePct > 100) return "Percentuale utilizzabile deve essere 0–100.";
-  if (cfg.roundTrip <= 0 || cfg.roundTrip > 1) return "Round-trip deve essere tra 0 e 1.";
-  if (cfg.installationCostEur < 0) return "Costo installazione non valido.";
+  if (cfg.acCapKw <= 0) return "validate.system.acCap";
+  if (cfg.batteryTotalKwh < 0) return "validate.system.batteryCapacity";
+  if (cfg.batteryUsablePct < 0 || cfg.batteryUsablePct > 100) return "validate.system.batteryUsablePct";
+  if (cfg.roundTrip <= 0 || cfg.roundTrip > 1) return "validate.system.roundTrip";
+  if (cfg.installationCostEur < 0) return "validate.system.installationCost";
   return null;
 }

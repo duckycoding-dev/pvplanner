@@ -1,6 +1,7 @@
 import { useState } from "react";
 import type { StoredSetup } from "../../lib/setupTypes.ts";
 import { ConsumptionEditor } from "../consumption/ConsumptionEditor.tsx";
+import { useT } from "../../i18n/useT.tsx";
 
 /**
  * Step consumi del wizard: ospita l'editor consumi sul dataset appena scaricato.
@@ -16,25 +17,23 @@ export function StepConsumption({
   setup: StoredSetup | null;
   onApply: (next: StoredSetup) => void;
 }) {
+  const { t } = useT();
   const [applied, setApplied] = useState(false);
 
   if (setup === null) {
     return (
       <div className="wizard-body">
-        <h4>Consumi</h4>
-        <p className="note">Scarica prima i dati PVGIS: i consumi si aggiungono sul dataset del sito.</p>
+        <h4>{t("wizard.consumption.title")}</h4>
+        <p className="note">{t("wizard.consumption.needFetch")}</p>
       </div>
     );
   }
 
   return (
     <div className="wizard-body">
-      <h4>Consumi</h4>
-      <p className="note">
-        Aggiungi i consumi per sbloccare le analisi economiche e batteria. Puoi anche saltare e farlo dopo dalla sezione
-        «Consumi» del menu di configurazione.
-      </p>
-      {applied && <p className="note consumption-applied">Consumi applicati ✓ — premi «Fine» per concludere.</p>}
+      <h4>{t("wizard.consumption.title")}</h4>
+      <p className="note">{t("wizard.consumption.intro")}</p>
+      {applied && <p className="note consumption-applied">{t("wizard.consumption.applied")}</p>}
       <ConsumptionEditor
         setup={setup}
         onApply={(next) => {

@@ -11,6 +11,7 @@ import {
 } from "recharts";
 import type { DayPoint } from "../lib/sliceDay.ts";
 import { useLegendToggle } from "../lib/useLegendToggle.ts";
+import { useT } from "../i18n/useT.tsx";
 
 interface Props {
   data: DayPoint[];
@@ -18,6 +19,7 @@ interface Props {
 }
 
 export function BatteryChart({ data, usableKwh }: Props) {
+  const { t } = useT();
   const { onClick, isHidden } = useLegendToggle();
   return (
     <ResponsiveContainer width="100%" height={220}>
@@ -25,14 +27,14 @@ export function BatteryChart({ data, usableKwh }: Props) {
         <CartesianGrid strokeDasharray="3 3" />
         <XAxis dataKey="hour" tickFormatter={(h: number) => String(h)} />
         <YAxis domain={[0, Math.ceil(usableKwh)]} label={{ value: "kWh", angle: -90, position: "insideLeft" }} />
-        <Tooltip formatter={(v: number) => v.toFixed(2)} labelFormatter={(h) => `ore ${h}`} />
+        <Tooltip formatter={(v: number) => v.toFixed(2)} labelFormatter={(h) => t("chart.hour", { h: String(h) })} />
         <Legend onClick={onClick} wrapperStyle={{ cursor: "pointer" }} />
-        <Bar dataKey="soc" name="SoC batteria" fill="#f59e0b" isAnimationActive={false} hide={isHidden("soc")} />
+        <Bar dataKey="soc" name={t("battery.soc")} fill="#f59e0b" isAnimationActive={false} hide={isHidden("soc")} />
         <ReferenceLine
           y={usableKwh}
           stroke="#b45309"
           strokeDasharray="6 3"
-          label={{ value: `capacità ${usableKwh} kWh`, position: "right", fontSize: 11, fill: "#b45309" }}
+          label={{ value: t("battery.capacity", { kwh: usableKwh }), position: "right", fontSize: 11, fill: "#b45309" }}
         />
       </BarChart>
     </ResponsiveContainer>

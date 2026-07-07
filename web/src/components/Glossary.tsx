@@ -1,18 +1,21 @@
 import { GLOSSARY } from "../lib/glossary.ts";
+import { useT } from "../i18n/useT.tsx";
 
 export function Glossary() {
+  const { t, lang } = useT();
   return (
     <div className="glossary">
-      <p className="muted">
-        Cosa indicano le voci della dashboard. Le formule sono riferite alla singola ora (Δt = 1 h, energia in kWh).
-      </p>
-      {Object.values(GLOSSARY).map((e) => (
-        <div className="gloss-item" key={e.term}>
-          <h4>{e.term}</h4>
-          <p>{e.desc}</p>
-          {e.formula !== undefined && <code>{e.formula}</code>}
-        </div>
-      ))}
+      <p className="muted">{t("glossary.intro")}</p>
+      {Object.values(GLOSSARY).map((e) => {
+        const entry = e[lang];
+        return (
+          <div className="gloss-item" key={entry.term}>
+            <h4>{entry.term}</h4>
+            <p>{entry.desc}</p>
+            {entry.formula !== undefined && <code>{entry.formula}</code>}
+          </div>
+        );
+      })}
     </div>
   );
 }

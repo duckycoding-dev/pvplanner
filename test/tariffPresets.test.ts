@@ -23,5 +23,5 @@ test("serialize → parse round-trips and validate passes", () => {
   const back = parseTariff(serializeTariff(t));
   expect(back.bands.length).toBe(t.bands.length);
   expect(validateTariff(back)).toBeNull();
-  expect(validateTariff({ ...t, defaultBuyPrice: -1 })).toContain("default");
+  expect(validateTariff({ ...t, defaultBuyPrice: -1 })).toBe("validate.tariff.defaultBuyNegative");
 });

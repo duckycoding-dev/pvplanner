@@ -1,9 +1,50 @@
 <!doctype html>
+<!-- lang="it" è il default; il toggle lingua aggiorna document.documentElement.lang a runtime (vedi LangProvider). -->
 <html lang="it">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Analisi Fotovoltaico</title>
+    <meta
+      name="description"
+      content="Stima produzione, autoconsumo, risparmio e tempo di rientro di un impianto fotovoltaico con o senza batteria, dai dati PVGIS. Dati solo nel browser, senza account."
+    />
+
+    <!-- Open Graph (anteprima link su social/chat) -->
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Analisi Fotovoltaico" />
+    <meta
+      property="og:description"
+      content="Stima produzione, autoconsumo, risparmio e tempo di rientro di un impianto fotovoltaico con o senza batteria, dai dati PVGIS."
+    />
+    <!-- [AZIONE DAVIDE] catturare uno screenshot 1200×630 della dashboard demo e salvarlo in web/public/og.png -->
+    <meta property="og:image" content="/og.png" />
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <!--
+      Cloudflare Web Analytics (cookieless, senza banner).
+      Attivo SOLO in produzione (hostname != localhost) E solo con un token reale.
+      TODO-DAVIDE: incollare il token dal dashboard Cloudflare → Web Analytics nel
+      <meta name="cf-analytics-token"> qui sotto (sostituendo "TODO-DAVIDE").
+      NB: il token vive nel meta, NON nello script inline: così il contenuto dello
+      script (e quindi l'hash sha256 in web/public/_headers) resta stabile quando
+      cambi il token. Se modifichi lo script inline, ricalcola l'hash (vedi _headers).
+    -->
+    <meta name="cf-analytics-token" content="TODO-DAVIDE" />
+    <script>
+      (function () {
+        var h = location.hostname;
+        if (h === "localhost" || h === "127.0.0.1" || h === "") return;
+        var m = document.querySelector('meta[name="cf-analytics-token"]');
+        var t = m && m.getAttribute("content");
+        if (!t || t === "TODO-DAVIDE") return;
+        var s = document.createElement("script");
+        s.defer = true;
+        s.src = "https://static.cloudflareinsights.com/beacon.min.js";
+        s.setAttribute("data-cf-beacon", JSON.stringify({ token: t }));
+        document.head.appendChild(s);
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

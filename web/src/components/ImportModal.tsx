@@ -1,6 +1,10 @@
 import { type DragEvent, useState } from "react";
+import { useT } from "../i18n/useT.tsx";
 
-/** Generic drag-and-drop import modal: parse a dropped/picked JSON file, validate, then import. */
+/**
+ * Generic drag-and-drop import modal: parse a dropped/picked JSON file, validate, then import.
+ * `parse` (throw) e `validate` restituiscono CHIAVI i18n: l'errore è tradotto qui con `t()`.
+ */
 export function ImportModal<T>({
   title,
   parse,
@@ -8,12 +12,14 @@ export function ImportModal<T>({
   onImport,
   onClose,
 }: {
-  title: string;
-  parse: (text: string) => T; // throws on malformed input
-  validate: (value: T) => string | null; // null = ok, else error message
+  title: string; // già tradotto dal chiamante
+  parse: (text: string) => T; // throws on malformed input (message = chiave i18n)
+  validate: (value: T) => string | null; // null = ok, altrimenti chiave i18n
   onImport: (value: T) => void;
   onClose: () => void;
 }) {
+  const { t } = useT();
+  // `error` è una CHIAVE i18n (tradotta al render).
   const [error, setError] = useState<string | null>(null);
   const [drag, setDrag] = useState(false);
 
@@ -28,7 +34,7 @@ export function ImportModal<T>({
       onImport(value);
       onClose();
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Errore di import.");
+      setError(e instanceof Error ? e.message : "import.errorGeneric");
     }
   };
 
@@ -37,7 +43,7 @@ export function ImportModal<T>({
     file
       .text()
       .then(handleText)
-      .catch(() => setError("Impossibile leggere il file."));
+      .catch(() => setError("import.fileUnreadable"));
   };
 
   const onDrop = (e: DragEvent): void => {
@@ -59,9 +65,9 @@ export function ImportModal<T>({
           onDragLeave={() => setDrag(false)}
           onDrop={onDrop}
         >
-          Trascina qui il file JSON, oppure{" "}
+          {t("import.dropPrompt")}{" "}
           <label className="file-pick">
-            scegli file
+            {t("common.chooseFile")}
             <input
               type="file"
               accept="application/json,.json"
@@ -70,9 +76,9 @@ export function ImportModal<T>({
             />
           </label>
         </div>
-        {error !== null && <p className="err">{error}</p>}
+        {error !== null && <p className="err">{t(error)}</p>}
         <div className="editor-actions">
-          <button onClick={onClose}>Chiudi</button>
+          <button onClick={onClose}>{t("common.close")}</button>
         </div>
       </div>
     </div>

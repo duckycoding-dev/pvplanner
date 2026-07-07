@@ -39,82 +39,84 @@ test("valido → null", () => {
   expect(validateWizardInputs(makeInputs())).toBeNull();
 });
 
+// validateWizardInputs ora ritorna CHIAVI i18n (tradotte al render dal chiamante).
+
 test("latitudine fuori range", () => {
   const i = makeInputs();
   i.location.latitude = 91;
-  expect(validateWizardInputs(i)).toContain("Latitudine");
+  expect(validateWizardInputs(i)).toBe("validate.wizard.lat");
 });
 
 test("longitudine fuori range", () => {
   const i = makeInputs();
   i.location.longitude = -181;
-  expect(validateWizardInputs(i)).toContain("Longitudine");
+  expect(validateWizardInputs(i)).toBe("validate.wizard.lon");
 });
 
 test("fuso orario non valido", () => {
   const i = makeInputs();
   i.timeZone = "Mars/Olympus";
-  expect(validateWizardInputs(i)).toContain("Fuso orario");
+  expect(validateWizardInputs(i)).toBe("validate.wizard.timezone");
 });
 
 test("azimuth fuori range", () => {
   const i = makeInputs();
   i.falde[0]!.azimuth = 200;
-  expect(validateWizardInputs(i)).toContain("azimuth");
+  expect(validateWizardInputs(i)).toBe("validate.wizard.faldaAzimuth");
 });
 
 test("tilt fuori range", () => {
   const i = makeInputs();
   i.falde[0]!.tilt = 95;
-  expect(validateWizardInputs(i)).toContain("inclinazione");
+  expect(validateWizardInputs(i)).toBe("validate.wizard.faldaTilt");
 });
 
 test("panelCount < 1", () => {
   const i = makeInputs();
   i.falde[0]!.panelCount = 0;
-  expect(validateWizardInputs(i)).toContain("pannelli");
+  expect(validateWizardInputs(i)).toBe("validate.wizard.faldaPanelCount");
 });
 
 test("panelCount non intero", () => {
   const i = makeInputs();
   i.falde[0]!.panelCount = 3.5;
-  expect(validateWizardInputs(i)).toContain("pannelli");
+  expect(validateWizardInputs(i)).toBe("validate.wizard.faldaPanelCount");
 });
 
 test("wp fuori range", () => {
   const i = makeInputs();
   i.falde[0]!.wp = 40;
-  expect(validateWizardInputs(i)).toContain("Wp");
+  expect(validateWizardInputs(i)).toBe("validate.wizard.faldaWp");
 });
 
 test("systemLossPct fuori range", () => {
   const i = makeInputs();
   i.systemLossPct = 50;
-  expect(validateWizardInputs(i)).toContain("Perdite");
+  expect(validateWizardInputs(i)).toBe("validate.wizard.systemLoss");
 });
 
 test("anni fuori intervallo per il db", () => {
   const i = makeInputs();
   i.years = { from: 2004, to: 2004 };
-  expect(validateWizardInputs(i)).toContain("2005");
+  expect(validateWizardInputs(i)).toBe("validate.wizard.yearsRange");
 });
 
 test("from > to", () => {
   const i = makeInputs();
   i.years = { from: 2021, to: 2020 };
-  expect(validateWizardInputs(i)).toContain("anno finale");
+  expect(validateWizardInputs(i)).toBe("validate.wizard.yearsOrder");
 });
 
 test("nessuna falda", () => {
   const i = makeInputs();
   i.falde = [];
-  expect(validateWizardInputs(i)).toContain("almeno una falda");
+  expect(validateWizardInputs(i)).toBe("validate.wizard.faldeMin");
 });
 
 test("id falda vuoto", () => {
   const i = makeInputs();
   i.falde[0]!.id = "";
-  expect(validateWizardInputs(i)).toContain("vuoto");
+  expect(validateWizardInputs(i)).toBe("validate.wizard.faldaIdEmpty");
 });
 
 test("id falde duplicati", () => {
@@ -123,7 +125,7 @@ test("id falde duplicati", () => {
     { id: "sud", azimuth: 0, tilt: 30, panelCount: 12, wp: 400 },
     { id: "sud", azimuth: 90, tilt: 30, panelCount: 12, wp: 400 },
   ];
-  expect(validateWizardInputs(i)).toContain("duplicat");
+  expect(validateWizardInputs(i)).toBe("validate.wizard.faldaIdDup");
 });
 
 test("parseStoredSetup: round-trip di un setup valido", () => {

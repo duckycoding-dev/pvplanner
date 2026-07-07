@@ -18,6 +18,7 @@ import { fmt } from "../lib/format.ts";
 import { MetricsTable, type MetricRow } from "./MetricsTable.tsx";
 import { NumberField } from "./NumberField.tsx";
 import { InfoTip } from "./InfoTip.tsx";
+import { useT } from "../i18n/useT.tsx";
 
 export interface CashSystem {
   id: string; // "a" | "b" | "novf"
@@ -42,6 +43,7 @@ export function CashflowSection({
   incentive: Incentive;
   defaultSecond: string;
 }) {
+  const { t } = useT();
   const [sel1, setSel1] = useState<string>(systems[0]?.id ?? "a");
   const [sel2, setSel2] = useState<string>(defaultSecond);
   const [years, setYears] = useState<number>(20);
@@ -85,24 +87,24 @@ export function CashflowSection({
     { key: "s2", label: sys2.label },
   ];
   const breakdownRows: MetricRow[] = [
-    { key: "buy", label: "Spesa acquisto evitata", info: "costo", good: "higher", money: "earn", render: eur, values: [m1.buyAvoided, m2.buyAvoided] },
-    { key: "exp", label: "Ricavo vendita (export)", info: "ricavo", good: "higher", money: "earn", render: eur, values: [m1.exportRevenue, m2.exportRevenue] },
-    { key: "save", label: "Risparmio annuo", info: "payback", good: "higher", money: "earn", render: eur, values: [m1.annualSaving, m2.annualSaving] },
-    { key: "inc", label: `Incentivo/anno (×${incN})`, good: "higher", money: "earn", render: eur, values: [m1.incPerYear, m2.incPerYear] },
-    { key: "capex", label: "Costo impianto (CAPEX)", good: "lower", money: "pay", render: eur, values: [sys1.capex, sys2.capex] },
+    { key: "buy", label: t("cashflow.buyAvoided"), info: "costo", good: "higher", money: "earn", render: eur, values: [m1.buyAvoided, m2.buyAvoided] },
+    { key: "exp", label: t("cashflow.exportRevenue"), info: "ricavo", good: "higher", money: "earn", render: eur, values: [m1.exportRevenue, m2.exportRevenue] },
+    { key: "save", label: t("cashflow.annualSaving"), info: "payback", good: "higher", money: "earn", render: eur, values: [m1.annualSaving, m2.annualSaving] },
+    { key: "inc", label: t("cashflow.incentivePerYear", { n: incN }), good: "higher", money: "earn", render: eur, values: [m1.incPerYear, m2.incPerYear] },
+    { key: "capex", label: t("cashflow.capex"), good: "lower", money: "pay", render: eur, values: [sys1.capex, sys2.capex] },
     {
       key: "pay",
-      label: "Tempo di rientro",
+      label: t("metrics.payback"),
       info: "payback",
       good: "lower",
-      render: (v) => (Number.isFinite(v) ? `${v.toFixed(1)} anni` : "—"),
+      render: (v) => (Number.isFinite(v) ? t("common.years", { n: v.toFixed(1) }) : "—"),
       values: [m1.payback ?? Infinity, m2.payback ?? Infinity],
     },
   ];
 
   const yearRows: MetricRow[] = Array.from({ length: years + 1 }, (_, y) => ({
     key: `y${y}`,
-    label: `anno ${y}`,
+    label: t("common.yearN", { n: y }),
     good: "higher",
     money: "benefit",
     render: eur,
@@ -113,19 +115,18 @@ export function CashflowSection({
     <section className="chart-card">
       <div className="section-head">
         <h3>
-          Andamento economico (cashflow cumulato)
+          {t("cashflow.chartTitle")}
           <InfoTip k="payback" />
         </h3>
       </div>
       <p className="note">
-        Quanto rendi nel tempo rispetto a <b>non installare nulla</b>: parti da −CAPEX (anno 0) e ogni
-        anno aggiungi il risparmio in bolletta (acquisto evitato + export) e, per i primi {incN} anni, la
-        quota incentivo. La curva taglia lo <b>zero</b> al tempo di rientro.
+        {t("cashflow.noteA")} <b>{t("cashflow.noteInstallNothing")}</b>
+        {t("cashflow.noteB", { n: incN })} <b>{t("cashflow.noteZero")}</b> {t("cashflow.noteC")}
       </p>
 
       <div className="cashflow-controls">
         <label className="text-field">
-          Sistema 1
+          {t("cashflow.system1")}
           <select value={sel1} onChange={(e) => setSel1(e.target.value)}>
             {systems.map((s) => (
               <option key={s.id} value={s.id}>
@@ -135,7 +136,7 @@ export function CashflowSection({
           </select>
         </label>
         <label className="text-field">
-          Sistema 2
+          {t("cashflow.system2")}
           <select value={sel2} onChange={(e) => setSel2(e.target.value)}>
             {systems.map((s) => (
               <option key={s.id} value={s.id}>
@@ -144,7 +145,7 @@ export function CashflowSection({
             ))}
           </select>
         </label>
-        <NumberField label="Anni" value={years} min={5} max={40} step={1} onChange={setYears} />
+        <NumberField label={t("cashflow.years")} value={years} min={5} max={40} step={1} onChange={setYears} />
       </div>
 
       <ResponsiveContainer width="100%" height={320}>
@@ -155,10 +156,10 @@ export function CashflowSection({
             type="number"
             domain={[0, years]}
             allowDecimals={false}
-            label={{ value: "anni", position: "insideBottom", offset: -2 }}
+            label={{ value: t("cashflow.axisYears"), position: "insideBottom", offset: -2 }}
           />
-          <YAxis label={{ value: "€ cumulati", angle: -90, position: "insideLeft" }} />
-          <Tooltip formatter={(v) => eur(Number(v))} labelFormatter={(y) => `anno ${y}`} />
+          <YAxis label={{ value: t("cashflow.axisCumulative"), angle: -90, position: "insideLeft" }} />
+          <Tooltip formatter={(v) => eur(Number(v))} labelFormatter={(y) => t("common.yearN", { n: Number(y) })} />
           <Legend />
           <ReferenceLine y={0} stroke="#475569" strokeDasharray="4 2" />
           <Line type="monotone" dataKey="s1" name={sys1.label} stroke={COLORS[0]} strokeWidth={2} dot={false} isAnimationActive={false} />
@@ -174,7 +175,7 @@ export function CashflowSection({
               x={cross}
               stroke="#7c3aed"
               strokeDasharray="3 3"
-              label={{ value: `sorpasso ${cross.toFixed(1)}a`, position: "top", fill: "#7c3aed", fontSize: 11 }}
+              label={{ value: t("cashflow.crossover", { years: cross.toFixed(1) }), position: "top", fill: "#7c3aed", fontSize: 11 }}
             />
           )}
           {cross !== null && <ReferenceDot x={cross} y={crossY} r={5} fill="#7c3aed" stroke="#fff" />}
@@ -185,21 +186,22 @@ export function CashflowSection({
         <div className="crossover-note">
           {cross !== null ? (
             <>
-              🔀 <b>{leader.label}</b> supera <b>{trailer.label}</b> dopo <b>{cross.toFixed(1)} anni</b> (cumulato ≈{" "}
-              {eur(crossY)}).
+              🔀 <b>{leader.label}</b> {t("cashflow.crossoverA")} <b>{trailer.label}</b> {t("cashflow.crossoverAfter")}{" "}
+              <b>{t("common.years", { n: cross.toFixed(1) })}</b> {t("cashflow.crossoverCumulative", { eur: eur(crossY) })}.
             </>
           ) : (
             <>
-              <b>{leader.label}</b> resta sempre davanti a <b>{trailer.label}</b> entro {years} anni (nessun sorpasso).
+              <b>{leader.label}</b> {t("cashflow.leadAlwaysA")} <b>{trailer.label}</b>{" "}
+              {t("cashflow.leadAlwaysB", { years })}
             </>
           )}
         </div>
       )}
 
-      <h4 className="subchart-title">Scomposizione del rientro (€/anno)</h4>
+      <h4 className="subchart-title">{t("cashflow.breakdownTitle")}</h4>
       <MetricsTable columns={breakdownCols} rows={breakdownRows} />
 
-      <MetricsTable title="Cumulato per anno" columns={breakdownCols} rows={yearRows} />
+      <MetricsTable title={t("cashflow.cumulativePerYear")} columns={breakdownCols} rows={yearRows} />
     </section>
   );
 }

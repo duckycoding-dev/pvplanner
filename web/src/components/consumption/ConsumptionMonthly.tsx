@@ -6,29 +6,17 @@ import {
 } from "../../../../src/core/consumption/monthlyTemplate.ts";
 import type { CanonicalConsumption } from "../../../../src/core/consumption/canonical.ts";
 import type { ConsumptionSpec, StoredSetup } from "../../lib/setupTypes.ts";
-import { MONTH_LABELS } from "../../lib/format.ts";
+import { useMonthLabels, useT } from "../../i18n/useT.tsx";
 import { InfoTip } from "../InfoTip.tsx";
 import { NumberField } from "../NumberField.tsx";
 import { ConsumptionPreview } from "./ConsumptionPreview.tsx";
 
-const SHAPE_LABELS: Record<DayShapeKey, string> = {
-  flat: "Costante",
-  morningEvening: "Mattina + sera",
-  daytimeWfh: "Diurno (smart-working)",
-  nightHeavy: "Notturno",
-};
-
-const SHAPE_TIP =
-  "Come si distribuiscono i kWh del giorno sulle 24 ore. " +
-  "«Costante»: stesso consumo a ogni ora (carichi continui, seconda casa). " +
-  "«Mattina + sera»: picchi 7–8 e 18–21, notte bassa — famiglia fuori casa di giorno (il profilo residenziale tipico). " +
-  "«Diurno (smart-working)»: come mattina+sera ma con consumo anche 9–17, qualcuno a casa di giorno. " +
-  "«Notturno»: notte alta, giorno basso, sera media — carichi programmati di notte (boiler, tariffa bioraria, ricarica EV).";
+const SHAPE_KEYS: DayShapeKey[] = ["flat", "morningEvening", "daytimeWfh", "nightHeavy"];
 
 export function defaultTemplate(): MonthlyTemplate {
   // Sagoma mattina/sera, 10 kWh/giorno per mese: punto di partenza da tarare in ~2 minuti.
   return {
-    months: MONTH_LABELS.map(() => ({ dailyKwh: 10, shape: "morningEvening" as DayShapeKey | number[] })),
+    months: Array.from({ length: 12 }, () => ({ dailyKwh: 10, shape: "morningEvening" as DayShapeKey | number[] })),
     weekendFactor: 1,
   };
 }
@@ -56,6 +44,8 @@ export function ConsumptionMonthly({
   setTemplate: (t: MonthlyTemplate) => void;
   apply: (spec: ConsumptionSpec, result: CanonicalConsumption) => void;
 }) {
+  const { t } = useT();
+  const monthLabels = useMonthLabels();
   const [advanced, setAdvanced] = useState(false);
   const [customText, setCustomText] = useState<Record<number, string>>({});
 
@@ -72,19 +62,15 @@ export function ConsumptionMonthly({
 
   return (
     <div className="consumption-method">
-      <p className="note">
-        Per ogni mese indica il consumo medio giornaliero e la sagoma tipica del giorno. L'app distribuisce i totali
-        sulle 8760 ore mantenendo il totale mensile.
-      </p>
+      <p className="note">{t("consumption.monthly.intro")}</p>
 
       <label className="consumption-adv-toggle">
-        <input type="checkbox" checked={advanced} onChange={(e) => setAdvanced(e.target.checked)} /> sagome personalizzate
-        (avanzato)
+        <input type="checkbox" checked={advanced} onChange={(e) => setAdvanced(e.target.checked)} />{" "}
+        {t("consumption.monthly.customShapesLabel")}
         <InfoTip
           entry={{
-            term: "Sagome personalizzate",
-            desc:
-              "Aggiunge alla tendina l'opzione «Personalizzata…»: 24 numeri, uno per ora (0–23), che descrivono la forma del giorno. Contano solo i rapporti tra i valori — la scala la fissa il kWh/giorno. Es: 1,1,1,1,1,1,2,3,2,1,… = picco alle 7.",
+            term: t("consumption.monthly.customShapesTip.term"),
+            desc: t("consumption.monthly.customShapesTip.desc"),
           }}
         />
       </label>
@@ -92,26 +78,28 @@ export function ConsumptionMonthly({
       <table className="consumption-months">
         <thead>
           <tr>
-            <th>Mese</th>
+            <th>{t("consumption.monthly.colMonth")}</th>
             <th>
-              kWh/giorno
+              {t("consumption.monthly.colDailyKwh")}
               <InfoTip
                 entry={{
-                  term: "kWh/giorno",
-                  desc: "Consumo medio giornaliero del mese. Lo trovi in bolletta: consumo del mese ÷ giorni. Es. 300 kWh a gennaio ≈ 9.7 kWh/giorno.",
+                  term: t("consumption.monthly.dailyKwhTip.term"),
+                  desc: t("consumption.monthly.dailyKwhTip.desc"),
                 }}
               />
             </th>
             <th>
-              Sagoma
-              <InfoTip entry={{ term: "Sagoma del giorno", desc: SHAPE_TIP }} />
+              {t("consumption.monthly.colShape")}
+              <InfoTip
+                entry={{ term: t("consumption.monthly.shapeTip.term"), desc: t("consumption.monthly.shapeTip.desc") }}
+              />
             </th>
           </tr>
         </thead>
         <tbody>
           {template.months.map((m, i) => (
             <tr key={i}>
-              <td>{MONTH_LABELS[i]}</td>
+              <td>{monthLabels[i]}</td>
               <td>
                 <input
                   type="number"
@@ -134,18 +122,18 @@ export function ConsumptionMonthly({
                     }
                   }}
                 >
-                  {(Object.keys(SHAPE_LABELS) as DayShapeKey[]).map((k) => (
+                  {SHAPE_KEYS.map((k) => (
                     <option key={k} value={k}>
-                      {SHAPE_LABELS[k]}
+                      {t(`consumption.shape.${k}`)}
                     </option>
                   ))}
-                  {advanced && <option value="custom">Personalizzata…</option>}
+                  {advanced && <option value="custom">{t("consumption.monthly.customOption")}</option>}
                 </select>
                 {advanced && Array.isArray(m.shape) && (
                   <input
                     className="consumption-custom"
                     type="text"
-                    placeholder="24 valori separati da virgola"
+                    placeholder={t("consumption.monthly.customPlaceholder")}
                     value={customText[i] ?? m.shape.join(",")}
                     onChange={(e) => {
                       const txt = e.target.value;
@@ -162,21 +150,21 @@ export function ConsumptionMonthly({
       </table>
 
       <NumberField
-        label="Fattore weekend"
+        label={t("consumption.monthly.weekendFactor.label")}
         value={template.weekendFactor}
         min={0.2}
         max={3}
         step={0.1}
         onChange={(v) => setTemplate({ ...template, weekendFactor: v })}
         tip={{
-          term: "Fattore weekend",
-          desc: "Moltiplica il consumo di sabato e domenica rispetto ai feriali: 1 = uguali; 1.3 = +30% nel weekend (si sta più a casa); 0.7 = −30% (casa vuota nel weekend). Il totale mensile resta quello impostato: cambia solo la ripartizione.",
+          term: t("consumption.monthly.weekendFactor.label"),
+          desc: t("consumption.monthly.weekendFactor.desc"),
         }}
       />
 
       <ConsumptionPreview result={result} viz={setup.viz} />
       <button className="wizard-primary" onClick={() => apply({ method: "monthly", template }, result)}>
-        Applica
+        {t("common.apply")}
       </button>
     </div>
   );

@@ -3,6 +3,7 @@ import { detectEDistribuzione, parseEDistribuzione } from "../../../../src/core/
 import { type CsvParseOptions, parseConsumptionCsv } from "../../../../src/core/consumption/parseCsv.ts";
 import type { CanonicalConsumption } from "../../../../src/core/consumption/canonical.ts";
 import type { ConsumptionSpec, StoredSetup } from "../../lib/setupTypes.ts";
+import { useT } from "../../i18n/useT.tsx";
 import { ConsumptionPreview } from "./ConsumptionPreview.tsx";
 
 export interface CsvState {
@@ -26,6 +27,7 @@ export function ConsumptionCsv({
   setState: (s: CsvState | null) => void;
   apply: (spec: ConsumptionSpec, result: CanonicalConsumption) => void;
 }) {
+  const { t } = useT();
   const [error, setError] = useState<string | null>(null);
   const [showWarnings, setShowWarnings] = useState(false);
   const [drag, setDrag] = useState(false);
@@ -59,8 +61,11 @@ export function ConsumptionCsv({
   return (
     <div className="consumption-method">
       <p className="note">
-        Carica la <strong>curva di carico</strong> reale (dal portale del distributore, es. e-distribuzione) oppure un
-        CSV a due colonne <code>timestamp, kWh</code> (orario o quartorario). Il formato viene riconosciuto in automatico.
+        {t("consumption.csv.introA")}
+        <strong>{t("consumption.csv.loadCurve")}</strong>
+        {t("consumption.csv.introB")}
+        <code>timestamp, kWh</code>
+        {t("consumption.csv.introC")}
       </p>
 
       <div
@@ -72,9 +77,9 @@ export function ConsumptionCsv({
         onDragLeave={() => setDrag(false)}
         onDrop={onDrop}
       >
-        trascina qui il CSV, oppure{" "}
+        {t("consumption.csv.dropzone")}{" "}
         <label className="file-pick">
-          scegli file
+          {t("common.chooseFile")}
           <input
             type="file"
             accept=".csv,text/csv,text/plain"
@@ -92,12 +97,12 @@ export function ConsumptionCsv({
       {state !== null && (
         <>
           <p className="note">
-            <strong>{state.filename}</strong> · copertura {state.result.meta.coveragePct}%
+            <strong>{state.filename}</strong> · {t("consumption.coverage", { pct: state.result.meta.coveragePct })}
           </p>
           {state.warnings.length > 0 && (
             <div className="consumption-warnings">
               <button className="section-toggle" onClick={() => setShowWarnings((o) => !o)}>
-                {showWarnings ? "▾" : "▸"} {state.warnings.length} avvisi
+                {showWarnings ? "▾" : "▸"} {t("consumption.csv.warnings", { n: state.warnings.length })}
               </button>
               {showWarnings && (
                 <ul>
@@ -112,7 +117,7 @@ export function ConsumptionCsv({
           )}
           <ConsumptionPreview result={state.result} viz={setup.viz} />
           <button className="wizard-primary" onClick={() => apply({ method: "csv", filename: state.filename }, state.result)}>
-            Applica
+            {t("common.apply")}
           </button>
         </>
       )}

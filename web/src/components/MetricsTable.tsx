@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { type Good, type Money, deltaClass, moneyClass } from "../lib/metricsTable.ts";
+import { useT } from "../i18n/useT.tsx";
 import { InfoTip } from "./InfoTip.tsx";
 
 export interface MetricCol {
@@ -33,6 +34,7 @@ export function MetricsTable({
   showDelta?: boolean;
   title?: string;
 }) {
+  const { t } = useT();
   const [hidden, setHidden] = useState<Set<string>>(new Set());
   const [bodyOpen, setBodyOpen] = useState(true);
   const toggle = (key: string): void =>
@@ -53,7 +55,7 @@ export function MetricsTable({
       <table className="metrics-table">
         <thead>
           <tr>
-            <th>Metrica</th>
+            <th>{t("metrics.metric")}</th>
             {columns.map((c) => (
               <th key={c.key}>{c.label}</th>
             ))}
@@ -66,7 +68,7 @@ export function MetricsTable({
             return (
               <tr key={r.key}>
                 <td>
-                  <button className="row-toggle" onClick={() => toggle(r.key)} title="nascondi riga">
+                  <button className="row-toggle" onClick={() => toggle(r.key)} title={t("metrics.hideRow")}>
                     {r.label}
                   </button>
                   {r.info !== undefined && <InfoTip k={r.info} />}
@@ -89,9 +91,9 @@ export function MetricsTable({
       </table>
       {hiddenRows.length > 0 && (
         <div className="metrics-hidden">
-          righe nascoste:{" "}
+          {t("metrics.hiddenRows")}{" "}
           {hiddenRows.map((r) => (
-            <button key={r.key} className="chip" onClick={() => toggle(r.key)} title="mostra riga">
+            <button key={r.key} className="chip" onClick={() => toggle(r.key)} title={t("metrics.showRow")}>
               {r.label} ✕
             </button>
           ))}

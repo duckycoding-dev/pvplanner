@@ -18,6 +18,7 @@ import { MetricsTable, type MetricRow } from "./MetricsTable.tsx";
 import { CompareDayChart } from "./CompareDayChart.tsx";
 import { CompareAnnualBars, CompareMonthlyBars } from "./CompareBars.tsx";
 import { type CashSystem, CashflowSection } from "./CashflowSection.tsx";
+import { useT } from "../i18n/useT.tsx";
 
 const kwh = (v: number): string => `${fmt(v)} kWh`;
 const eur = (v: number): string => `${fmt(v, 2)} €`;
@@ -30,7 +31,7 @@ interface Case {
 
 interface RowDef {
   key: string;
-  label: string;
+  labelKey: string;
   info?: string;
   good: Good;
   money?: Money;
@@ -39,19 +40,19 @@ interface RowDef {
 }
 
 const DEFS: RowDef[] = [
-  { key: "prod", label: "Produzione pratica", info: "produzione", good: "higher", render: kwh, get: (s) => s.r.production.annual.practicalKwh },
-  { key: "clip", label: "Clipping", info: "clipping", good: "lower", render: kwh, get: (s) => s.r.production.annual.clippingLossKwh },
-  { key: "self", label: "Autoconsumo", info: "autoconsumo", good: "higher", render: kwh, get: (s) => s.r.metrics.selfConsumedKwh },
-  { key: "rate", label: "Tasso autoconsumo", info: "tassoAutoconsumo", good: "higher", render: pct, get: (s) => s.r.metrics.selfConsumptionRate },
-  { key: "suff", label: "Autosufficienza", info: "autosufficienza", good: "higher", render: pct, get: (s) => s.r.metrics.selfSufficiency },
-  { key: "imp", label: "Import da rete", info: "import", good: "lower", render: kwh, get: (s) => s.r.metrics.importKwh },
-  { key: "exp", label: "Export in rete", info: "export", good: "higher", render: kwh, get: (s) => s.r.metrics.exportKwh },
-  { key: "cyc", label: "Cicli batteria/anno", info: "cicli", good: "none", render: cyc, get: (s) => s.r.metrics.battery?.equivalentCycles ?? 0 },
-  { key: "loss", label: "Perdita round-trip", info: "roundTripLoss", good: "lower", render: kwh, get: (s) => s.r.metrics.battery?.roundTripLossKwh ?? 0 },
-  { key: "recClip", label: "Clipping recuperato", info: "clippingRecuperato", good: "higher", render: kwh, get: (s) => s.r.metrics.battery?.recoveredClipKwh ?? 0 },
-  { key: "buy", label: "Spesa acquisto", info: "costo", good: "lower", money: "pay", render: eur, get: (s) => s.c.annual.buyCost },
-  { key: "sell", label: "Ricavo vendita", info: "ricavo", good: "higher", money: "earn", render: eur, get: (s) => s.c.annual.sellRevenue },
-  { key: "net", label: "Costo netto/anno", info: "nettoCosto", good: "lower", money: "net", render: eur, get: (s) => s.c.annual.netCost },
+  { key: "prod", labelKey: "metrics.productionActual", info: "produzione", good: "higher", render: kwh, get: (s) => s.r.production.annual.practicalKwh },
+  { key: "clip", labelKey: "metrics.clipping", info: "clipping", good: "lower", render: kwh, get: (s) => s.r.production.annual.clippingLossKwh },
+  { key: "self", labelKey: "metrics.selfConsumption", info: "autoconsumo", good: "higher", render: kwh, get: (s) => s.r.metrics.selfConsumedKwh },
+  { key: "rate", labelKey: "metrics.selfConsumptionRate", info: "tassoAutoconsumo", good: "higher", render: pct, get: (s) => s.r.metrics.selfConsumptionRate },
+  { key: "suff", labelKey: "metrics.selfSufficiency", info: "autosufficienza", good: "higher", render: pct, get: (s) => s.r.metrics.selfSufficiency },
+  { key: "imp", labelKey: "metrics.importGrid", info: "import", good: "lower", render: kwh, get: (s) => s.r.metrics.importKwh },
+  { key: "exp", labelKey: "metrics.exportGrid", info: "export", good: "higher", render: kwh, get: (s) => s.r.metrics.exportKwh },
+  { key: "cyc", labelKey: "metrics.cyclesYear", info: "cicli", good: "none", render: cyc, get: (s) => s.r.metrics.battery?.equivalentCycles ?? 0 },
+  { key: "loss", labelKey: "metrics.roundTripLoss", info: "roundTripLoss", good: "lower", render: kwh, get: (s) => s.r.metrics.battery?.roundTripLossKwh ?? 0 },
+  { key: "recClip", labelKey: "metrics.clippingRecovered", info: "clippingRecuperato", good: "higher", render: kwh, get: (s) => s.r.metrics.battery?.recoveredClipKwh ?? 0 },
+  { key: "buy", labelKey: "metrics.buyCost", info: "costo", good: "lower", money: "pay", render: eur, get: (s) => s.c.annual.buyCost },
+  { key: "sell", labelKey: "metrics.sellRevenue", info: "ricavo", good: "higher", money: "earn", render: eur, get: (s) => s.c.annual.sellRevenue },
+  { key: "net", labelKey: "metrics.netCostYear", info: "nettoCosto", good: "lower", money: "net", render: eur, get: (s) => s.c.annual.netCost },
 ];
 
 export function ComparePage({
@@ -67,6 +68,7 @@ export function ComparePage({
   tariff: Tariff;
   incentive: Incentive;
 }) {
+  const { t } = useT();
   const bDiffers = useMemo(() => !equalsSystems(systemA, systemB), [systemA, systemB]);
 
   const noPv = useMemo<Case>(() => {
@@ -87,11 +89,11 @@ export function ComparePage({
   const labelB = systemB.label.length > 0 ? systemB.label : "B";
   const cases: Case[] = bDiffers ? [noPv, caseA, caseB] : [noPv, caseA];
   const columns = bDiffers
-    ? [{ key: "novf", label: "senza FV" }, { key: "a", label: labelA }, { key: "b", label: labelB }]
-    : [{ key: "novf", label: "senza FV" }, { key: "a", label: labelA }];
+    ? [{ key: "novf", label: t("scenario.noPv") }, { key: "a", label: labelA }, { key: "b", label: labelB }]
+    : [{ key: "novf", label: t("scenario.noPv") }, { key: "a", label: labelA }];
   const rows: MetricRow[] = DEFS.map((d) => ({
     key: d.key,
-    label: d.label,
+    label: t(d.labelKey),
     ...(d.info === undefined ? {} : { info: d.info }),
     good: d.good,
     ...(d.money === undefined ? {} : { money: d.money }),
@@ -107,15 +109,15 @@ export function ComparePage({
   const cashSystems: CashSystem[] = [
     { id: "a", label: labelA, capex: systemA.installationCostEur, buy: caseA.c.annual.buyCost, sell: caseA.c.annual.sellRevenue, net: caseA.c.annual.netCost },
     { id: "b", label: labelB, capex: systemB.installationCostEur, buy: caseB.c.annual.buyCost, sell: caseB.c.annual.sellRevenue, net: caseB.c.annual.netCost },
-    { id: "novf", label: "senza FV", capex: 0, buy: noPv.c.annual.buyCost, sell: noPv.c.annual.sellRevenue, net: noPvNet },
+    { id: "novf", label: t("scenario.noPv"), capex: 0, buy: noPv.c.annual.buyCost, sell: noPv.c.annual.sellRevenue, net: noPvNet },
   ];
 
   rows.push({
     key: "pay",
-    label: "Tempo di rientro",
+    label: t("metrics.payback"),
     info: "payback",
     good: "lower",
-    render: (v) => (Number.isFinite(v) ? `${v.toFixed(1)} anni` : "—"),
+    render: (v) => (Number.isFinite(v) ? t("common.years", { n: v.toFixed(1) }) : "—"),
     values: cases.map((s, i) => {
       const capex = capexByCase[i] ?? 0;
       if (capex <= 0) return Infinity;
@@ -127,15 +129,25 @@ export function ComparePage({
   return (
     <div className="compare-page">
       <p className="note">
-        Tabella: <b>senza FV</b> (riferimento) · <b>{labelA}</b>
-        {bDiffers ? <> · <b>{labelB}</b></> : null}. Grafici: A vs B.{" "}
-        {bDiffers ? "" : "Modifica il Sistema B nel menu per confrontarlo con A."} {labelA}:{" "}
-        {totalPeakKwp(systemA).toFixed(2)} kWp · batteria {batteryUsableKwh(systemA).toFixed(2)} kWh — {labelB}:{" "}
-        {totalPeakKwp(systemB).toFixed(2)} kWp · batteria {batteryUsableKwh(systemB).toFixed(2)} kWh.
+        {t("compare.tableLabel")} <b>{t("scenario.noPv")}</b> {t("compare.reference")} · <b>{labelA}</b>
+        {bDiffers ? <> · <b>{labelB}</b></> : null}. {t("compare.charts")}{" "}
+        {bDiffers ? "" : t("compare.editSystemB")}{" "}
+        {t("compare.systemSpecs", {
+          label: labelA,
+          kwp: totalPeakKwp(systemA).toFixed(2),
+          batt: batteryUsableKwh(systemA).toFixed(2),
+        })}{" "}
+        —{" "}
+        {t("compare.systemSpecs", {
+          label: labelB,
+          kwp: totalPeakKwp(systemB).toFixed(2),
+          batt: batteryUsableKwh(systemB).toFixed(2),
+        })}
+        .
       </p>
 
       <section className="chart-card">
-        <MetricsTable title="Indicatori annui" columns={columns} rows={rows} />
+        <MetricsTable title={t("compare.annualIndicators")} columns={columns} rows={rows} />
       </section>
 
       <CompareDayChart

@@ -5,16 +5,17 @@ import { type CanonicalConsumption, validateCanonical } from "../../../../src/co
 import type { ConsumptionSpec, StoredSetup } from "../../lib/setupTypes.ts";
 import { applyConsumption } from "../../lib/applyConsumption.ts";
 import { fmt } from "../../lib/format.ts";
+import { useT } from "../../i18n/useT.tsx";
 import { ConsumptionCsv, type CsvState } from "./ConsumptionCsv.tsx";
 import { ConsumptionMonthly, defaultTemplate } from "./ConsumptionMonthly.tsx";
 import { ConsumptionParametric } from "./ConsumptionParametric.tsx";
 
 type Method = "csv" | "monthly" | "parametric";
 
-const METHOD_TABS: { key: Method; label: string }[] = [
-  { key: "csv", label: "CSV" },
-  { key: "monthly", label: "Template mensili" },
-  { key: "parametric", label: "Stima parametrica" },
+const METHOD_TABS: { key: Method; labelKey: string }[] = [
+  { key: "csv", labelKey: "consumption.method.csv" },
+  { key: "monthly", labelKey: "consumption.method.monthly" },
+  { key: "parametric", labelKey: "consumption.method.parametric" },
 ];
 
 /**
@@ -33,6 +34,7 @@ export function ConsumptionEditor({
   /** Riceve il NUOVO StoredSetup con i consumi applicati; il chiamante lo salva. */
   onApply: (next: StoredSetup) => void;
 }) {
+  const { t } = useT();
   const saved = setup.consumption ?? null;
   const [method, setMethod] = useState<Method>(saved?.spec.method ?? "monthly");
   // Stato per metodo, conservato al cambio tab; il metodo salvato riparte dalla sua spec.
@@ -63,13 +65,14 @@ export function ConsumptionEditor({
     <div className="consumption-editor">
       {saved !== null && (
         <p className="note consumption-current">
-          In uso: <strong>{saved.result.meta.label}</strong> · {fmt(saved.result.meta.annualKwh)} kWh/anno
+          {t("consumption.editor.inUse")} <strong>{saved.result.meta.label}</strong> ·{" "}
+          {fmt(saved.result.meta.annualKwh)} {t("consumption.editor.perYear")}
         </p>
       )}
       <div className="consumption-tabs">
-        {METHOD_TABS.map((t) => (
-          <button key={t.key} className={method === t.key ? "active" : ""} onClick={() => setMethod(t.key)}>
-            {t.label}
+        {METHOD_TABS.map((tab) => (
+          <button key={tab.key} className={method === tab.key ? "active" : ""} onClick={() => setMethod(tab.key)}>
+            {t(tab.labelKey)}
           </button>
         ))}
       </div>

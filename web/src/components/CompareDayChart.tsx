@@ -18,6 +18,7 @@ import { quickPickDays } from "../lib/quickPickDays.ts";
 import { dayIndexToDateInput, fmt, formatDayLabel } from "../lib/format.ts";
 import { useLegendToggle } from "../lib/useLegendToggle.ts";
 import { MetricsTable, type MetricRow } from "./MetricsTable.tsx";
+import { useT } from "../i18n/useT.tsx";
 
 const DAY_MS = 86_400_000;
 
@@ -68,6 +69,7 @@ export function CompareDayChart({
   usableA: number;
   usableB: number;
 }) {
+  const { t } = useT();
   const { onClick, isHidden } = useLegendToggle();
   const soc = useLegendToggle();
   const total = Math.floor(viz.hourly.loadKwh.length / 24);
@@ -91,20 +93,20 @@ export function CompareDayChart({
 
   const capMax = Math.max(usableA, usableB);
   const sameCap = usableA === usableB;
-  const labelCapA = sameCap ? `max ${fmt(usableA, 1)} kWh` : `max ${labelA}`;
+  const labelCapA = sameCap ? t("compare.maxKwh", { kwh: fmt(usableA, 1) }) : t("compare.maxLabel", { label: labelA });
 
   const dailyCols = [
     { key: "a", label: labelA },
     { key: "b", label: labelB },
   ];
   const dailyRows: MetricRow[] = [
-    { key: "prod", label: "Produzione pratica", info: "produzione", good: "higher", render: kwh2, values: [ta.prod, tb.prod] },
-    { key: "clip", label: "Clipping", info: "clipping", good: "lower", render: kwh2, values: [ta.clip, tb.clip] },
-    { key: "self", label: "Autoconsumo", info: "autoconsumo", good: "higher", render: kwh2, values: [ta.self, tb.self] },
-    { key: "imp", label: "Import da rete", info: "import", good: "lower", render: kwh2, values: [ta.imp, tb.imp] },
-    { key: "exp", label: "Export in rete", info: "export", good: "higher", render: kwh2, values: [ta.exp, tb.exp] },
-    { key: "dis", label: "Scarica batteria", good: "none", render: kwh2, values: [ta.dis, tb.dis] },
-    { key: "loss", label: "Perdita round-trip", info: "roundTripLoss", good: "lower", render: kwh2, values: [ta.cha - ta.dis, tb.cha - tb.dis] },
+    { key: "prod", label: t("metrics.productionActual"), info: "produzione", good: "higher", render: kwh2, values: [ta.prod, tb.prod] },
+    { key: "clip", label: t("metrics.clipping"), info: "clipping", good: "lower", render: kwh2, values: [ta.clip, tb.clip] },
+    { key: "self", label: t("metrics.selfConsumption"), info: "autoconsumo", good: "higher", render: kwh2, values: [ta.self, tb.self] },
+    { key: "imp", label: t("metrics.importGrid"), info: "import", good: "lower", render: kwh2, values: [ta.imp, tb.imp] },
+    { key: "exp", label: t("metrics.exportGrid"), info: "export", good: "higher", render: kwh2, values: [ta.exp, tb.exp] },
+    { key: "dis", label: t("metrics.batteryDischarge"), good: "none", render: kwh2, values: [ta.dis, tb.dis] },
+    { key: "loss", label: t("metrics.roundTripLoss"), info: "roundTripLoss", good: "lower", render: kwh2, values: [ta.cha - ta.dis, tb.cha - tb.dis] },
   ];
 
   return (
@@ -123,9 +125,9 @@ export function CompareDayChart({
           <strong className="day-label">{formatDayLabel(ts)}</strong>
         </div>
         <div className="picks">
-          <button onClick={() => setDayIndex(picks.maxClipping)}>max clipping</button>
-          <button onClick={() => setDayIndex(picks.maxProduction)}>max produzione</button>
-          <button onClick={() => setDayIndex(picks.minProduction)}>min produzione</button>
+          <button onClick={() => setDayIndex(picks.maxClipping)}>{t("daily.pickMaxClipping")}</button>
+          <button onClick={() => setDayIndex(picks.maxProduction)}>{t("daily.pickMaxProduction")}</button>
+          <button onClick={() => setDayIndex(picks.minProduction)}>{t("daily.pickMinProduction")}</button>
         </div>
       </div>
 
@@ -134,19 +136,19 @@ export function CompareDayChart({
           <CartesianGrid strokeDasharray="3 3" />
           <XAxis dataKey="hour" />
           <YAxis label={{ value: "kWh", angle: -90, position: "insideLeft" }} />
-          <Tooltip formatter={(v) => Number(v).toFixed(2)} labelFormatter={(h) => `ore ${h}`} />
+          <Tooltip formatter={(v) => Number(v).toFixed(2)} labelFormatter={(h) => t("chart.hour", { h: String(h) })} />
           <Legend onClick={onClick} wrapperStyle={{ cursor: "pointer" }} />
 
           {/* coverage drawn first as filled areas so production/load lines sit on top */}
-          <Area type="monotone" dataKey="selfA" name={`coperto ${labelA}`} stroke="#3b82f6" fill="#93c5fd" fillOpacity={0.5} isAnimationActive={false} hide={isHidden("selfA")} />
-          <Area type="monotone" dataKey="selfB" name={`coperto ${labelB}`} stroke="#3b82f6" strokeDasharray="5 3" fill="#bfdbfe" fillOpacity={0.3} isAnimationActive={false} hide={isHidden("selfB")} />
-          <Line type="monotone" dataKey="load" name="consumo" stroke="#dc2626" strokeWidth={2} dot={false} isAnimationActive={false} hide={isHidden("load")} />
-          <Line type="monotone" dataKey="prodA" name={`produzione ${labelA}`} stroke="#16a34a" strokeWidth={2} dot={false} isAnimationActive={false} hide={isHidden("prodA")} />
-          <Line type="monotone" dataKey="prodB" name={`produzione ${labelB}`} stroke="#16a34a" strokeDasharray="5 3" dot={false} isAnimationActive={false} hide={isHidden("prodB")} />
+          <Area type="monotone" dataKey="selfA" name={t("compare.coveredLabel", { label: labelA })} stroke="#3b82f6" fill="#93c5fd" fillOpacity={0.5} isAnimationActive={false} hide={isHidden("selfA")} />
+          <Area type="monotone" dataKey="selfB" name={t("compare.coveredLabel", { label: labelB })} stroke="#3b82f6" strokeDasharray="5 3" fill="#bfdbfe" fillOpacity={0.3} isAnimationActive={false} hide={isHidden("selfB")} />
+          <Line type="monotone" dataKey="load" name={t("chart.consumption")} stroke="#dc2626" strokeWidth={2} dot={false} isAnimationActive={false} hide={isHidden("load")} />
+          <Line type="monotone" dataKey="prodA" name={t("compare.productionLabel", { label: labelA })} stroke="#16a34a" strokeWidth={2} dot={false} isAnimationActive={false} hide={isHidden("prodA")} />
+          <Line type="monotone" dataKey="prodB" name={t("compare.productionLabel", { label: labelB })} stroke="#16a34a" strokeDasharray="5 3" dot={false} isAnimationActive={false} hide={isHidden("prodB")} />
         </ComposedChart>
       </ResponsiveContainer>
 
-      <h4 className="subchart-title">Stato di carica batteria (SoC)</h4>
+      <h4 className="subchart-title">{t("compare.socTitle")}</h4>
       <ResponsiveContainer width="100%" height={200}>
         <ComposedChart data={pts} margin={{ top: 6, right: 24, left: 0, bottom: 4 }}>
           <CartesianGrid strokeDasharray="3 3" />
@@ -155,10 +157,10 @@ export function CompareDayChart({
             domain={[0, capMax > 0 ? Math.ceil(capMax) : "auto"]}
             label={{ value: "kWh", angle: -90, position: "insideLeft" }}
           />
-          <Tooltip formatter={(v) => Number(v).toFixed(2)} labelFormatter={(h) => `ore ${h}`} />
+          <Tooltip formatter={(v) => Number(v).toFixed(2)} labelFormatter={(h) => t("chart.hour", { h: String(h) })} />
           <Legend onClick={soc.onClick} wrapperStyle={{ cursor: "pointer" }} />
-          <Line type="monotone" dataKey="socA" name={`SoC ${labelA}`} stroke="#f59e0b" strokeWidth={2} dot={false} isAnimationActive={false} hide={soc.isHidden("socA")} />
-          <Line type="monotone" dataKey="socB" name={`SoC ${labelB}`} stroke="#f59e0b" strokeDasharray="5 3" dot={false} isAnimationActive={false} hide={soc.isHidden("socB")} />
+          <Line type="monotone" dataKey="socA" name={t("compare.socLabel", { label: labelA })} stroke="#f59e0b" strokeWidth={2} dot={false} isAnimationActive={false} hide={soc.isHidden("socA")} />
+          <Line type="monotone" dataKey="socB" name={t("compare.socLabel", { label: labelB })} stroke="#f59e0b" strokeDasharray="5 3" dot={false} isAnimationActive={false} hide={soc.isHidden("socB")} />
           {usableA > 0 && (
             <ReferenceLine
               y={usableA}
@@ -172,13 +174,13 @@ export function CompareDayChart({
               y={usableB}
               stroke="#92400e"
               strokeDasharray="2 2"
-              label={{ value: `max ${labelB}`, position: "insideBottomRight", fontSize: 11, fill: "#92400e" }}
+              label={{ value: t("compare.maxLabel", { label: labelB }), position: "insideBottomRight", fontSize: 11, fill: "#92400e" }}
             />
           )}
         </ComposedChart>
       </ResponsiveContainer>
 
-      <h4 className="subchart-title">Bilancio energetico del giorno</h4>
+      <h4 className="subchart-title">{t("compare.dayBalanceTitle")}</h4>
       <MetricsTable columns={dailyCols} rows={dailyRows} />
     </div>
   );

@@ -8,6 +8,7 @@ import { type Incentive, incentiveTotalEur, systemPaybackYears } from "../lib/ec
 import { MetricsTable, type MetricRow } from "./MetricsTable.tsx";
 import { InfoTip } from "./InfoTip.tsx";
 import { ConsumptionLockedBox } from "./ConsumptionLockedBox.tsx";
+import { useT } from "../i18n/useT.tsx";
 
 const eur = (v: number): string => `${fmt(v, 2)} €`;
 
@@ -24,6 +25,7 @@ function KpiCard({
   highlight?: string;
   info?: string;
 }) {
+  const { t } = useT();
   const single = con === undefined;
   return (
     <div className="card kpi">
@@ -38,11 +40,11 @@ function KpiCard({
       ) : (
         <>
           <div className="row">
-            <span className="k">senza</span>
+            <span className="k">{t("scenario.without")}</span>
             <span>{senza}</span>
           </div>
           <div className="row">
-            <span className="k">con</span>
+            <span className="k">{t("scenario.with")}</span>
             <span>{con}</span>
           </div>
         </>
@@ -65,6 +67,7 @@ export function AnnualOverview({
   hasBattery: boolean;
   hasConsumption: boolean;
 }) {
+  const { t } = useT();
   const { onClick, isHidden } = useLegendToggle();
   const p = viz.annual.production;
   const nb = viz.annual.noBattery;
@@ -75,25 +78,25 @@ export function AnnualOverview({
   const cc = scenarioCost(viz, "con", tariff);
   const capex = viz.meta.installationCostEur;
   const payback = systemPaybackYears(capex, cc.annual.netCost, np.annual.netCost, incentive);
-  const paybackText = payback === null ? "oltre 40 anni" : `${payback.toFixed(1)} anni`;
+  const paybackText = payback === null ? t("annual.paybackOver") : t("common.years", { n: payback.toFixed(1) });
 
   // First column is always "senza FV" (reference); Δ = last two columns:
   // battery effect (con vs senza) when there is a battery, else FV vs senza FV.
   const costCols = hasBattery
-    ? [{ key: "novf", label: "senza FV" }, { key: "senza", label: "senza batteria" }, { key: "con", label: "con batteria" }]
-    : [{ key: "novf", label: "senza FV" }, { key: "fv", label: "FV" }];
+    ? [{ key: "novf", label: t("scenario.noPv") }, { key: "senza", label: t("scenario.noBattery") }, { key: "con", label: t("scenario.withBattery") }]
+    : [{ key: "novf", label: t("scenario.noPv") }, { key: "fv", label: t("scenario.pv") }];
   const v3 = (noPvV: number, senzaV: number, conV: number): number[] =>
     hasBattery ? [noPvV, senzaV, conV] : [noPvV, senzaV];
   const costRows: MetricRow[] = [
-    { key: "buy", label: "Spesa acquisto", info: "costo", good: "lower", money: "pay", render: eur, values: v3(np.annual.buyCost, cs.annual.buyCost, cc.annual.buyCost) },
-    { key: "sell", label: "Ricavo vendita", info: "ricavo", good: "higher", money: "earn", render: eur, values: v3(np.annual.sellRevenue, cs.annual.sellRevenue, cc.annual.sellRevenue) },
-    { key: "net", label: "Costo netto/anno", info: "nettoCosto", good: "lower", money: "net", render: eur, values: v3(np.annual.netCost, cs.annual.netCost, cc.annual.netCost) },
+    { key: "buy", label: t("metrics.buyCost"), info: "costo", good: "lower", money: "pay", render: eur, values: v3(np.annual.buyCost, cs.annual.buyCost, cc.annual.buyCost) },
+    { key: "sell", label: t("metrics.sellRevenue"), info: "ricavo", good: "higher", money: "earn", render: eur, values: v3(np.annual.sellRevenue, cs.annual.sellRevenue, cc.annual.sellRevenue) },
+    { key: "net", label: t("metrics.netCostYear"), info: "nettoCosto", good: "lower", money: "net", render: eur, values: v3(np.annual.netCost, cs.annual.netCost, cc.annual.netCost) },
   ];
 
   const barData = [
-    { metric: "autoconsumo", senza: nb.selfConsumedKwh, con: wb.selfConsumedKwh },
-    { metric: "import", senza: nb.importKwh, con: wb.importKwh },
-    { metric: "export", senza: nb.exportKwh, con: wb.exportKwh },
+    { metric: t("chart.selfConsumption"), senza: nb.selfConsumedKwh, con: wb.selfConsumedKwh },
+    { metric: t("chart.import"), senza: nb.importKwh, con: wb.importKwh },
+    { metric: t("chart.export"), senza: nb.exportKwh, con: wb.exportKwh },
   ];
 
   return (
@@ -101,16 +104,24 @@ export function AnnualOverview({
       <section className="cards">
         <div className="card">
           <h3>
-            Produzione {viz.meta.year}
+            {t("annual.productionYear", { year: viz.meta.year })}
             <InfoTip k="produzione" />
           </h3>
           <p className="big">{fmt(p.practicalKwh)} kWh</p>
           <p className="muted">
-            teorica {fmt(p.theoreticalKwh)} · clipping {fmt(p.clippingLossKwh)} ({pct(p.clippingPct / 100)}),{" "}
-            {p.clippedHours} h<InfoTip k="clipping" /> · picco {p.peakKw.toFixed(1)} kW<InfoTip k="picco" />
+            {t("annual.prodDetail", {
+              theo: fmt(p.theoreticalKwh),
+              clip: fmt(p.clippingLossKwh),
+              clipPct: pct(p.clippingPct / 100),
+              hours: p.clippedHours,
+            })}
+            <InfoTip k="clipping" />
+            {t("annual.prodPeak", { peak: p.peakKw.toFixed(1) })}
+            <InfoTip k="picco" />
           </p>
           <p className="muted">
-            media 2005–2023: {fmt(p.multiyearKwh)} kWh<InfoTip k="multiyear" />
+            {t("annual.multiyearAvg", { kwh: fmt(p.multiyearKwh) })}
+            <InfoTip k="multiyear" />
           </p>
         </div>
       </section>
@@ -121,37 +132,37 @@ export function AnnualOverview({
         <>
       <section className="cards">
         <KpiCard
-          label="Tasso autoconsumo"
+          label={t("metrics.selfConsumptionRate")}
           info="tassoAutoconsumo"
           senza={pct(nb.selfConsumptionRate)}
           con={hasBattery ? pct(wb.selfConsumptionRate) : undefined}
         />
         <KpiCard
-          label="Autosufficienza"
+          label={t("metrics.selfSufficiency")}
           info="autosufficienza"
           senza={pct(nb.selfSufficiency)}
           con={hasBattery ? pct(wb.selfSufficiency) : undefined}
-          highlight={`+${d.selfSufficiencyPoints.toFixed(1)} punti`}
+          highlight={t("annual.pointsPlus", { points: d.selfSufficiencyPoints.toFixed(1) })}
         />
         <KpiCard
-          label="Import da rete"
+          label={t("metrics.importGrid")}
           info="import"
           senza={`${fmt(nb.importKwh)} kWh`}
           con={hasBattery ? `${fmt(wb.importKwh)} kWh` : undefined}
           highlight={`−${fmt(d.importReductionKwh)} kWh`}
         />
         <KpiCard
-          label="Export in rete"
+          label={t("metrics.exportGrid")}
           info="export"
           senza={`${fmt(nb.exportKwh)} kWh`}
           con={hasBattery ? `${fmt(wb.exportKwh)} kWh` : undefined}
         />
         {hasBattery && (
-          <KpiCard label="Cicli batteria/anno" info="cicli" senza="—" con={fmt(wb.battery.equivalentCycles)} />
+          <KpiCard label={t("metrics.cyclesYear")} info="cicli" senza="—" con={fmt(wb.battery.equivalentCycles)} />
         )}
         {hasBattery && (
           <KpiCard
-            label="Perdita round-trip"
+            label={t("metrics.roundTripLoss")}
             info="roundTripLoss"
             senza="—"
             con={`${fmt(wb.battery.roundTripLossKwh)} kWh`}
@@ -159,7 +170,7 @@ export function AnnualOverview({
         )}
         {hasBattery && wb.battery.recoveredClipKwh > 0 && (
           <KpiCard
-            label="Clipping recuperato"
+            label={t("metrics.clippingRecovered")}
             info="clippingRecuperato"
             senza="—"
             con={`${fmt(wb.battery.recoveredClipKwh)} kWh`}
@@ -169,7 +180,7 @@ export function AnnualOverview({
 
       <section className="chart-card">
         <MetricsTable
-          title={hasBattery ? "Costi energia (Δ = effetto batteria)" : "Costi energia (Δ = FV vs senza FV)"}
+          title={hasBattery ? t("metrics.energyCostsBattery") : t("metrics.energyCostsPv")}
           columns={costCols}
           rows={costRows}
         />
@@ -178,17 +189,17 @@ export function AnnualOverview({
       <section className="cards">
         <div className="card">
           <h3>
-            Tempo di rientro<InfoTip k="payback" />
+            {t("metrics.payback")}<InfoTip k="payback" />
           </h3>
           <p className="big">{paybackText}</p>
           <p className="muted">
-            CAPEX {fmt(capex)} € · incentivo {fmt(incentiveTotalEur(incentive, capex))} € · vs «senza FV»
+            {t("annual.paybackDetail", { capex: fmt(capex), incentive: fmt(incentiveTotalEur(incentive, capex)) })}
           </p>
         </div>
       </section>
 
       <section className="chart-card">
-        <h3>{hasBattery ? "Energia: senza vs con batteria" : "Energia (FV)"}</h3>
+        <h3>{hasBattery ? t("annual.energyChartBattery") : t("annual.energyChartPv")}</h3>
         <ResponsiveContainer width="100%" height={300}>
           <BarChart data={barData}>
             <CartesianGrid strokeDasharray="3 3" />
@@ -196,8 +207,8 @@ export function AnnualOverview({
             <YAxis label={{ value: "kWh", angle: -90, position: "insideLeft" }} />
             <Tooltip formatter={(v: number) => `${fmt(v)} kWh`} />
             <Legend onClick={onClick} wrapperStyle={{ cursor: "pointer" }} />
-            <Bar dataKey="senza" name={hasBattery ? "senza batteria" : "FV"} fill="#94a3b8" hide={isHidden("senza")} />
-            {hasBattery && <Bar dataKey="con" name="con batteria" fill="#3b82f6" hide={isHidden("con")} />}
+            <Bar dataKey="senza" name={hasBattery ? t("scenario.noBattery") : t("scenario.pv")} fill="#94a3b8" hide={isHidden("senza")} />
+            {hasBattery && <Bar dataKey="con" name={t("scenario.withBattery")} fill="#3b82f6" hide={isHidden("con")} />}
           </BarChart>
         </ResponsiveContainer>
       </section>

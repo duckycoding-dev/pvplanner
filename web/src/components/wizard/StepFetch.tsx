@@ -2,6 +2,7 @@ import { type DragEvent, useState } from "react";
 import { buildDataset } from "../../lib/buildDataset.ts";
 import { saveSetup } from "../../lib/datasetStore.ts";
 import type { StoredSetup, WizardInputs } from "../../lib/setupTypes.ts";
+import { useT } from "../../i18n/useT.tsx";
 
 type FaldaState = "idle" | "running" | "ok" | "error";
 
@@ -11,11 +12,12 @@ interface DroppedFile {
   faldaId: string; // falda a cui il file è assegnato
 }
 
-const STATE_LABEL: Record<FaldaState, string> = {
-  idle: "in attesa",
-  running: "in corso…",
-  ok: "ok",
-  error: "errore",
+// Chiave i18n per ogni stato, tradotta al render.
+const STATE_KEY: Record<FaldaState, string> = {
+  idle: "wizard.fetch.state.idle",
+  running: "wizard.fetch.state.running",
+  ok: "wizard.fetch.state.ok",
+  error: "wizard.fetch.state.error",
 };
 
 /**
@@ -34,6 +36,7 @@ export function StepFetch({
   inputs: WizardInputs;
   onComplete: (setup: StoredSetup) => void;
 }) {
+  const { t } = useT();
   const faldaIds = inputs.falde.map((f) => f.id);
   const [states, setStates] = useState<Record<string, FaldaState>>(() =>
     Object.fromEntries(faldaIds.map((id) => [id, "idle"])),
@@ -99,7 +102,7 @@ export function StepFetch({
       }),
     )
       .then((parsed) => setFiles((prev) => [...prev, ...parsed]))
-      .catch(() => setGlobalError("Impossibile leggere uno dei file (JSON non valido)."));
+      .catch(() => setGlobalError(t("wizard.fetch.fileReadError")));
   };
 
   const onDrop = (e: DragEvent): void => {
@@ -110,7 +113,7 @@ export function StepFetch({
 
   return (
     <div className="wizard-body">
-      <h4>Scarico dati PVGIS</h4>
+      <h4>{t("wizard.fetch.title")}</h4>
 
       {inputs.falde.map((f) => {
         const st = states[f.id] ?? "idle";
@@ -118,10 +121,10 @@ export function StepFetch({
           <div className="wizard-fetch-item" key={f.id}>
             <span className="wizard-fetch-id">{f.id}</span>
             {st === "error" && errors[f.id] !== undefined && <span className="err">{errors[f.id]}</span>}
-            <span className={`wizard-fetch-state ${st}`}>{STATE_LABEL[st]}</span>
+            <span className={`wizard-fetch-state ${st}`}>{t(STATE_KEY[st])}</span>
             {st === "error" && !running && (
               <button className="wizard-retry" onClick={() => void run()}>
-                Riprova
+                {t("wizard.fetch.retry")}
               </button>
             )}
           </div>
@@ -129,7 +132,7 @@ export function StepFetch({
       })}
 
       <button className="wizard-primary" onClick={() => void run()} disabled={running}>
-        {running ? "Scarico…" : "Scarica dati PVGIS"}
+        {running ? t("wizard.fetch.downloading") : t("wizard.fetch.download")}
       </button>
 
       {globalError !== null && <p className="err">{globalError}</p>}
@@ -143,9 +146,9 @@ export function StepFetch({
         onDragLeave={() => setDrag(false)}
         onDrop={onDrop}
       >
-        oppure trascina qui i JSON <code>seriescalc</code> scaricati a mano dal sito PVGIS (uno per falda), oppure{" "}
+        {t("wizard.fetch.dropBefore")} <code>seriescalc</code> {t("wizard.fetch.dropAfter")}{" "}
         <label className="file-pick">
-          scegli file
+          {t("common.chooseFile")}
           <input
             type="file"
             accept="application/json,.json"
@@ -175,7 +178,7 @@ export function StepFetch({
           <button
             className="wizard-falda-del"
             onClick={() => setFiles((prev) => prev.filter((_, j) => j !== i))}
-            aria-label="Rimuovi file"
+            aria-label={t("wizard.fetch.removeFile")}
           >
             ✕
           </button>

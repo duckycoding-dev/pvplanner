@@ -2,46 +2,48 @@ import { useState } from "react";
 import { Bar, BarChart, CartesianGrid, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import type { Scenario, Viz } from "../types.ts";
 import type { Tariff } from "../../../src/core/economics/tariff.ts";
-import { fmt, MONTH_LABELS } from "../lib/format.ts";
+import { fmt } from "../lib/format.ts";
 import { useLegendToggle } from "../lib/useLegendToggle.ts";
 import { noPvCost, scenarioCost } from "../lib/viewCosts.ts";
 import { MetricsTable, type MetricRow } from "./MetricsTable.tsx";
 import { InfoTip } from "./InfoTip.tsx";
 import { ConsumptionLockedBox } from "./ConsumptionLockedBox.tsx";
+import { useMonthLabels, useT } from "../i18n/useT.tsx";
 
 const eur = (v: number): string => `${fmt(v, 2)} €`;
 
 interface BarSpec {
   key: string;
-  name: string;
+  nameKey: string;
+  scenarioKey?: string;
   fill: string;
 }
 
 const NET_BARS: Record<Scenario, BarSpec[]> = {
   con: [
-    { key: "selfCon", name: "autoconsumo", fill: "#3b82f6" },
-    { key: "impCon", name: "import", fill: "#dc2626" },
-    { key: "expCon", name: "export", fill: "#94a3b8" },
+    { key: "selfCon", nameKey: "chart.selfConsumption", fill: "#3b82f6" },
+    { key: "impCon", nameKey: "chart.import", fill: "#dc2626" },
+    { key: "expCon", nameKey: "chart.export", fill: "#94a3b8" },
   ],
   senza: [
-    { key: "selfSen", name: "autoconsumo", fill: "#3b82f6" },
-    { key: "impSen", name: "import", fill: "#dc2626" },
-    { key: "expSen", name: "export", fill: "#94a3b8" },
+    { key: "selfSen", nameKey: "chart.selfConsumption", fill: "#3b82f6" },
+    { key: "impSen", nameKey: "chart.import", fill: "#dc2626" },
+    { key: "expSen", nameKey: "chart.export", fill: "#94a3b8" },
   ],
   entrambi: [
-    { key: "selfCon", name: "autoconsumo (con)", fill: "#3b82f6" },
-    { key: "selfSen", name: "autoconsumo (senza)", fill: "#93c5fd" },
-    { key: "impCon", name: "import (con)", fill: "#dc2626" },
-    { key: "impSen", name: "import (senza)", fill: "#fca5a5" },
-    { key: "expCon", name: "export (con)", fill: "#64748b" },
-    { key: "expSen", name: "export (senza)", fill: "#cbd5e1" },
+    { key: "selfCon", nameKey: "chart.selfConsumption", scenarioKey: "scenario.with", fill: "#3b82f6" },
+    { key: "selfSen", nameKey: "chart.selfConsumption", scenarioKey: "scenario.without", fill: "#93c5fd" },
+    { key: "impCon", nameKey: "chart.import", scenarioKey: "scenario.with", fill: "#dc2626" },
+    { key: "impSen", nameKey: "chart.import", scenarioKey: "scenario.without", fill: "#fca5a5" },
+    { key: "expCon", nameKey: "chart.export", scenarioKey: "scenario.with", fill: "#64748b" },
+    { key: "expSen", nameKey: "chart.export", scenarioKey: "scenario.without", fill: "#cbd5e1" },
   ],
 };
 
-const SCENARIOS: { key: Scenario; label: string }[] = [
-  { key: "con", label: "con batteria" },
-  { key: "senza", label: "senza batteria" },
-  { key: "entrambi", label: "entrambi" },
+const SCENARIOS: { key: Scenario; labelKey: string }[] = [
+  { key: "con", labelKey: "scenario.withBattery" },
+  { key: "senza", labelKey: "scenario.noBattery" },
+  { key: "entrambi", labelKey: "scenario.both" },
 ];
 
 export function MonthlyView({
@@ -55,6 +57,8 @@ export function MonthlyView({
   hasBattery: boolean;
   hasConsumption: boolean;
 }) {
+  const { t } = useT();
+  const monthLabels = useMonthLabels();
   const prodToggle = useLegendToggle();
   const netToggle = useLegendToggle();
   const [scenario, setScenario] = useState<Scenario>("con");
@@ -64,16 +68,16 @@ export function MonthlyView({
   const cc = scenarioCost(viz, "con", tariff);
   // First column "senza FV" (reference); Δ = last two columns.
   const costCols = hasBattery
-    ? [{ key: "novf", label: "senza FV" }, { key: "senza", label: "senza batteria" }, { key: "con", label: "con batteria" }]
-    : [{ key: "novf", label: "senza FV" }, { key: "fv", label: "FV" }];
+    ? [{ key: "novf", label: t("scenario.noPv") }, { key: "senza", label: t("scenario.noBattery") }, { key: "con", label: t("scenario.withBattery") }]
+    : [{ key: "novf", label: t("scenario.noPv") }, { key: "fv", label: t("scenario.pv") }];
   const v3 = (noPvV: number, senzaV: number, conV: number): number[] =>
     hasBattery ? [noPvV, senzaV, conV] : [noPvV, senzaV];
   const costRows: MetricRow[] = [
-    { key: "buy", label: "Spesa acquisto", info: "costo", good: "lower", money: "pay", render: eur, values: v3(np.annual.buyCost, cs.annual.buyCost, cc.annual.buyCost) },
-    { key: "sell", label: "Ricavo vendita", info: "ricavo", good: "higher", money: "earn", render: eur, values: v3(np.annual.sellRevenue, cs.annual.sellRevenue, cc.annual.sellRevenue) },
-    { key: "net", label: "Costo netto/anno", info: "nettoCosto", good: "lower", money: "net", render: eur, values: v3(np.annual.netCost, cs.annual.netCost, cc.annual.netCost) },
+    { key: "buy", label: t("metrics.buyCost"), info: "costo", good: "lower", money: "pay", render: eur, values: v3(np.annual.buyCost, cs.annual.buyCost, cc.annual.buyCost) },
+    { key: "sell", label: t("metrics.sellRevenue"), info: "ricavo", good: "higher", money: "earn", render: eur, values: v3(np.annual.sellRevenue, cs.annual.sellRevenue, cc.annual.sellRevenue) },
+    { key: "net", label: t("metrics.netCostYear"), info: "nettoCosto", good: "lower", money: "net", render: eur, values: v3(np.annual.netCost, cs.annual.netCost, cc.annual.netCost) },
   ];
-  const monthlyNetRows: MetricRow[] = MONTH_LABELS.map((name, k) => ({
+  const monthlyNetRows: MetricRow[] = monthLabels.map((name, k) => ({
     key: `m${k}`,
     label: name,
     good: "lower",
@@ -83,7 +87,7 @@ export function MonthlyView({
   }));
 
   const data = viz.monthly.map((m) => ({
-    name: MONTH_LABELS[m.month - 1],
+    name: monthLabels[m.month - 1],
     pratica: m.prodPracticalKwh,
     clipping: m.clippingKwh,
     selfCon: m.wb.selfConsumedKwh,
@@ -100,14 +104,14 @@ export function MonthlyView({
         <>
           <section className="chart-card">
             <MetricsTable
-              title={hasBattery ? "Costi energia (Δ = effetto batteria)" : "Costi energia (Δ = FV vs senza FV)"}
+              title={hasBattery ? t("metrics.energyCostsBattery") : t("metrics.energyCostsPv")}
               columns={costCols}
               rows={costRows}
             />
           </section>
 
           <section className="chart-card">
-            <MetricsTable title="Costo netto per mese" columns={costCols} rows={monthlyNetRows} />
+            <MetricsTable title={t("monthly.netCostPerMonth")} columns={costCols} rows={monthlyNetRows} />
           </section>
         </>
       )}
@@ -115,7 +119,7 @@ export function MonthlyView({
       <section className="chart-card">
         <div className="section-head">
           <h3>
-            Produzione mensile (pratica + clipping = teorica)
+            {t("monthly.productionTitle")}
             <InfoTip k="clipping" />
           </h3>
         </div>
@@ -126,8 +130,8 @@ export function MonthlyView({
             <YAxis label={{ value: "kWh", angle: -90, position: "insideLeft" }} />
             <Tooltip formatter={(v: number) => `${fmt(v)} kWh`} />
             <Legend onClick={prodToggle.onClick} wrapperStyle={{ cursor: "pointer" }} />
-            <Bar dataKey="pratica" name="produzione" stackId="p" fill="#16a34a" hide={prodToggle.isHidden("pratica")} />
-            <Bar dataKey="clipping" name="clipping" stackId="p" fill="#f59e0b" hide={prodToggle.isHidden("clipping")} />
+            <Bar dataKey="pratica" name={t("chart.production")} stackId="p" fill="#16a34a" hide={prodToggle.isHidden("pratica")} />
+            <Bar dataKey="clipping" name={t("chart.clipping")} stackId="p" fill="#f59e0b" hide={prodToggle.isHidden("clipping")} />
           </BarChart>
         </ResponsiveContainer>
       </section>
@@ -138,14 +142,14 @@ export function MonthlyView({
         <section className="chart-card">
           <div className="section-head">
             <h3>
-              Autoconsumo e rete per mese
+              {t("monthly.selfConsumptionGridTitle")}
               <InfoTip k="autoconsumo" />
             </h3>
             {hasBattery && (
               <span className="seg">
                 {SCENARIOS.map((s) => (
                   <button key={s.key} className={scenario === s.key ? "active" : ""} onClick={() => setScenario(s.key)}>
-                    {s.label}
+                    {t(s.labelKey)}
                   </button>
                 ))}
               </span>
@@ -159,7 +163,17 @@ export function MonthlyView({
               <Tooltip formatter={(v: number) => `${fmt(v)} kWh`} />
               <Legend onClick={netToggle.onClick} wrapperStyle={{ cursor: "pointer" }} />
               {NET_BARS[effScenario].map((b) => (
-                <Bar key={b.key} dataKey={b.key} name={b.name} fill={b.fill} hide={netToggle.isHidden(b.key)} />
+                <Bar
+                  key={b.key}
+                  dataKey={b.key}
+                  name={
+                    b.scenarioKey === undefined
+                      ? t(b.nameKey)
+                      : t("monthly.seriesScenario", { metric: t(b.nameKey), scenario: t(b.scenarioKey) })
+                  }
+                  fill={b.fill}
+                  hide={netToggle.isHidden(b.key)}
+                />
               ))}
             </BarChart>
           </ResponsiveContainer>

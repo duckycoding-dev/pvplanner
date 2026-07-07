@@ -36,61 +36,62 @@ export type ConsumptionSpec =
   | { method: "parametric"; house: HouseParams };
 
 /**
- * Valida gli input del wizard. Ritorna un messaggio d'errore (italiano) sul primo
- * problema trovato, oppure null se tutto è valido. Stile dei messaggi coerente con
- * validateAgainstBaseline in systemConfig.ts.
+ * Valida gli input del wizard. Ritorna una CHIAVE i18n sul primo problema trovato,
+ * oppure null se tutto è valido; il chiamante traduce con `t()` al render. I dettagli
+ * dinamici (id falda, fuso, intervallo anni) sono omessi dai messaggi per restare
+ * traducibili senza interpolazione — vedi web/src/i18n.
  */
 export function validateWizardInputs(i: WizardInputs): string | null {
   const { latitude, longitude } = i.location;
   if (!Number.isFinite(latitude) || latitude < -90 || latitude > 90) {
-    return "Latitudine deve essere tra -90 e 90.";
+    return "validate.wizard.lat";
   }
   if (!Number.isFinite(longitude) || longitude < -180 || longitude > 180) {
-    return "Longitudine deve essere tra -180 e 180.";
+    return "validate.wizard.lon";
   }
 
   if (!Intl.supportedValuesOf("timeZone").includes(i.timeZone)) {
-    return `Fuso orario non valido: "${i.timeZone}".`;
+    return "validate.wizard.timezone";
   }
 
   if (i.systemLossPct < 0 || i.systemLossPct > 40) {
-    return "Perdite di sistema devono essere tra 0 e 40.";
+    return "validate.wizard.systemLoss";
   }
 
   const range = ALLOWED_YEARS[i.radiationDb];
   if (range === undefined) {
-    return `Database di radiazione non valido: "${String(i.radiationDb)}".`;
+    return "validate.wizard.radiationDb";
   }
   if (i.years.from < range.min || i.years.from > range.max || i.years.to < range.min || i.years.to > range.max) {
-    return `Anni fuori intervallo per ${i.radiationDb} (${range.min}–${range.max}).`;
+    return "validate.wizard.yearsRange";
   }
   if (i.years.from > i.years.to) {
-    return "Anno iniziale deve essere ≤ anno finale.";
+    return "validate.wizard.yearsOrder";
   }
 
   if (i.falde.length < 1) {
-    return "Serve almeno una falda.";
+    return "validate.wizard.faldeMin";
   }
   const seen = new Set<string>();
   for (const f of i.falde) {
     if (f.id.trim().length === 0) {
-      return "ID falda non può essere vuoto.";
+      return "validate.wizard.faldaIdEmpty";
     }
     if (seen.has(f.id)) {
-      return `ID falde duplicati: "${f.id}".`;
+      return "validate.wizard.faldaIdDup";
     }
     seen.add(f.id);
     if (f.azimuth < -180 || f.azimuth > 180) {
-      return `Falda "${f.id}": azimuth deve essere tra -180 e 180.`;
+      return "validate.wizard.faldaAzimuth";
     }
     if (f.tilt < 0 || f.tilt > 90) {
-      return `Falda "${f.id}": inclinazione deve essere tra 0 e 90.`;
+      return "validate.wizard.faldaTilt";
     }
     if (!Number.isInteger(f.panelCount) || f.panelCount < 1) {
-      return `Falda "${f.id}": numero pannelli deve essere un intero ≥ 1.`;
+      return "validate.wizard.faldaPanelCount";
     }
     if (f.wp < 50 || f.wp > 1000) {
-      return `Falda "${f.id}": potenza pannello (Wp) deve essere tra 50 e 1000.`;
+      return "validate.wizard.faldaWp";
     }
   }
 

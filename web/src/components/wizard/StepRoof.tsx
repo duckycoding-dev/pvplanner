@@ -1,10 +1,9 @@
 import { ALLOWED_YEARS } from "../../../../src/core/pvgis/allowedYears.ts";
 import type { WizardInputs } from "../../lib/setupTypes.ts";
 import { NumberField } from "../NumberField.tsx";
+import { useT } from "../../i18n/useT.tsx";
 
 type Falda = WizardInputs["falde"][number];
-
-const AZIMUTH_HINT = "0 = Sud · −90 = Est · +90 = Ovest, convenzione PVGIS";
 
 /** id progressivo del tipo "falda-N" evitando collisioni con quelli esistenti. */
 function nextFaldaId(falde: Falda[]): string {
@@ -27,6 +26,7 @@ export function StepRoof({
   inputs: WizardInputs;
   patch: (p: Partial<WizardInputs>) => void;
 }) {
+  const { t } = useT();
   const range = ALLOWED_YEARS[inputs.radiationDb];
   const yearOptions: number[] = [];
   for (let y = range.min; y <= range.max; y++) yearOptions.push(y);
@@ -58,7 +58,7 @@ export function StepRoof({
 
   return (
     <div className="wizard-body">
-      <h4>Tetto e falde</h4>
+      <h4>{t("wizard.roof.title")}</h4>
 
       {inputs.falde.map((f, i) => (
         <fieldset className="falda-edit" key={i}>
@@ -68,26 +68,26 @@ export function StepRoof({
                 className="wizard-falda-id"
                 value={f.id}
                 onChange={(e) => updateFalda(i, { id: e.target.value })}
-                aria-label="ID falda"
+                aria-label={t("wizard.roof.faldaIdAria")}
               />
               {inputs.falde.length > 1 && (
-                <button className="wizard-falda-del" onClick={() => removeFalda(i)} aria-label="Rimuovi falda">
+                <button className="wizard-falda-del" onClick={() => removeFalda(i)} aria-label={t("wizard.roof.removeFalda")}>
                   ✕
                 </button>
               )}
             </div>
           </legend>
           <NumberField
-            label="Azimuth (°)"
+            label={t("wizard.roof.azimuth")}
             value={f.azimuth}
             min={-180}
             max={180}
             step={5}
             onChange={(v) => updateFalda(i, { azimuth: v })}
           />
-          <span className="wizard-hint">{AZIMUTH_HINT}</span>
+          <span className="wizard-hint">{t("wizard.roof.azimuthHint")}</span>
           <NumberField
-            label="Inclinazione (°)"
+            label={t("wizard.roof.tilt")}
             value={f.tilt}
             min={0}
             max={90}
@@ -95,7 +95,7 @@ export function StepRoof({
             onChange={(v) => updateFalda(i, { tilt: v })}
           />
           <NumberField
-            label="N° pannelli"
+            label={t("wizard.roof.panelCount")}
             value={f.panelCount}
             min={1}
             max={200}
@@ -103,7 +103,7 @@ export function StepRoof({
             onChange={(v) => updateFalda(i, { panelCount: v })}
           />
           <NumberField
-            label="Potenza pannello"
+            label={t("wizard.roof.panelPower")}
             unit="Wp"
             value={f.wp}
             min={50}
@@ -115,22 +115,22 @@ export function StepRoof({
       ))}
 
       <button className="wizard-add" onClick={addFalda}>
-        + Aggiungi falda
+        {t("wizard.roof.addFalda")}
       </button>
 
       <label className="text-field">
-        Posa
+        {t("wizard.roof.mounting")}
         <select
           value={inputs.mounting}
           onChange={(e) => patch({ mounting: e.target.value === "free" ? "free" : "building" })}
         >
-          <option value="building">Su edificio</option>
-          <option value="free">A terra (struttura libera)</option>
+          <option value="building">{t("wizard.roof.mountingBuilding")}</option>
+          <option value="free">{t("wizard.roof.mountingFree")}</option>
         </select>
       </label>
 
       <NumberField
-        label="Perdite di sistema"
+        label={t("wizard.roof.systemLoss")}
         unit="%"
         value={inputs.systemLossPct}
         min={0}
@@ -140,7 +140,7 @@ export function StepRoof({
       />
 
       <label className="text-field">
-        Database di radiazione
+        {t("wizard.roof.radiationDb")}
         <select value={inputs.radiationDb} onChange={(e) => changeDb(e.target.value as WizardInputs["radiationDb"])}>
           {(Object.keys(ALLOWED_YEARS) as WizardInputs["radiationDb"][]).map((db) => (
             <option key={db} value={db}>
@@ -152,7 +152,7 @@ export function StepRoof({
 
       <div className="wizard-search">
         <label className="text-field">
-          Anno da
+          {t("wizard.roof.yearFrom")}
           <select
             value={inputs.years.from}
             onChange={(e) => patch({ years: { ...inputs.years, from: Number(e.target.value) } })}
@@ -165,7 +165,7 @@ export function StepRoof({
           </select>
         </label>
         <label className="text-field">
-          Anno a
+          {t("wizard.roof.yearTo")}
           <select
             value={inputs.years.to}
             onChange={(e) => patch({ years: { ...inputs.years, to: Number(e.target.value) } })}
@@ -180,7 +180,11 @@ export function StepRoof({
       </div>
       {multiYear && (
         <p className="note">
-          media ora-per-ora di {inputs.years.to - inputs.years.from + 1} anni ({inputs.years.from}–{inputs.years.to})
+          {t("wizard.roof.multiYearNote", {
+            n: inputs.years.to - inputs.years.from + 1,
+            from: inputs.years.from,
+            to: inputs.years.to,
+          })}
         </p>
       )}
     </div>

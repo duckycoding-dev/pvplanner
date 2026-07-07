@@ -3,8 +3,7 @@ import type { Tariff, TariffBand } from "../../../src/core/economics/tariff.ts";
 import { f1f2f3Tariff, monorarioTariff, parseTariff, serializeTariff, validateTariff } from "../lib/tariffPresets.ts";
 import { NumberField } from "./NumberField.tsx";
 import { ImportModal } from "./ImportModal.tsx";
-
-const DAY_LABELS = ["L", "M", "M", "G", "V", "S", "D"]; // index 0=Lun .. 6=Dom
+import { useT } from "../i18n/useT.tsx";
 
 let bandSeq = 0;
 function newBand(): TariffBand {
@@ -13,6 +12,8 @@ function newBand(): TariffBand {
 }
 
 export function TariffEditor({ tariff, setTariff }: { tariff: Tariff; setTariff: (t: Tariff) => void }) {
+  const { t } = useT();
+  const dayLabels = t("tariff.dayLabels").split(","); // index 0=Lun .. 6=Dom
   const [importing, setImporting] = useState(false);
 
   const updateBand = (id: string, patch: Partial<TariffBand>): void => {
@@ -41,17 +42,17 @@ export function TariffEditor({ tariff, setTariff }: { tariff: Tariff; setTariff:
   return (
     <div className="editor">
       <div className="editor-actions">
-        <button onClick={() => setTariff(monorarioTariff(0.25, 0.1))}>Monorario</button>
-        <button onClick={() => setTariff(f1f2f3Tariff())}>F1/F2/F3</button>
+        <button onClick={() => setTariff(monorarioTariff(0.25, 0.1))}>{t("tariff.presetMono")}</button>
+        <button onClick={() => setTariff(f1f2f3Tariff())}>{t("tariff.presetF1F2F3")}</button>
       </div>
 
       <label className="text-field">
-        Nome
+        {t("tariff.name")}
         <input value={tariff.label} onChange={(e) => setTariff({ ...tariff, label: e.target.value })} />
       </label>
 
       <NumberField
-        label="Prezzo acquisto default"
+        label={t("tariff.buyDefault")}
         unit="€/kWh"
         value={tariff.defaultBuyPrice}
         min={0}
@@ -60,7 +61,7 @@ export function TariffEditor({ tariff, setTariff }: { tariff: Tariff; setTariff:
         onChange={(v) => setTariff({ ...tariff, defaultBuyPrice: v })}
       />
       <NumberField
-        label="Prezzo vendita"
+        label={t("tariff.sell")}
         unit="€/kWh"
         value={tariff.sellPrice}
         min={0}
@@ -84,23 +85,23 @@ export function TariffEditor({ tariff, setTariff }: { tariff: Tariff; setTariff:
               </button>
             </legend>
             <div className="band-hours">
-              <NumberField label="dalle ora" value={from} min={0} max={24} step={1} onChange={(v) => setHour(b, 0, v)} />
-              <NumberField label="alle ora" value={to} min={0} max={24} step={1} onChange={(v) => setHour(b, 1, v)} />
+              <NumberField label={t("tariff.bandFrom")} value={from} min={0} max={24} step={1} onChange={(v) => setHour(b, 0, v)} />
+              <NumberField label={t("tariff.bandTo")} value={to} min={0} max={24} step={1} onChange={(v) => setHour(b, 1, v)} />
             </div>
             <div className="band-days">
-              {DAY_LABELS.map((lbl, d) => (
+              {dayLabels.map((lbl, d) => (
                 <button
                   key={d}
                   className={b.days.includes(d) ? "day on" : "day"}
                   onClick={() => toggleDay(b, d)}
-                  title={`giorno ${lbl}`}
+                  title={t("tariff.bandDay", { d: lbl })}
                 >
                   {lbl}
                 </button>
               ))}
             </div>
             <NumberField
-              label="prezzo acquisto"
+              label={t("tariff.bandBuy")}
               unit="€/kWh"
               value={b.buyPrice}
               min={0}
@@ -113,15 +114,15 @@ export function TariffEditor({ tariff, setTariff }: { tariff: Tariff; setTariff:
       })}
 
       <div className="editor-actions">
-        <button onClick={() => setTariff({ ...tariff, bands: [...tariff.bands, newBand()] })}>+ fascia</button>
-        <button onClick={exportTariff}>Esporta</button>
-        <button onClick={() => setImporting(true)}>Importa</button>
+        <button onClick={() => setTariff({ ...tariff, bands: [...tariff.bands, newBand()] })}>{t("tariff.addBand")}</button>
+        <button onClick={exportTariff}>{t("common.export")}</button>
+        <button onClick={() => setImporting(true)}>{t("common.import")}</button>
       </div>
-      <p className="note">Le ore non coperte da alcuna fascia usano il prezzo default. Risoluzione oraria.</p>
+      <p className="note">{t("tariff.note")}</p>
 
       {importing && (
         <ImportModal
-          title="Importa Tariffa"
+          title={t("import.title", { what: t("tariff.title") })}
           parse={parseTariff}
           validate={validateTariff}
           onImport={setTariff}

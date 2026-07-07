@@ -24,8 +24,9 @@ export function serializeTariff(t: Tariff): string {
   return JSON.stringify(t, null, 2);
 }
 
-function reqNumber(v: unknown, ctx: string): number {
-  if (typeof v !== "number" || Number.isNaN(v)) throw new Error(`Tariffa non valida: ${ctx} deve essere un numero.`);
+// I messaggi thrown sono CHIAVI i18n: ImportModal le traduce con `t()` al render.
+function reqNumber(v: unknown): number {
+  if (typeof v !== "number" || Number.isNaN(v)) throw new Error("import.tariff.field");
   return v;
 }
 
@@ -34,9 +35,9 @@ export function parseTariff(text: string): Tariff {
   try {
     raw = JSON.parse(text);
   } catch {
-    throw new Error("File non valido: JSON non leggibile.");
+    throw new Error("import.jsonUnreadable");
   }
-  if (typeof raw !== "object" || raw === null) throw new Error("Tariffa non valida: atteso un oggetto.");
+  if (typeof raw !== "object" || raw === null) throw new Error("import.tariff.notObject");
   const o = raw as Record<string, unknown>;
   const bandsRaw = Array.isArray(o["bands"]) ? o["bands"] : [];
   const bands: TariffBand[] = bandsRaw.map((b, i) => {
@@ -48,27 +49,31 @@ export function parseTariff(text: string): Tariff {
       color: typeof bo["color"] === "string" ? bo["color"] : "#3b82f6",
       hours: hoursRaw.map((h) => {
         const pair = h as number[];
-        return [reqNumber(pair[0], `bands[${i}].hours`), reqNumber(pair[1], `bands[${i}].hours`)] as [number, number];
+        return [reqNumber(pair[0]), reqNumber(pair[1])] as [number, number];
       }),
-      days: Array.isArray(bo["days"]) ? (bo["days"] as number[]).map((d) => reqNumber(d, `bands[${i}].days`)) : [],
-      buyPrice: reqNumber(bo["buyPrice"], `bands[${i}].buyPrice`),
+      days: Array.isArray(bo["days"]) ? (bo["days"] as number[]).map((d) => reqNumber(d)) : [],
+      buyPrice: reqNumber(bo["buyPrice"]),
     };
   });
   return {
     label: typeof o["label"] === "string" ? o["label"] : "Tariffa",
     bands,
-    defaultBuyPrice: reqNumber(o["defaultBuyPrice"], "defaultBuyPrice"),
-    sellPrice: reqNumber(o["sellPrice"], "sellPrice"),
+    defaultBuyPrice: reqNumber(o["defaultBuyPrice"]),
+    sellPrice: reqNumber(o["sellPrice"]),
   };
 }
 
+/**
+ * Ritorna null se la tariffa è valida, altrimenti una CHIAVE i18n (tradotta dal
+ * chiamante con `t()`). Il nome fascia è omesso per restare traducibile senza interpolazione.
+ */
 export function validateTariff(t: Tariff): string | null {
-  if (t.defaultBuyPrice < 0) return "Il prezzo default non può essere negativo.";
-  if (t.sellPrice < 0) return "Il prezzo di vendita non può essere negativo.";
+  if (t.defaultBuyPrice < 0) return "validate.tariff.defaultBuyNegative";
+  if (t.sellPrice < 0) return "validate.tariff.sellNegative";
   for (const b of t.bands) {
-    if (b.buyPrice < 0) return `Fascia "${b.name}": prezzo negativo.`;
+    if (b.buyPrice < 0) return "validate.tariff.bandBuyNegative";
     for (const [from, to] of b.hours) {
-      if (from < 0 || from > 24 || to < 0 || to > 24) return `Fascia "${b.name}": ore fuori 0–24.`;
+      if (from < 0 || from > 24 || to < 0 || to > 24) return "validate.tariff.bandHours";
     }
   }
   return null;

@@ -6,10 +6,11 @@ import { StepLocation } from "./StepLocation.tsx";
 import { StepRoof } from "./StepRoof.tsx";
 import { StepConsumption } from "./StepConsumption.tsx";
 import { StepFetch } from "./StepFetch.tsx";
+import { useT } from "../../i18n/useT.tsx";
 
 // Nota: i consumi seguono lo scarico perché l'editor ha bisogno dell'asse orario e
 // della temperatura reale del sito, disponibili solo dopo il download PVGIS.
-const STEP_LABELS = ["Località", "Tetto", "Scarico", "Consumi"] as const;
+const STEP_KEYS = ["wizard.step.location", "wizard.step.roof", "wizard.step.fetch", "wizard.step.consumption"] as const;
 
 /** Input di partenza quando non c'è un setup salvato: Roma, una falda a Sud, SARAH3. */
 function defaultInputs(): WizardInputs {
@@ -37,15 +38,19 @@ export function SetupWizard({
   open,
   setOpen,
   initialInputs,
+  initialStep = 1,
   onComplete,
 }: {
   open: boolean;
   setOpen: (v: boolean) => void;
   initialInputs: WizardInputs | null;
+  /** Step iniziale all'apertura (default 1). Il flusso "setup condiviso" apre allo Scarico (3). */
+  initialStep?: 1 | 2 | 3 | 4;
   onComplete: (setup: StoredSetup) => void;
 }) {
+  const { t } = useT();
   const ref = useRef<HTMLDialogElement>(null);
-  const [step, setStep] = useState<1 | 2 | 3 | 4>(1);
+  const [step, setStep] = useState<1 | 2 | 3 | 4>(initialStep);
   const [inputs, setInputs] = useState<WizardInputs>(() => initialInputs ?? defaultInputs());
   // Dataset costruito allo step "Scarico"; i consumi (step 4) lo aggiornano.
   const [built, setBuilt] = useState<StoredSetup | null>(null);
@@ -54,15 +59,15 @@ export function SetupWizard({
     const d = ref.current;
     if (d === null) return;
     if (open && !d.open) {
-      // Riparti sempre dallo step 1 con i valori più recenti a ogni apertura.
-      setStep(1);
+      // A ogni apertura riparti dallo step richiesto (1 di norma; 3=Scarico per il setup condiviso).
+      setStep(initialStep);
       setInputs(initialInputs ?? defaultInputs());
       setBuilt(null);
       d.showModal();
     } else if (!open && d.open) {
       d.close();
     }
-  }, [open, initialInputs]);
+  }, [open, initialInputs, initialStep]);
 
   const patch = (p: Partial<WizardInputs>): void => setInputs((prev) => ({ ...prev, ...p }));
 
@@ -93,19 +98,19 @@ export function SetupWizard({
       }}
     >
       <div className="menu-head">
-        <strong>Setup dati PVGIS</strong>
-        <button className="menu-close" onClick={finish} aria-label="Chiudi">
+        <strong>{t("wizard.title")}</strong>
+        <button className="menu-close" onClick={finish} aria-label={t("common.close")}>
           ✕
         </button>
       </div>
 
       <div className="wizard-steps">
-        {STEP_LABELS.map((label, i) => {
+        {STEP_KEYS.map((labelKey, i) => {
           const n = i + 1;
           const cls = n === step ? "wizard-step active" : n < step ? "wizard-step done" : "wizard-step";
           return (
-            <div className={cls} key={label}>
-              {n}. {label}
+            <div className={cls} key={labelKey}>
+              {n}. {t(labelKey)}
             </div>
           );
         })}
@@ -132,28 +137,30 @@ export function SetupWizard({
         />
       )}
 
-      {(step === 1 || step === 2) && !canAdvance && <p className="err wizard-error">{validationError}</p>}
+      {(step === 1 || step === 2) && !canAdvance && validationError !== null && (
+        <p className="err wizard-error">{t(validationError)}</p>
+      )}
 
       <div className="wizard-nav">
         {step > 1 ? (
-          <button onClick={() => setStep((s) => (s - 1) as 1 | 2 | 3 | 4)}>← Indietro</button>
+          <button onClick={() => setStep((s) => (s - 1) as 1 | 2 | 3 | 4)}>{t("wizard.back")}</button>
         ) : (
-          <button onClick={() => setOpen(false)}>Annulla</button>
+          <button onClick={() => setOpen(false)}>{t("common.cancel")}</button>
         )}
         {step === 1 && (
           <button className="wizard-next" disabled={!canAdvance} onClick={() => setStep(2)}>
-            Avanti →
+            {t("wizard.next")}
           </button>
         )}
         {step === 2 && (
           <button className="wizard-next" disabled={!canAdvance} onClick={() => setStep(3)}>
-            Avanti →
+            {t("wizard.next")}
           </button>
         )}
         {/* Step 3: il fetch parte dal bottone interno "Scarica dati PVGIS" e avanza allo step 4. */}
         {step === 4 && built !== null && (
           <button className="wizard-next" onClick={finish}>
-            Fine ✓
+            {t("wizard.finish")}
           </button>
         )}
       </div>

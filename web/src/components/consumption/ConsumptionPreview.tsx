@@ -2,7 +2,8 @@ import { useMemo } from "react";
 import { Bar, BarChart, CartesianGrid, Legend, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import type { CanonicalConsumption } from "../../../../src/core/consumption/canonical.ts";
 import type { Viz } from "../../types.ts";
-import { fmt, MONTH_LABELS } from "../../lib/format.ts";
+import { fmt } from "../../lib/format.ts";
+import { useMonthLabels, useT } from "../../i18n/useT.tsx";
 import { InfoTip } from "../InfoTip.tsx";
 
 /**
@@ -11,7 +12,9 @@ import { InfoTip } from "../InfoTip.tsx";
  * sagome si vedono senza mescolarsi). Riusa i pattern grafici Recharts esistenti.
  */
 export function ConsumptionPreview({ result, viz }: { result: CanonicalConsumption; viz: Viz }) {
-  const { monthly, dayCurve } = useMemo(() => {
+  const { t } = useT();
+  const monthLabels = useMonthLabels();
+  const { monthlyKwh, dayCurve } = useMemo(() => {
     const months = viz.hourly.months;
     const localHour = viz.hourly.localHour;
     const weekday = viz.hourly.weekday; // 0=lun .. 6=dom (giorno locale)
@@ -36,7 +39,7 @@ export function ConsumptionPreview({ result, viz }: { result: CanonicalConsumpti
       }
     }
     return {
-      monthly: mSum.map((kwh, k) => ({ name: MONTH_LABELS[k], kwh })),
+      monthlyKwh: mSum,
       dayCurve: Array.from({ length: 24 }, (_, h) => ({
         hour: `${String(h).padStart(2, "0")}`,
         feriale: wdCount[h]! > 0 ? wdSum[h]! / wdCount[h]! : 0,
@@ -45,31 +48,34 @@ export function ConsumptionPreview({ result, viz }: { result: CanonicalConsumpti
     };
   }, [result, viz]);
 
+  // Etichette mesi localizzate applicate dopo il calcolo pesante (che dipende solo da result/viz).
+  const monthly = useMemo(
+    () => monthlyKwh.map((kwh, k) => ({ name: monthLabels[k], kwh })),
+    [monthlyKwh, monthLabels],
+  );
+
   return (
     <div className="consumption-preview">
       <p className="note">
-        Consumo annuo stimato: <strong>{fmt(result.meta.annualKwh)} kWh</strong>
-        {result.meta.source === "csv" ? ` · copertura ${result.meta.coveragePct}%` : ""}
+        {t("consumption.preview.annualEstimate")} <strong>{fmt(result.meta.annualKwh)} kWh</strong>
+        {result.meta.source === "csv" ? ` · ${t("consumption.coverage", { pct: result.meta.coveragePct })}` : ""}
       </p>
 
-      <div className="subchart-title">Consumo per mese (kWh)</div>
+      <div className="subchart-title">{t("consumption.preview.monthlyTitle")}</div>
       <ResponsiveContainer width="100%" height={180}>
         <BarChart data={monthly}>
           <CartesianGrid strokeDasharray="3 3" />
           <XAxis dataKey="name" />
           <YAxis />
           <Tooltip formatter={(v: number) => `${fmt(v)} kWh`} />
-          <Bar dataKey="kwh" name="consumo" fill="#6366f1" />
+          <Bar dataKey="kwh" name={t("consumption.preview.seriesConsumption")} fill="#6366f1" />
         </BarChart>
       </ResponsiveContainer>
 
       <div className="subchart-title">
-        Giornata tipo — media oraria annua (kWh)
+        {t("consumption.preview.dayTitle")}
         <InfoTip
-          entry={{
-            term: "Giornata tipo",
-            desc: "Per ogni ora del giorno (0–23), la media di quell'ora su tutti i giorni dell'anno: non è un giorno preciso ma il profilo medio. Feriali e weekend sono separati, così il fattore weekend e le sagome si leggono direttamente.",
-          }}
+          entry={{ term: t("consumption.preview.dayTip.term"), desc: t("consumption.preview.dayTip.desc") }}
         />
       </div>
       <ResponsiveContainer width="100%" height={180}>
@@ -79,8 +85,20 @@ export function ConsumptionPreview({ result, viz }: { result: CanonicalConsumpti
           <YAxis />
           <Tooltip formatter={(v: number) => `${fmt(v, 2)} kWh`} />
           <Legend />
-          <Line type="monotone" dataKey="feriale" name="feriale" stroke="#6366f1" dot={false} />
-          <Line type="monotone" dataKey="weekend" name="weekend" stroke="#f59e0b" dot={false} />
+          <Line
+            type="monotone"
+            dataKey="feriale"
+            name={t("consumption.preview.seriesWeekday")}
+            stroke="#6366f1"
+            dot={false}
+          />
+          <Line
+            type="monotone"
+            dataKey="weekend"
+            name={t("consumption.preview.seriesWeekend")}
+            stroke="#f59e0b"
+            dot={false}
+          />
         </LineChart>
       </ResponsiveContainer>
     </div>

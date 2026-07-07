@@ -9,11 +9,12 @@ import { BatteryChart } from "./BatteryChart.tsx";
 import { MetricsTable, type MetricRow } from "./MetricsTable.tsx";
 import { InfoTip } from "./InfoTip.tsx";
 import { ConsumptionLockedBox } from "./ConsumptionLockedBox.tsx";
+import { useT } from "../i18n/useT.tsx";
 
-const SCENARIOS: { key: Scenario; label: string }[] = [
-  { key: "con", label: "con batteria" },
-  { key: "senza", label: "senza batteria" },
-  { key: "entrambi", label: "entrambi" },
+const SCENARIOS: { key: Scenario; labelKey: string }[] = [
+  { key: "con", labelKey: "scenario.withBattery" },
+  { key: "senza", labelKey: "scenario.noBattery" },
+  { key: "entrambi", labelKey: "scenario.both" },
 ];
 
 const DAY_MS = 86_400_000;
@@ -29,6 +30,7 @@ export function DailyExplorer({
   hasBattery: boolean;
   hasConsumption: boolean;
 }) {
+  const { t } = useT();
   const h = viz.hourly;
   const total = dayCount(h);
   const picks = useMemo(() => quickPickDays(h), [h]);
@@ -82,24 +84,24 @@ export function DailyExplorer({
   const eur = (v: number): string => `${fmt(v, 2)} €`;
   // First column "senza FV" (reference); Δ = last two columns.
   const cols = hasBattery
-    ? [{ key: "novf", label: "senza FV" }, { key: "senza", label: "senza batteria" }, { key: "con", label: "con batteria" }]
-    : [{ key: "novf", label: "senza FV" }, { key: "fv", label: "FV" }];
+    ? [{ key: "novf", label: t("scenario.noPv") }, { key: "senza", label: t("scenario.noBattery") }, { key: "con", label: t("scenario.withBattery") }]
+    : [{ key: "novf", label: t("scenario.noPv") }, { key: "fv", label: t("scenario.pv") }];
   const v3 = (noPvV: number, senzaV: number, conV: number): number[] =>
     hasBattery ? [noPvV, senzaV, conV] : [noPvV, senzaV];
   const dayRows: MetricRow[] = [
-    { key: "prod", label: "Produzione", info: "produzione", good: "higher", render: kwh1, values: v3(0, prod, prod) },
-    { key: "cons", label: "Consumo", info: "consumo", good: "none", render: kwh1, values: v3(cons, cons, cons) },
-    { key: "self", label: "Autoconsumo", info: "autoconsumo", good: "higher", render: kwh1, values: v3(0, selfSenza, selfCon) },
-    { key: "imp", label: "Import", info: "import", good: "lower", render: kwh1, values: v3(cons, impSenza, impCon) },
-    { key: "exp", label: "Export", info: "export", good: "higher", render: kwh1, values: v3(0, expSenza, expCon) },
-    { key: "clip", label: "Clipping", info: "clipping", good: "lower", render: kwh1, values: v3(0, clip, clip) },
+    { key: "prod", label: t("metrics.production"), info: "produzione", good: "higher", render: kwh1, values: v3(0, prod, prod) },
+    { key: "cons", label: t("metrics.consumption"), info: "consumo", good: "none", render: kwh1, values: v3(cons, cons, cons) },
+    { key: "self", label: t("metrics.selfConsumption"), info: "autoconsumo", good: "higher", render: kwh1, values: v3(0, selfSenza, selfCon) },
+    { key: "imp", label: t("metrics.import"), info: "import", good: "lower", render: kwh1, values: v3(cons, impSenza, impCon) },
+    { key: "exp", label: t("metrics.export"), info: "export", good: "higher", render: kwh1, values: v3(0, expSenza, expCon) },
+    { key: "clip", label: t("metrics.clipping"), info: "clipping", good: "lower", render: kwh1, values: v3(0, clip, clip) },
     ...(hasBattery
       ? [
-          { key: "cyc", label: "Cicli", info: "cicli", good: "none" as const, render: (v: number) => (v > 0 ? v.toFixed(2) : "—"), values: [0, 0, cycCon] },
-          { key: "loss", label: "Perdita round-trip", info: "roundTripLoss", good: "lower" as const, render: kwh1, values: [0, 0, lossCon] },
+          { key: "cyc", label: t("metrics.cycles"), info: "cicli", good: "none" as const, render: (v: number) => (v > 0 ? v.toFixed(2) : "—"), values: [0, 0, cycCon] },
+          { key: "loss", label: t("metrics.roundTripLoss"), info: "roundTripLoss", good: "lower" as const, render: kwh1, values: [0, 0, lossCon] },
         ]
       : []),
-    { key: "net", label: "Netto giorno", info: "nettoCosto", good: "lower", money: "net", render: eur, values: v3(netNoPv, netSenza, netCon) },
+    { key: "net", label: t("metrics.netDay"), info: "nettoCosto", good: "lower", money: "net", render: eur, values: v3(netNoPv, netSenza, netCon) },
   ];
 
   return (
@@ -118,15 +120,15 @@ export function DailyExplorer({
           <strong className="day-label">{formatDayLabel(ts)}</strong>
         </div>
         <div className="picks">
-          <button onClick={() => setDayIndex(picks.maxClipping)}>max clipping</button>
-          <button onClick={() => setDayIndex(picks.maxProduction)}>max produzione</button>
-          <button onClick={() => setDayIndex(picks.minProduction)}>min produzione</button>
+          <button onClick={() => setDayIndex(picks.maxClipping)}>{t("daily.pickMaxClipping")}</button>
+          <button onClick={() => setDayIndex(picks.maxProduction)}>{t("daily.pickMaxProduction")}</button>
+          <button onClick={() => setDayIndex(picks.minProduction)}>{t("daily.pickMinProduction")}</button>
         </div>
         {hasBattery && hasConsumption && (
           <div className="scenario">
             {SCENARIOS.map((s) => (
               <button key={s.key} className={scenario === s.key ? "active" : ""} onClick={() => setScenario(s.key)}>
-                {s.label}
+                {t(s.labelKey)}
               </button>
             ))}
           </div>
@@ -136,7 +138,7 @@ export function DailyExplorer({
       {hasConsumption && (
         <section className="chart-card">
           <MetricsTable
-            title={hasBattery ? "Riepilogo giorno (Δ = effetto batteria)" : "Riepilogo giorno (Δ = FV vs senza FV)"}
+            title={hasBattery ? t("daily.summaryBattery") : t("daily.summaryPv")}
             columns={cols}
             rows={dayRows}
           />
@@ -146,7 +148,7 @@ export function DailyExplorer({
       <div className="chart-card">
         <div className="section-head">
           <h3>
-            Potenza oraria (kW)
+            {t("daily.powerTitle")}
             <InfoTip k="coperto" />
           </h3>
         </div>
@@ -156,19 +158,19 @@ export function DailyExplorer({
       {!hasConsumption ? (
         <ConsumptionLockedBox />
       ) : !hasBattery ? (
-        <p className="note">Sistema A senza batteria: nessun accumulo.</p>
+        <p className="note">{t("daily.noBatterySystemA")}</p>
       ) : !isNb ? (
         <div className="chart-card">
           <div className="section-head">
             <h3>
-              Stato di carica batteria (kWh)
+              {t("daily.socTitle")}
               <InfoTip k="soc" />
             </h3>
           </div>
           <BatteryChart data={pts} usableKwh={viz.meta.batteryUsableKwh} />
         </div>
       ) : (
-        <p className="note">Scenario «senza batteria»: nessun accumulo.</p>
+        <p className="note">{t("daily.noBatteryScenario")}</p>
       )}
     </div>
   );

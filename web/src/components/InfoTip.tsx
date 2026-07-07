@@ -1,6 +1,7 @@
 import { useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { type GlossaryEntry, GLOSSARY } from "../lib/glossary.ts";
+import { type GlossaryEntry, glossaryEntry } from "../lib/glossary.ts";
+import { useT } from "../i18n/useT.tsx";
 
 /**
  * Small ⓘ that reveals a styled tooltip on hover/focus. The bubble is rendered in a
@@ -15,7 +16,8 @@ import { type GlossaryEntry, GLOSSARY } from "../lib/glossary.ts";
  * c'è spazio, va sotto l'ancora).
  */
 export function InfoTip({ k, entry: inline }: { k?: string; entry?: GlossaryEntry }) {
-  const entry = inline ?? (k !== undefined ? GLOSSARY[k] : undefined);
+  const { lang } = useT();
+  const entry = inline ?? (k !== undefined ? glossaryEntry(k, lang) : undefined);
   const ref = useRef<HTMLSpanElement>(null);
   const bubbleRef = useRef<HTMLSpanElement>(null);
   const [open, setOpen] = useState(false);
