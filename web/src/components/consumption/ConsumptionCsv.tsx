@@ -21,11 +21,14 @@ export function ConsumptionCsv({
   state,
   setState,
   apply,
+  hideApply,
 }: {
   setup: StoredSetup;
   state: CsvState | null;
   setState: (s: CsvState | null) => void;
   apply: (spec: ConsumptionSpec, result: CanonicalConsumption) => void;
+  /** Wizard: «Applica» nascosto, applica il bottone «Fine» del wizard. */
+  hideApply?: boolean;
 }) {
   const { t } = useT();
   const [error, setError] = useState<string | null>(null);
@@ -116,9 +119,11 @@ export function ConsumptionCsv({
             </div>
           )}
           <ConsumptionPreview result={state.result} viz={setup.viz} />
-          <button className="wizard-primary" onClick={() => apply({ method: "csv", filename: state.filename }, state.result)}>
-            {t("common.apply")}
-          </button>
+          {hideApply !== true && (
+            <button className="wizard-primary" onClick={() => apply({ method: "csv", filename: state.filename }, state.result)}>
+              {t("common.apply")}
+            </button>
+          )}
         </>
       )}
     </div>

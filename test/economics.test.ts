@@ -1,5 +1,5 @@
 import { expect, test } from "bun:test";
-import { incentiveTotalEur, systemPaybackYears } from "../web/src/lib/economics.ts";
+import { incentiveForMode, incentiveTotalEur, systemPaybackYears } from "../web/src/lib/economics.ts";
 
 test("incentiveTotalEur: percent of capex or fixed amount", () => {
   expect(incentiveTotalEur({ mode: "percent", value: 50, years: 10 }, 16000)).toBe(8000);
@@ -13,4 +13,16 @@ test("systemPaybackYears uses saving = noPvNet - systemNet", () => {
   expect(systemPaybackYears(1000, 0, 100, { mode: "percent", value: 50, years: 1 })).toBeCloseTo(5, 6);
   // system costs more than no-PV → never
   expect(systemPaybackYears(1000, 200, 100, { mode: "fixed", value: 0, years: 1 })).toBeNull();
+});
+
+test("incentiveForMode: cambio tab → default del modo, niente carry-over", () => {
+  const p = incentiveForMode({ mode: "fixed", value: 4500, years: 10 }, "percent");
+  expect(p).toEqual({ mode: "percent", value: 50, years: 10 });
+  const f = incentiveForMode({ mode: "percent", value: 45, years: 10 }, "fixed");
+  expect(f).toEqual({ mode: "fixed", value: 0, years: 10 });
+});
+
+test("incentiveForMode: stesso modo → oggetto identico (nessun reset)", () => {
+  const cur = { mode: "percent" as const, value: 45, years: 10 };
+  expect(incentiveForMode(cur, "percent")).toBe(cur);
 });

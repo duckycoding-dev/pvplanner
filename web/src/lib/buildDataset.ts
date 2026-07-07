@@ -17,10 +17,17 @@ const WIZARD_INCENTIVE: IncentiveConfig = { mode: "percent", value: 50, years: 1
 
 const EN_DASH = "–";
 
-/** peakKwp di una falda: numero pannelli × Wp / 1000. */
-function faldaPeakKwp(f: WizardInputs["falde"][number]): number {
-  return (f.panelCount * f.wp) / 1000;
-}
+/** Scala di fetch: PVGIS è lineare nella potenza di picco, quindi si scarica sempre
+ *  a 1 kWp per falda e i sistemi A/B riscalano le serie (runSystem). */
+const FETCH_KWP = 1;
+
+/** Seed plausibile del sistema iniziale per falda (l'utente lo edita in SystemEditor). */
+const SEED_PANEL_COUNT = 10;
+const SEED_WP = 450; // → 4.5 kWp/falda
+
+/** Tetto AC di default: è un dato dell'inverter (taglia residenziale comune),
+ *  non derivabile dalla potenza dei pannelli. L'utente lo corregge poi. */
+const DEFAULT_AC_CAP_KW = 6;
 
 /** Costruisce l'URL same-origin verso il proxy PVGIS per una falda. */
 function seriescalcUrl(inputs: WizardInputs, falda: WizardInputs["falde"][number]): string {
@@ -33,7 +40,7 @@ function seriescalcUrl(inputs: WizardInputs, falda: WizardInputs["falde"][number
     outputformat: "json",
     browser: "0",
     pvcalculation: "1",
-    peakpower: String(faldaPeakKwp(falda)),
+    peakpower: String(FETCH_KWP),
     mountingplace: inputs.mounting,
     loss: String(inputs.systemLossPct),
     angle: String(falda.tilt),
@@ -54,7 +61,9 @@ function seriescalcUrl(inputs: WizardInputs, falda: WizardInputs["falde"][number
  * lancia un Error con status + testo PVGIS: il chiamante gestisce il retry per falda.
  *
  * Non calcola PVcalc (multi-anno) né consumi: dataset produzione-only, batteria a 0.
- * `acCapKw` è un seed (Σ peakKwp arrotondata, ≥ 1) che l'utente edita nell'editor sistemi.
+ * `acCapKw` è un seed fisso (6 kW: dato dell'inverter, non derivabile dalle falde);
+ * il fetch è a 1 kWp/falda (PVGIS è lineare) e `meta.falde` seeda 10×450 Wp a falda:
+ * l'utente imposta il sistema reale in SystemEditor, che riscala le serie.
  */
 export async function buildDataset(
   inputs: WizardInputs,
@@ -68,7 +77,6 @@ export async function buildDataset(
   const total = inputs.falde.length;
   for (let index = 0; index < total; index++) {
     const falda = inputs.falde[index]!;
-    const peakKwp = faldaPeakKwp(falda);
     onProgress({ kind: "falda-start", id: falda.id, index, total });
 
     let file: unknown;
@@ -84,7 +92,7 @@ export async function buildDataset(
       file = await res.json();
     }
 
-    const { series } = parseFaldaHourly(file, { id: falda.id, azimuth: falda.azimuth, peakKwp }, `PVGIS falda "${falda.id}"`);
+    const { series } = parseFaldaHourly(file, { id: falda.id, azimuth: falda.azimuth, peakKwp: FETCH_KWP }, `PVGIS falda "${falda.id}"`);
     hourly.push(from < to ? typicalYear(series, from, to) : series);
     onProgress({ kind: "falda-done", id: falda.id });
   }
@@ -95,10 +103,7 @@ export async function buildDataset(
   const base = hourly[0]!;
   const referenceYear = new Date(base.timestampsUtc[0]!).getUTCFullYear();
 
-  const totalPeakKwp = inputs.falde.reduce((s, f) => s + faldaPeakKwp(f), 0);
-  const defaultAcCap = Math.max(1, Math.round(totalPeakKwp));
-
-  const result = buildProductionSeries({ hourly, power: [], acCapKw: defaultAcCap, year: referenceYear });
+  const result = buildProductionSeries({ hourly, power: [], acCapKw: DEFAULT_AC_CAP_KW, year: referenceYear });
 
   const yearLabel = from < to ? `media ${from}${EN_DASH}${to}` : String(from);
 
@@ -106,10 +111,10 @@ export async function buildDataset(
     year: referenceYear,
     yearLabel,
     timeZone: inputs.timeZone,
-    acCapKw: defaultAcCap,
+    acCapKw: DEFAULT_AC_CAP_KW,
     batteryTotalKwh: 0,
     batteryUsablePct: 0,
-    batteryPortKw: defaultAcCap,
+    batteryPortKw: DEFAULT_AC_CAP_KW,
     batteryRoundTrip: 0.9,
     batteryCoupling: "dc",
     installationCostEur: 0,
@@ -117,9 +122,9 @@ export async function buildDataset(
     falde: inputs.falde.map((f) => ({
       id: f.id,
       azimuth: f.azimuth,
-      peakKwp: faldaPeakKwp(f),
-      panelCount: f.panelCount,
-      wp: f.wp,
+      peakKwp: (SEED_PANEL_COUNT * SEED_WP) / 1000,
+      panelCount: SEED_PANEL_COUNT,
+      wp: SEED_WP,
     })),
     consumptionSource: "none",
     consumptionNote: "",

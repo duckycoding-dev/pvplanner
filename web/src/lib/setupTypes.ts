@@ -13,7 +13,7 @@ export interface WizardInputs {
   mounting: "building" | "free";
   systemLossPct: number;
   years: { from: number; to: number }; // from === to → anno singolo
-  falde: { id: string; azimuth: number; tilt: number; panelCount: number; wp: number }[];
+  falde: { id: string; azimuth: number; tilt: number }[];
 }
 
 export interface StoredSetup {
@@ -86,12 +86,6 @@ export function validateWizardInputs(i: WizardInputs): string | null {
     }
     if (f.tilt < 0 || f.tilt > 90) {
       return "validate.wizard.faldaTilt";
-    }
-    if (!Number.isInteger(f.panelCount) || f.panelCount < 1) {
-      return "validate.wizard.faldaPanelCount";
-    }
-    if (f.wp < 50 || f.wp > 1000) {
-      return "validate.wizard.faldaWp";
     }
   }
 

@@ -16,8 +16,9 @@ function nextFaldaId(falde: Falda[]): string {
 }
 
 /**
- * Step 2 — tetto: falde ripetibili (orientamento/inclinazione/pannelli/Wp) più i
- * parametri comuni (posa, perdite, database di radiazione, intervallo anni).
+ * Step 2 — tetto: falde ripetibili (orientamento/inclinazione) più i parametri
+ * comuni (posa, perdite, database di radiazione, intervallo anni). Niente potenza:
+ * PVGIS è lineare nel peakpower (fetch a 1 kWp), il sistema si configura dopo.
  */
 export function StepRoof({
   inputs,
@@ -39,7 +40,7 @@ export function StepRoof({
   };
   const addFalda = (): void => {
     patch({
-      falde: [...inputs.falde, { id: nextFaldaId(inputs.falde), azimuth: 0, tilt: 30, panelCount: 10, wp: 450 }],
+      falde: [...inputs.falde, { id: nextFaldaId(inputs.falde), azimuth: 0, tilt: 30 }],
     });
   };
   const removeFalda = (index: number): void => {
@@ -93,23 +94,6 @@ export function StepRoof({
             max={90}
             step={1}
             onChange={(v) => updateFalda(i, { tilt: v })}
-          />
-          <NumberField
-            label={t("wizard.roof.panelCount")}
-            value={f.panelCount}
-            min={1}
-            max={200}
-            step={1}
-            onChange={(v) => updateFalda(i, { panelCount: v })}
-          />
-          <NumberField
-            label={t("wizard.roof.panelPower")}
-            unit="Wp"
-            value={f.wp}
-            min={50}
-            max={1000}
-            step={5}
-            onChange={(v) => updateFalda(i, { wp: v })}
           />
         </fieldset>
       ))}

@@ -10,6 +10,7 @@ import {
   totalPeakKwp,
 } from "../lib/systemConfig.ts";
 import { runSystem } from "../lib/runSystem.ts";
+import { useStableSystem } from "../lib/useStableSystem.ts";
 import { systemCost } from "../lib/viewCosts.ts";
 import { type Incentive, systemPaybackYears } from "../lib/economics.ts";
 import { fmt, pct } from "../lib/format.ts";
@@ -75,14 +76,17 @@ export function ComparePage({
     const r = runSystem(noPvConfig(viz), viz);
     return { r, c: systemCost(viz, r, tariff) };
   }, [viz, tariff]);
+  // Riferimenti stabili: digitare il nome (label) non rilancia la simulazione.
+  const stableA = useStableSystem(systemA);
+  const stableB = useStableSystem(systemB);
   const caseA = useMemo<Case>(() => {
-    const r = runSystem(systemA, viz);
+    const r = runSystem(stableA, viz);
     return { r, c: systemCost(viz, r, tariff) };
-  }, [systemA, viz, tariff]);
+  }, [stableA, viz, tariff]);
   const caseB = useMemo<Case>(() => {
-    const r = runSystem(systemB, viz);
+    const r = runSystem(stableB, viz);
     return { r, c: systemCost(viz, r, tariff) };
-  }, [systemB, viz, tariff]);
+  }, [stableB, viz, tariff]);
 
   // Table: "senza FV" reference + A, plus B when it differs from A. Charts compare A vs B only.
   const labelA = systemA.label.length > 0 ? systemA.label : "A";
@@ -158,6 +162,8 @@ export function ComparePage({
         labelB={labelB}
         usableA={batteryUsableKwh(systemA)}
         usableB={batteryUsableKwh(systemB)}
+        acCapA={systemA.acCapKw}
+        acCapB={systemB.acCapKw}
       />
       <CompareMonthlyBars a={caseA.r} b={caseB.r} labelA={labelA} labelB={labelB} />
       <CompareAnnualBars a={caseA.r} b={caseB.r} labelA={labelA} labelB={labelB} />

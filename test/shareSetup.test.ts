@@ -17,8 +17,6 @@ function makeWizard(nFalde = 1): WizardInputs {
     id: `falda-${i + 1}`,
     azimuth: i * 45 - 45,
     tilt: 30,
-    panelCount: 10 + i,
-    wp: 450,
   }));
   return {
     location: { latitude: 41.902, longitude: 12.496, label: "Roma, Italia" },
@@ -35,7 +33,7 @@ function makeWizard(nFalde = 1): WizardInputs {
 function makeSystem(label: string, wizard: WizardInputs): SystemConfigB {
   return {
     label,
-    falde: wizard.falde.map((f) => ({ id: f.id, azimuth: f.azimuth, panelCount: f.panelCount, wp: f.wp })),
+    falde: wizard.falde.map((f, i) => ({ id: f.id, azimuth: f.azimuth, panelCount: 10 + i, wp: 450 })),
     acCapKw: 6,
     batteryTotalKwh: 10,
     batteryUsablePct: 90,

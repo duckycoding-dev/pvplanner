@@ -1,9 +1,10 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { HOUSE_DEFAULTS, type HouseParams } from "../../../../src/core/consumption/houseLoad.ts";
 import type { MonthlyTemplate } from "../../../../src/core/consumption/monthlyTemplate.ts";
 import { type CanonicalConsumption, validateCanonical } from "../../../../src/core/consumption/canonical.ts";
 import type { ConsumptionSpec, StoredSetup } from "../../lib/setupTypes.ts";
 import { applyConsumption } from "../../lib/applyConsumption.ts";
+import { buildPendingSetup } from "../../lib/pendingConsumption.ts";
 import { fmt } from "../../lib/format.ts";
 import { useT } from "../../i18n/useT.tsx";
 import { ConsumptionCsv, type CsvState } from "./ConsumptionCsv.tsx";
@@ -29,10 +30,15 @@ const METHOD_TABS: { key: Method; labelKey: string }[] = [
 export function ConsumptionEditor({
   setup,
   onApply,
+  wizard,
 }: {
   setup: StoredSetup;
-  /** Riceve il NUOVO StoredSetup con i consumi applicati; il chiamante lo salva. */
-  onApply: (next: StoredSetup) => void;
+  /** Riceve il NUOVO StoredSetup con i consumi applicati; il chiamante lo salva.
+   *  Assente in modalità wizard (i bottoni «Applica» sono nascosti). */
+  onApply?: (next: StoredSetup) => void;
+  /** Modalità wizard: nasconde «Applica» e registra il getter del candidato
+   *  corrente, che il bottone «Fine» del wizard applica. */
+  wizard?: { registerGetPending: (get: () => StoredSetup | null) => void };
 }) {
   const { t } = useT();
   const saved = setup.consumption ?? null;
@@ -58,8 +64,14 @@ export function ConsumptionEditor({
       return;
     }
     setError(null);
-    onApply(applyConsumption(setup, spec, result));
+    onApply?.(applyConsumption(setup, spec, result));
   };
+
+  const hideApply = wizard !== undefined;
+  // Senza deps: a ogni render registra la closure sullo stato più recente.
+  useEffect(() => {
+    wizard?.registerGetPending(() => buildPendingSetup(setup, { method, template, house, csv }));
+  });
 
   return (
     <div className="consumption-editor">
@@ -77,12 +89,12 @@ export function ConsumptionEditor({
         ))}
       </div>
 
-      {method === "csv" && <ConsumptionCsv setup={setup} state={csv} setState={setCsv} apply={apply} />}
+      {method === "csv" && <ConsumptionCsv setup={setup} state={csv} setState={setCsv} apply={apply} hideApply={hideApply} />}
       {method === "monthly" && (
-        <ConsumptionMonthly setup={setup} template={template} setTemplate={setTemplate} apply={apply} />
+        <ConsumptionMonthly setup={setup} template={template} setTemplate={setTemplate} apply={apply} hideApply={hideApply} />
       )}
       {method === "parametric" && (
-        <ConsumptionParametric setup={setup} house={house} setHouse={setHouse} apply={apply} />
+        <ConsumptionParametric setup={setup} house={house} setHouse={setHouse} apply={apply} hideApply={hideApply} />
       )}
 
       {error !== null && <p className="err">{error}</p>}

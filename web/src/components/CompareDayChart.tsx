@@ -14,7 +14,7 @@ import {
 import type { Viz } from "../types.ts";
 import type { SystemResult } from "../../../src/core/comparison/computeSystem.ts";
 import { sliceCompareDay } from "../lib/sliceCompareDay.ts";
-import { quickPickDays } from "../lib/quickPickDays.ts";
+import { combineSeries, quickPickDays } from "../lib/quickPickDays.ts";
 import { dayIndexToDateInput, fmt, formatDayLabel } from "../lib/format.ts";
 import { useLegendToggle } from "../lib/useLegendToggle.ts";
 import { MetricsTable, type MetricRow } from "./MetricsTable.tsx";
@@ -60,6 +60,8 @@ export function CompareDayChart({
   labelB,
   usableA,
   usableB,
+  acCapA,
+  acCapB,
 }: {
   a: SystemResult;
   b: SystemResult;
@@ -68,12 +70,23 @@ export function CompareDayChart({
   labelB: string;
   usableA: number;
   usableB: number;
+  acCapA: number;
+  acCapB: number;
 }) {
   const { t } = useT();
   const { onClick, isHidden } = useLegendToggle();
   const soc = useLegendToggle();
   const total = Math.floor(viz.hourly.loadKwh.length / 24);
-  const picks = useMemo(() => quickPickDays(viz.hourly), [viz]);
+  // Picks dalle serie per-sistema (A+B): la baseline può non clippare mai
+  // mentre i sistemi configurati sì (fix: puntava sempre al 1° gennaio).
+  const picks = useMemo(
+    () =>
+      quickPickDays({
+        productionPracticalKwh: combineSeries(a.production.hourly.practicalKwh, b.production.hourly.practicalKwh),
+        clippingKwh: combineSeries(a.production.hourly.clippingLossKwh, b.production.hourly.clippingLossKwh),
+      }),
+    [a, b],
+  );
   const [dayIndex, setDayIndex] = useState<number>(picks.maxProduction);
 
   const pts = useMemo(() => sliceCompareDay(a, b, viz, dayIndex), [a, b, viz, dayIndex]);
@@ -94,6 +107,11 @@ export function CompareDayChart({
   const capMax = Math.max(usableA, usableB);
   const sameCap = usableA === usableB;
   const labelCapA = sameCap ? t("compare.maxKwh", { kwh: fmt(usableA, 1) }) : t("compare.maxLabel", { label: labelA });
+
+  const sameAcCap = acCapA === acCapB;
+  const acLabelA = sameAcCap
+    ? t("power.acCeiling", { kw: acCapA })
+    : t("compare.acCeilingLabel", { label: labelA, kw: acCapA });
 
   const dailyCols = [
     { key: "a", label: labelA },
@@ -125,7 +143,14 @@ export function CompareDayChart({
           <strong className="day-label">{formatDayLabel(ts)}</strong>
         </div>
         <div className="picks">
-          <button onClick={() => setDayIndex(picks.maxClipping)}>{t("daily.pickMaxClipping")}</button>
+          <button
+            disabled={picks.maxClipping === null}
+            onClick={() => {
+              if (picks.maxClipping !== null) setDayIndex(picks.maxClipping);
+            }}
+          >
+            {t("daily.pickMaxClipping")}
+          </button>
           <button onClick={() => setDayIndex(picks.maxProduction)}>{t("daily.pickMaxProduction")}</button>
           <button onClick={() => setDayIndex(picks.minProduction)}>{t("daily.pickMinProduction")}</button>
         </div>
@@ -145,6 +170,21 @@ export function CompareDayChart({
           <Line type="monotone" dataKey="load" name={t("chart.consumption")} stroke="#dc2626" strokeWidth={2} dot={false} isAnimationActive={false} hide={isHidden("load")} />
           <Line type="monotone" dataKey="prodA" name={t("compare.productionLabel", { label: labelA })} stroke="#16a34a" strokeWidth={2} dot={false} isAnimationActive={false} hide={isHidden("prodA")} />
           <Line type="monotone" dataKey="prodB" name={t("compare.productionLabel", { label: labelB })} stroke="#16a34a" strokeDasharray="5 3" dot={false} isAnimationActive={false} hide={isHidden("prodB")} />
+          {/* tetto AC: su bucket orari kW ≡ kWh (stessa convenzione di PowerChart) */}
+          <ReferenceLine
+            y={acCapA}
+            stroke="#6b7280"
+            strokeDasharray="6 3"
+            label={{ value: acLabelA, position: "right", fontSize: 11, fill: "#6b7280" }}
+          />
+          {!sameAcCap && (
+            <ReferenceLine
+              y={acCapB}
+              stroke="#9ca3af"
+              strokeDasharray="2 2"
+              label={{ value: t("compare.acCeilingLabel", { label: labelB, kw: acCapB }), position: "right", fontSize: 11, fill: "#9ca3af" }}
+            />
+          )}
         </ComposedChart>
       </ResponsiveContainer>
 

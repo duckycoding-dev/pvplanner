@@ -48,11 +48,14 @@ export function ConsumptionParametric({
   house,
   setHouse,
   apply,
+  hideApply,
 }: {
   setup: StoredSetup;
   house: HouseParams;
   setHouse: (h: HouseParams) => void;
   apply: (spec: ConsumptionSpec, result: CanonicalConsumption) => void;
+  /** Wizard: «Applica» nascosto, applica il bottone «Fine» del wizard. */
+  hideApply?: boolean;
 }) {
   const { t } = useT();
   const [advanced, setAdvanced] = useState(false);
@@ -124,9 +127,11 @@ export function ConsumptionParametric({
       {preview !== null && (
         <>
           <ConsumptionPreview result={preview} viz={setup.viz} />
-          <button className="wizard-primary" onClick={() => apply({ method: "parametric", house }, preview)}>
-            {t("common.apply")}
-          </button>
+          {hideApply !== true && (
+            <button className="wizard-primary" onClick={() => apply({ method: "parametric", house }, preview)}>
+              {t("common.apply")}
+            </button>
+          )}
         </>
       )}
     </div>

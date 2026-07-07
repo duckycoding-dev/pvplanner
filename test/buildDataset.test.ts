@@ -41,8 +41,8 @@ const BASE_INPUTS: WizardInputs = {
   systemLossPct: 14,
   years: { from: 2023, to: 2023 },
   falde: [
-    { id: "sud", azimuth: 0, tilt: 30, panelCount: 10, wp: 400 }, // 4 kWp
-    { id: "est", azimuth: -90, tilt: 20, panelCount: 5, wp: 400 }, // 2 kWp
+    { id: "sud", azimuth: 0, tilt: 30 },
+    { id: "est", azimuth: -90, tilt: 20 },
   ],
 };
 
@@ -78,7 +78,7 @@ test("buildDataset requests one correct /api/pvgis URL per falda", async () => {
     outputformat: "json",
     browser: "0",
     pvcalculation: "1",
-    peakpower: "4",
+    peakpower: "1",
     mountingplace: "building",
     loss: "14",
     angle: "30",
@@ -90,7 +90,7 @@ test("buildDataset requests one correct /api/pvgis URL per falda", async () => {
 
   const u1 = new URL(calls[1]!, "http://x");
   expect(Object.fromEntries(u1.searchParams)).toMatchObject({
-    peakpower: "2",
+    peakpower: "1",
     angle: "20",
     aspect: "-90",
   });
@@ -128,12 +128,19 @@ test("buildDataset viz: consumptionSource none, per-falda P/1000, zero load", as
   const est = viz.hourly.falde.find((f) => f.id === "est")!;
   expect(sud.productionKwh[0]).toBe(0.8);
   expect(est.productionKwh[0]).toBe(0.5);
-  expect(sud.peakKwp).toBe(4);
-  expect(est.peakKwp).toBe(2);
+  // scala di fetch: PVGIS è lineare nel peakpower → si scarica sempre a 1 kWp
+  expect(sud.peakKwp).toBe(1);
+  expect(est.peakKwp).toBe(1);
 
-  // combined practical = 0.8 + 0.5, no clipping (acCap = round(4+2) = 6 kW).
+  // tetto AC seed fisso: dato dell'inverter, non derivato dalle falde
   expect(viz.meta.acCapKw).toBe(6);
+  expect(viz.meta.batteryPortKw).toBe(6);
   expect(viz.hourly.productionPracticalKwh[0]).toBeCloseTo(1.3, 6);
+
+  // seed plausibile del sistema iniziale: 10 × 450 Wp = 4.5 kWp per falda
+  expect(viz.meta.falde.map((f) => f.panelCount)).toEqual([10, 10]);
+  expect(viz.meta.falde.map((f) => f.wp)).toEqual([450, 450]);
+  expect(viz.meta.falde.map((f) => f.peakKwp)).toEqual([4.5, 4.5]);
 
   expect(viz.hourly.loadKwh.every((x) => x === 0)).toBe(true);
   expect(viz.meta.batteryTotalKwh).toBe(0);

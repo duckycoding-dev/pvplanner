@@ -65,6 +65,12 @@ export function equalsSystems(a: SystemConfigB, b: SystemConfigB): boolean {
   return true;
 }
 
+/** Mantiene `prev` se `next` è computazionalmente equivalente (equalsSystems ignora
+ *  la label): usato per non far ripartire i memo costosi digitando il nome. */
+export function keepIfEquivalent(prev: SystemConfigB, next: SystemConfigB): SystemConfigB {
+  return prev !== next && equalsSystems(prev, next) ? prev : next;
+}
+
 export function serialize(cfg: SystemConfigB): string {
   return JSON.stringify(cfg, null, 2);
 }

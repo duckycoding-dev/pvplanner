@@ -13,6 +13,7 @@ import { ConsumptionLockedBox } from "./components/ConsumptionLockedBox.tsx";
 import type { StoredSetup } from "./lib/setupTypes.ts";
 import { type SystemConfigB, cloneFromBaseline, parseSystemConfigB, validateAgainstBaseline } from "./lib/systemConfig.ts";
 import { deriveMonoViz } from "./lib/monoView.ts";
+import { useStableSystem } from "./lib/useStableSystem.ts";
 import { hasConsumption } from "./lib/vizFlags.ts";
 import { loadSetup, saveSetup } from "./lib/datasetStore.ts";
 import { defaultTariff, validateTariff } from "./lib/tariffPresets.ts";
@@ -198,7 +199,9 @@ export function App() {
   };
 
   // Mono views (annual/monthly/daily) follow System A, recomputed live.
-  const { vizA, hasBattery } = useMemo(() => deriveMonoViz(activeViz, systemA), [activeViz, systemA]);
+  // stableSystemA: la label non è computazionale → digitare il nome non ricalcola.
+  const stableSystemA = useStableSystem(systemA);
+  const { vizA, hasBattery } = useMemo(() => deriveMonoViz(activeViz, stableSystemA), [activeViz, stableSystemA]);
 
   // Hotkey "m" toggles the configuration menu (ignored while typing in a form field).
   useEffect(() => {

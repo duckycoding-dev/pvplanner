@@ -8,6 +8,14 @@ export function defaultIncentive(viz: Viz): Incentive {
   return { ...viz.meta.incentive };
 }
 
+/** Incentivo dopo il click su una tab modo: se il modo non cambia ritorna l'oggetto
+ *  invariato; altrimenti azzera il valore al default del modo (niente carry-over:
+ *  45 % non deve diventare 45 €). */
+export function incentiveForMode(cur: Incentive, mode: Incentive["mode"]): Incentive {
+  if (cur.mode === mode) return cur;
+  return { ...cur, mode, value: mode === "percent" ? 50 : 0 };
+}
+
 export function incentiveTotalEur(incentive: Incentive, capexEur: number): number {
   return incentive.mode === "percent" ? (capexEur * incentive.value) / 100 : incentive.value;
 }

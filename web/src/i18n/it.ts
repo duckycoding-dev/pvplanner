@@ -44,6 +44,7 @@ export const it: Dict = {
   "wizard.back": "← Indietro",
   "wizard.next": "Avanti →",
   "wizard.finish": "Fine ✓",
+  "wizard.skip": "Salta",
 
   // --- wizard: località ---
   "wizard.location.title": "Località",
@@ -67,8 +68,6 @@ export const it: Dict = {
   "wizard.roof.removeFalda": "Rimuovi falda",
   "wizard.roof.azimuth": "Azimuth (°)",
   "wizard.roof.tilt": "Inclinazione (°)",
-  "wizard.roof.panelCount": "N° pannelli",
-  "wizard.roof.panelPower": "Potenza pannello",
   "wizard.roof.addFalda": "+ Aggiungi falda",
   "wizard.roof.mounting": "Posa",
   "wizard.roof.mountingBuilding": "Su edificio",
@@ -97,8 +96,7 @@ export const it: Dict = {
   "wizard.consumption.title": "Consumi",
   "wizard.consumption.needFetch": "Scarica prima i dati PVGIS: i consumi si aggiungono sul dataset del sito.",
   "wizard.consumption.intro":
-    "Aggiungi i consumi per sbloccare le analisi economiche e batteria. Puoi anche saltare e farlo dopo dalla sezione «Consumi» del menu di configurazione.",
-  "wizard.consumption.applied": "Consumi applicati ✓ — premi «Fine» per concludere.",
+    "Aggiungi i consumi per sbloccare le analisi economiche e batteria: «Fine ✓» applica i valori del metodo attivo. Con «Salta» concludi senza consumi e li aggiungi dopo dalla sezione «Consumi» del menu di configurazione.",
 
   // --- validazioni (messaggi restituiti come chiavi da validate*) ---
   "validate.wizard.lat": "La latitudine deve essere tra -90 e 90.",
@@ -113,8 +111,6 @@ export const it: Dict = {
   "validate.wizard.faldaIdDup": "ID falde duplicati.",
   "validate.wizard.faldaAzimuth": "L'azimuth di una falda deve essere tra -180 e 180.",
   "validate.wizard.faldaTilt": "L'inclinazione di una falda deve essere tra 0 e 90.",
-  "validate.wizard.faldaPanelCount": "Il numero di pannelli di una falda deve essere un intero ≥ 1.",
-  "validate.wizard.faldaWp": "La potenza pannello (Wp) di una falda deve essere tra 50 e 1000.",
   "validate.system.geometryMismatch": "Geometria diversa dalla baseline (falde non corrispondenti): import non supportato.",
   "validate.system.faldaMissing": "Una falda della baseline è assente.",
   "validate.system.faldaAzimuth": "L'azimuth di una falda non corrisponde alla baseline (geometria non modificabile).",
@@ -426,6 +422,7 @@ export const it: Dict = {
   "compare.socLabel": "SoC {label}",
   "compare.maxKwh": "max {kwh} kWh",
   "compare.maxLabel": "max {label}",
+  "compare.acCeilingLabel": "tetto AC {label} ({kw} kW)",
   "compare.dayBalanceTitle": "Bilancio energetico del giorno",
 
   // --- grafico potenza ---

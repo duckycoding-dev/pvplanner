@@ -16,7 +16,7 @@ function makeInputs(): WizardInputs {
     mounting: "building",
     systemLossPct: 14,
     years: { from: 2020, to: 2020 },
-    falde: [{ id: "sud", azimuth: 0, tilt: 30, panelCount: 12, wp: 400 }],
+    falde: [{ id: "sud", azimuth: 0, tilt: 30 }],
   };
 }
 
@@ -71,24 +71,6 @@ test("tilt fuori range", () => {
   expect(validateWizardInputs(i)).toBe("validate.wizard.faldaTilt");
 });
 
-test("panelCount < 1", () => {
-  const i = makeInputs();
-  i.falde[0]!.panelCount = 0;
-  expect(validateWizardInputs(i)).toBe("validate.wizard.faldaPanelCount");
-});
-
-test("panelCount non intero", () => {
-  const i = makeInputs();
-  i.falde[0]!.panelCount = 3.5;
-  expect(validateWizardInputs(i)).toBe("validate.wizard.faldaPanelCount");
-});
-
-test("wp fuori range", () => {
-  const i = makeInputs();
-  i.falde[0]!.wp = 40;
-  expect(validateWizardInputs(i)).toBe("validate.wizard.faldaWp");
-});
-
 test("systemLossPct fuori range", () => {
   const i = makeInputs();
   i.systemLossPct = 50;
@@ -122,8 +104,8 @@ test("id falda vuoto", () => {
 test("id falde duplicati", () => {
   const i = makeInputs();
   i.falde = [
-    { id: "sud", azimuth: 0, tilt: 30, panelCount: 12, wp: 400 },
-    { id: "sud", azimuth: 90, tilt: 30, panelCount: 12, wp: 400 },
+    { id: "sud", azimuth: 0, tilt: 30 },
+    { id: "sud", azimuth: 90, tilt: 30 },
   ];
   expect(validateWizardInputs(i)).toBe("validate.wizard.faldaIdDup");
 });

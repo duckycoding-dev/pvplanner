@@ -24,7 +24,7 @@ function defaultInputs(): WizardInputs {
     mounting: "building",
     systemLossPct: 14,
     years: { from: year, to: year },
-    falde: [{ id: "falda-1", azimuth: 0, tilt: 30, panelCount: 10, wp: 450 }],
+    falde: [{ id: "falda-1", azimuth: 0, tilt: 30 }],
   };
 }
 
@@ -54,6 +54,8 @@ export function SetupWizard({
   const [inputs, setInputs] = useState<WizardInputs>(() => initialInputs ?? defaultInputs());
   // Dataset costruito allo step "Scarico"; i consumi (step 4) lo aggiornano.
   const [built, setBuilt] = useState<StoredSetup | null>(null);
+  // Getter del candidato consumi correnti (registrato dall'editor allo step 4).
+  const getPendingRef = useRef<(() => StoredSetup | null) | null>(null);
 
   useEffect(() => {
     const d = ref.current;
@@ -63,6 +65,7 @@ export function SetupWizard({
       setStep(initialStep);
       setInputs(initialInputs ?? defaultInputs());
       setBuilt(null);
+      getPendingRef.current = null;
       d.showModal();
     } else if (!open && d.open) {
       d.close();
@@ -86,6 +89,20 @@ export function SetupWizard({
       setBuilt(null);
     }
     setOpen(false);
+  };
+
+  /** «Fine ✓»: applica i consumi correnti dell'editor (se validi) e conclude.
+   *  Candidato nullo (form non valido / CSV mancante) → equivale a «Salta». */
+  const finishApply = (): void => {
+    const pending = getPendingRef.current?.() ?? null;
+    if (pending !== null) {
+      void saveSetup(pending);
+      setBuilt(null);
+      onComplete(pending);
+      setOpen(false);
+      return;
+    }
+    finish();
   };
 
   return (
@@ -130,9 +147,8 @@ export function SetupWizard({
       {step === 4 && (
         <StepConsumption
           setup={built}
-          onApply={(next) => {
-            void saveSetup(next);
-            setBuilt(next);
+          registerGetPending={(g) => {
+            getPendingRef.current = g;
           }}
         />
       )}
@@ -159,9 +175,12 @@ export function SetupWizard({
         )}
         {/* Step 3: il fetch parte dal bottone interno "Scarica dati PVGIS" e avanza allo step 4. */}
         {step === 4 && built !== null && (
-          <button className="wizard-next" onClick={finish}>
-            {t("wizard.finish")}
-          </button>
+          <>
+            <button onClick={finish}>{t("wizard.skip")}</button>
+            <button className="wizard-next" onClick={finishApply}>
+              {t("wizard.finish")}
+            </button>
+          </>
         )}
       </div>
     </dialog>

@@ -43,6 +43,7 @@ export const en: Dict = {
   "wizard.back": "← Back",
   "wizard.next": "Next →",
   "wizard.finish": "Done ✓",
+  "wizard.skip": "Skip",
 
   // --- wizard: location ---
   "wizard.location.title": "Location",
@@ -66,8 +67,6 @@ export const en: Dict = {
   "wizard.roof.removeFalda": "Remove roof face",
   "wizard.roof.azimuth": "Azimuth (°)",
   "wizard.roof.tilt": "Tilt (°)",
-  "wizard.roof.panelCount": "Panel count",
-  "wizard.roof.panelPower": "Panel power",
   "wizard.roof.addFalda": "+ Add roof face",
   "wizard.roof.mounting": "Mounting",
   "wizard.roof.mountingBuilding": "Building-integrated",
@@ -96,8 +95,7 @@ export const en: Dict = {
   "wizard.consumption.title": "Consumption",
   "wizard.consumption.needFetch": "Download the PVGIS data first: consumption is added on top of the site dataset.",
   "wizard.consumption.intro":
-    "Add consumption to unlock the economic and battery analyses. You can also skip this and do it later from the “Consumption” section of the configuration menu.",
-  "wizard.consumption.applied": "Consumption applied ✓ — press “Done” to finish.",
+    "Add consumption to unlock the economic and battery analyses: “Done ✓” applies the active method's values. “Skip” finishes without consumption; you can add it later from the “Consumption” section of the configuration menu.",
 
   // --- validations (messages returned as keys by validate*) ---
   "validate.wizard.lat": "Latitude must be between -90 and 90.",
@@ -112,8 +110,6 @@ export const en: Dict = {
   "validate.wizard.faldaIdDup": "Duplicate roof-face IDs.",
   "validate.wizard.faldaAzimuth": "A roof face azimuth must be between -180 and 180.",
   "validate.wizard.faldaTilt": "A roof face tilt must be between 0 and 90.",
-  "validate.wizard.faldaPanelCount": "A roof face panel count must be an integer ≥ 1.",
-  "validate.wizard.faldaWp": "A roof face panel power (Wp) must be between 50 and 1000.",
   "validate.system.geometryMismatch": "Geometry differs from the baseline (roof faces do not match): import not supported.",
   "validate.system.faldaMissing": "A baseline roof face is missing.",
   "validate.system.faldaAzimuth": "A roof face azimuth does not match the baseline (geometry cannot be changed).",
@@ -425,6 +421,7 @@ export const en: Dict = {
   "compare.socLabel": "SoC {label}",
   "compare.maxKwh": "max {kwh} kWh",
   "compare.maxLabel": "max {label}",
+  "compare.acCeilingLabel": "AC ceiling {label} ({kw} kW)",
   "compare.dayBalanceTitle": "Day energy balance",
 
   // --- power chart ---

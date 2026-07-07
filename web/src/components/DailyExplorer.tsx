@@ -34,7 +34,7 @@ export function DailyExplorer({
   const h = viz.hourly;
   const total = dayCount(h);
   const picks = useMemo(() => quickPickDays(h), [h]);
-  const [dayIndex, setDayIndex] = useState<number>(picks.maxClipping);
+  const [dayIndex, setDayIndex] = useState<number>(picks.maxClipping ?? picks.maxProduction);
   const [scenario, setScenario] = useState<Scenario>("con");
   // Senza consumi le viste con/senza batteria non hanno significato: forziamo "senza".
   const effScenario: Scenario = hasBattery && hasConsumption ? scenario : "senza";
@@ -120,7 +120,14 @@ export function DailyExplorer({
           <strong className="day-label">{formatDayLabel(ts)}</strong>
         </div>
         <div className="picks">
-          <button onClick={() => setDayIndex(picks.maxClipping)}>{t("daily.pickMaxClipping")}</button>
+          <button
+            disabled={picks.maxClipping === null}
+            onClick={() => {
+              if (picks.maxClipping !== null) setDayIndex(picks.maxClipping);
+            }}
+          >
+            {t("daily.pickMaxClipping")}
+          </button>
           <button onClick={() => setDayIndex(picks.maxProduction)}>{t("daily.pickMaxProduction")}</button>
           <button onClick={() => setDayIndex(picks.minProduction)}>{t("daily.pickMinProduction")}</button>
         </div>

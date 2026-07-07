@@ -6,6 +6,7 @@ import {
   cloneFromBaseline,
   equalsBaseline,
   equalsSystems,
+  keepIfEquivalent,
   noPvConfig,
   parseSystemConfigB,
   serialize,
@@ -108,4 +109,29 @@ test("coupling: default dc per file vecchi, ac se esplicito, incluso in equals",
   const ac = parseSystemConfigB(JSON.stringify({ ...JSON.parse(serialize(legacy)), coupling: "ac" }));
   expect(ac.coupling).toBe("ac");
   expect(equalsSystems(legacy, ac)).toBe(false);
+});
+
+function makeCfg(): SystemConfigB {
+  return {
+    label: "Sistema A",
+    falde: [{ id: "sud", azimuth: 0, panelCount: 10, wp: 450 }],
+    acCapKw: 6,
+    batteryTotalKwh: 10,
+    batteryUsablePct: 90,
+    roundTrip: 0.9,
+    coupling: "dc",
+    installationCostEur: 15000,
+  };
+}
+
+test("keepIfEquivalent: cambia solo la label → mantiene il riferimento precedente", () => {
+  const prev = makeCfg();
+  const next = { ...prev, label: "Nuovo nome" };
+  expect(keepIfEquivalent(prev, next)).toBe(prev);
+});
+
+test("keepIfEquivalent: cambia un campo computazionale → ritorna il nuovo", () => {
+  const prev = makeCfg();
+  const next = { ...prev, acCapKw: 7 };
+  expect(keepIfEquivalent(prev, next)).toBe(next);
 });

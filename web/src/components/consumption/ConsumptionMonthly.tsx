@@ -38,11 +38,14 @@ export function ConsumptionMonthly({
   template,
   setTemplate,
   apply,
+  hideApply,
 }: {
   setup: StoredSetup;
   template: MonthlyTemplate;
   setTemplate: (t: MonthlyTemplate) => void;
   apply: (spec: ConsumptionSpec, result: CanonicalConsumption) => void;
+  /** Wizard: «Applica» nascosto, applica il bottone «Fine» del wizard. */
+  hideApply?: boolean;
 }) {
   const { t } = useT();
   const monthLabels = useMonthLabels();
@@ -163,9 +166,11 @@ export function ConsumptionMonthly({
       />
 
       <ConsumptionPreview result={result} viz={setup.viz} />
-      <button className="wizard-primary" onClick={() => apply({ method: "monthly", template }, result)}>
-        {t("common.apply")}
-      </button>
+      {hideApply !== true && (
+        <button className="wizard-primary" onClick={() => apply({ method: "monthly", template }, result)}>
+          {t("common.apply")}
+        </button>
+      )}
     </div>
   );
 }

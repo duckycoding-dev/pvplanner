@@ -1,4 +1,4 @@
-import type { Incentive } from "../lib/economics.ts";
+import { type Incentive, incentiveForMode } from "../lib/economics.ts";
 import { NumberField } from "./NumberField.tsx";
 import { useT } from "../i18n/useT.tsx";
 
@@ -8,10 +8,10 @@ export function IncentiveEditor({ incentive, setIncentive }: { incentive: Incent
   return (
     <div className="editor">
       <span className="seg">
-        <button className={incentive.mode === "percent" ? "active" : ""} onClick={() => setIncentive({ ...incentive, mode: "percent" })}>
+        <button className={incentive.mode === "percent" ? "active" : ""} onClick={() => setIncentive(incentiveForMode(incentive, "percent"))}>
           {t("incentive.percentMode")}
         </button>
-        <button className={incentive.mode === "fixed" ? "active" : ""} onClick={() => setIncentive({ ...incentive, mode: "fixed" })}>
+        <button className={incentive.mode === "fixed" ? "active" : ""} onClick={() => setIncentive(incentiveForMode(incentive, "fixed"))}>
           {t("incentive.fixedMode")}
         </button>
       </span>
