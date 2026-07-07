@@ -43,6 +43,7 @@ riassunto, stato, legenda simboli/unità, documenti collegati).
 - [`07-consumi.md`](07-consumi.md) — consumi: tre metodi di inserimento (CSV reale, template mensili, stima parametrica) + forma canonica + modello fisico
 - [`08-wizard-setup.md`](08-wizard-setup.md) — wizard di setup + pipeline browser (fetch PVGIS via proxy, anno tipico, IndexedDB, editor consumi, modalità solo-produzione, demo)
 - [`09-deploy.md`](09-deploy.md) — build di produzione, preview locale, header/CSP, analytics e checklist deploy Cloudflare Pages [AZIONE DAVIDE]
+- [`handoff-post-fase3.md`](handoff-post-fase3.md) — stato post-Fase 3 e lavoro rimanente (azioni Davide vs backlog implementazione/promozione)
 - _(prossimi)_ NPV/TIR + sensibilità
 
 ## Esecuzione
