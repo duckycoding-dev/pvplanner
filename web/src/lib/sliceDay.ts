@@ -15,6 +15,7 @@ export interface DayPoint {
   charge: number;
   discharge: number;
   soc: number;
+  temp?: number;
 }
 
 export function dayCount(h: Hourly): number {
@@ -42,6 +43,7 @@ export function sliceDay(h: Hourly, dayIndex: number): DayPoint[] {
       charge: h.wb.chargeKwh[j] ?? 0,
       discharge: h.wb.dischargeKwh[j] ?? 0,
       soc: h.wb.socKwh[j] ?? 0,
+      temp: h.t2m?.[j],
     });
   }
   return points;

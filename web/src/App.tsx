@@ -85,7 +85,7 @@ function loadIncentive(): Incentive {
 }
 
 export function App() {
-  const { t, lang, setLang } = useT();
+  const { t } = useT();
   const [tab, setTab] = useState<Tab>("giorno");
   // Boot: "loading" finché IndexedDB non risponde; StoredSetup = dataset dell'utente;
   // null = nessun setup salvato → si usa il viz demo e si mostra il banner.
@@ -104,7 +104,15 @@ export function App() {
   const [aboutOpen, setAboutOpen] = useState(false);
 
   // Viz attivo: quello del setup salvato, altrimenti il demo (fallback statico).
-  const activeViz = dataset !== "loading" && dataset !== null ? dataset.viz : demoViz;
+  // Backfill T2m: i viz salvati prima dell'introduzione di hourly.t2m non hanno la
+  // serie temperatura, ma lo StoredSetup conserva sempre `hourlyT2m` → la iniettiamo
+  // così la linea temperatura compare anche sui dataset già in cache (niente re-fetch).
+  const activeViz = useMemo<Viz>(() => {
+    if (dataset === "loading" || dataset === null) return demoViz;
+    const v = dataset.viz;
+    if (v.hourly.t2m !== undefined || dataset.hourlyT2m.length === 0) return v;
+    return { ...v, hourly: { ...v.hourly, t2m: dataset.hourlyT2m } };
+  }, [dataset]);
   const consumption = hasConsumption(activeViz);
 
   // Boot asincrono da IndexedDB. Rilegge anche i sistemi A/B validandoli contro il
@@ -310,14 +318,6 @@ export function App() {
             <h1>
               {t("app.title")} <span className="year">{vizA.meta.year}</span>
             </h1>
-            <span className="lang-toggle seg" role="group" aria-label={t("lang.switch")}>
-              <button className={lang === "it" ? "active" : ""} aria-pressed={lang === "it"} onClick={() => setLang("it")}>
-                {t("lang.it")}
-              </button>
-              <button className={lang === "en" ? "active" : ""} aria-pressed={lang === "en"} onClick={() => setLang("en")}>
-                {t("lang.en")}
-              </button>
-            </span>
           </div>
           <p className="sub">
             {t("header.sub", {

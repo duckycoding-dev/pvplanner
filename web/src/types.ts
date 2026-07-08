@@ -32,6 +32,7 @@ export interface Hourly {
   productionPracticalKwh: number[];
   clippingKwh: number[];
   loadKwh: number[];
+  t2m?: number[];
   nb: { selfConsumedKwh: number[]; importKwh: number[]; exportKwh: number[] };
   wb: {
     selfConsumedKwh: number[];

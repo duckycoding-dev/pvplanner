@@ -11,6 +11,8 @@ import { ConsumptionEditor } from "./consumption/ConsumptionEditor.tsx";
 import { ShareSetupDialog } from "./ShareSetupDialog.tsx";
 import { type SharedConfig, buildSharedConfig, parseSharedConfig, serializeSharedConfig } from "../lib/shareSetup.ts";
 import { useT } from "../i18n/useT.tsx";
+import type { Lang } from "../i18n/types.ts";
+import { useTheme } from "../theme/useTheme.tsx";
 
 /**
  * Fixed left rail with a single toggle that opens the configuration as a native
@@ -52,7 +54,8 @@ export function Sidebar({
   /** Setup importato da file: il chiamante mostra la conferma e apre il wizard precompilato. */
   onImportSetup: (cfg: SharedConfig) => void;
 }) {
-  const { t } = useT();
+  const { t, lang, setLang } = useT();
+  const { theme, toggleTheme } = useTheme();
   const [openTariff, setOpenTariff] = useState(true);
   const [openA, setOpenA] = useState(true);
   const [openB, setOpenB] = useState(false);
@@ -109,10 +112,32 @@ export function Sidebar({
   return (
     <>
       <div className="rail">
-        <img src="/pvplanner_fullsize_logo.png" alt="" className="rail-logo" />
-        <button className="rail-toggle" onClick={() => setOpen(true)} title={t("menu.openTitle")} aria-label={t("menu.open")}>
-          ☰
-        </button>
+        <div className="rail-main">
+          <img src="/pvplanner_fullsize_logo.png" alt="" className="rail-logo" />
+          <button className="rail-toggle" onClick={() => setOpen(true)} title={t("menu.openTitle")} aria-label={t("menu.open")}>
+            ☰
+          </button>
+        </div>
+        <div className="rail-controls">
+          <select
+            className="lang-select"
+            aria-label={t("lang.switch")}
+            value={lang}
+            onChange={(e) => setLang(e.target.value as Lang)}
+          >
+            <option value="it">🇮🇹</option>
+            <option value="en">🇬🇧</option>
+          </select>
+          <button
+            type="button"
+            className="theme-toggle"
+            aria-label={t(theme === "dark" ? "theme.toLight" : "theme.toDark")}
+            aria-pressed={theme === "dark"}
+            onClick={toggleTheme}
+          >
+            {theme === "dark" ? "☀️" : "🌙"}
+          </button>
+        </div>
       </div>
 
       <dialog

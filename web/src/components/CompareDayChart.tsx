@@ -161,6 +161,7 @@ export function CompareDayChart({
           <CartesianGrid strokeDasharray="3 3" />
           <XAxis dataKey="hour" />
           <YAxis label={{ value: "kWh", angle: -90, position: "insideLeft" }} />
+          <YAxis yAxisId="temp" orientation="right" tickFormatter={(v) => String(Math.round(Number(v)))} label={{ value: "°C", angle: 90, position: "insideRight" }} />
           <Tooltip formatter={(v) => Number(v).toFixed(2)} labelFormatter={(h) => t("chart.hour", { h: String(h) })} />
           <Legend onClick={onClick} wrapperStyle={{ cursor: "pointer" }} />
 
@@ -171,6 +172,18 @@ export function CompareDayChart({
           <Line type="monotone" dataKey="prodA" name={t("compare.productionLabel", { label: labelA })} stroke="#16a34a" strokeWidth={2} dot={false} isAnimationActive={false} hide={isHidden("prodA")} />
           <Line type="monotone" dataKey="prodB" name={t("compare.productionLabel", { label: labelB })} stroke="#16a34a" strokeDasharray="5 3" dot={false} isAnimationActive={false} hide={isHidden("prodB")} />
           {/* tetto AC: su bucket orari kW ≡ kWh (stessa convenzione di PowerChart) */}
+          <Line
+            yAxisId="temp"
+            type="monotone"
+            dataKey="temp"
+            name={t("chart.temperature")}
+            stroke="#f59e0b"
+            strokeWidth={2}
+            dot={false}
+            isAnimationActive={false}
+            connectNulls
+            hide={isHidden("temp")}
+          />
           <ReferenceLine
             y={acCapA}
             stroke="#6b7280"

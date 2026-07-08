@@ -33,6 +33,7 @@ export function PowerChart({ data, scenario, acCapKw }: Props) {
         <CartesianGrid strokeDasharray="3 3" />
         <XAxis dataKey="hour" tickFormatter={(h: number) => String(h)} />
         <YAxis label={{ value: "kW", angle: -90, position: "insideLeft" }} />
+        <YAxis yAxisId="temp" orientation="right" tickFormatter={(v: number) => String(Math.round(v))} label={{ value: "°C", angle: 90, position: "insideRight" }} />
         <Tooltip formatter={(v: number) => v.toFixed(2)} labelFormatter={(h) => t("chart.hour", { h: String(h) })} />
         <Legend onClick={onClick} wrapperStyle={{ cursor: "pointer" }} />
 
@@ -103,6 +104,18 @@ export function PowerChart({ data, scenario, acCapKw }: Props) {
           dot={false}
           isAnimationActive={false}
           hide={isHidden("load")}
+        />
+        <Line
+          yAxisId="temp"
+          type="monotone"
+          dataKey="temp"
+          name={t("chart.temperature")}
+          stroke="#f59e0b"
+          strokeWidth={2}
+          dot={false}
+          isAnimationActive={false}
+          connectNulls
+          hide={isHidden("temp")}
         />
         <ReferenceLine
           y={acCapKw}

@@ -128,6 +128,7 @@ export interface VizObject {
     productionPracticalKwh: number[];
     clippingKwh: number[];
     loadKwh: number[];
+    t2m: number[];
     nb: { selfConsumedKwh: number[]; importKwh: number[]; exportKwh: number[] };
     wb: {
       selfConsumedKwh: number[];
@@ -254,6 +255,7 @@ export function buildVizObject(
       productionPracticalKwh: arr3(result.combined.hourly.practicalKwh),
       clippingKwh: arr3(result.combined.hourly.clippingLossKwh),
       loadKwh: woh ? arr3(woh.loadKwh) : zeros(hours),
+      t2m: arr3(base.t2m),
       nb: {
         selfConsumedKwh: woh ? arr3(woh.selfConsumedKwh) : zeros(hours),
         importKwh: woh ? arr3(woh.importKwh) : zeros(hours),

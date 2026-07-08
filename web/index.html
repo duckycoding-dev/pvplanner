@@ -6,6 +6,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Analisi Fotovoltaico</title>
     <meta name="theme-color" content="#0b1f33" />
+    <!-- Anti-FOUC: imposta data-theme prima del bundle React, stessa logica di resolveInitialTheme. -->
+    <script>
+      (function () {
+        try {
+          var s = localStorage.getItem("theme");
+          var t = s === "light" || s === "dark" ? s : (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+          document.documentElement.setAttribute("data-theme", t);
+        } catch (e) {}
+      })();
+    </script>
     <meta
       name="description"
       content="Stima produzione, autoconsumo, risparmio e tempo di rientro di un impianto fotovoltaico con o senza batteria, dai dati PVGIS. Dati solo nel browser, senza account."

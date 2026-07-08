@@ -10,6 +10,7 @@ export interface ComparePoint {
   selfB: number;
   socA: number;
   socB: number;
+  temp?: number;
 }
 
 /** Slice the 24 hours of a day into A-vs-B chart points (practical production, coverage, SoC). */
@@ -27,6 +28,7 @@ export function sliceCompareDay(a: SystemResult, b: SystemResult, viz: Viz, dayI
       selfB: b.hourly.selfConsumedKwh[j] ?? 0,
       socA: a.hourly.socKwh[j] ?? 0,
       socB: b.hourly.socKwh[j] ?? 0,
+      temp: viz.hourly.t2m?.[j],
     });
   }
   return pts;
