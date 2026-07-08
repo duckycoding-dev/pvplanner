@@ -1,7 +1,6 @@
 import { useT } from "../i18n/useT.tsx";
 
-// TODO-DAVIDE: URL del repository pubblico (AGPL) una volta creato su GitHub.
-const REPO_URL = "TODO-DAVIDE"; // es. https://github.com/…/analisi-fotovoltaico
+const REPO_URL = "https://github.com/duckycoding-dev/pvplanner";
 
 /**
  * Pagina Info & Privacy (bilingue via i18n): cos'è, come funziona, privacy by design,

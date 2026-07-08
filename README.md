@@ -24,7 +24,7 @@ All models are **deterministic** — no AI at runtime.
 
 ### Online demo
 
-Live instance: **[AZIONE DAVIDE — link to the deployed Cloudflare Pages URL]**
+Live instance: [pvplanner.pages.dev](pvplanner.pages.dev)
 
 ### Local development
 

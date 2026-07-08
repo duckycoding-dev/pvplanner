@@ -2,9 +2,8 @@ import type { CanonicalConsumption } from "../../../src/core/consumption/canonic
 import { formatConsumptionNote } from "../lib/consumptionDisplay.ts";
 import { useT } from "../i18n/useT.tsx";
 
-// TODO-DAVIDE: sostituire questi URL segnaposto (blog, LinkedIn, donazione) prima del deploy.
-const BLOG_URL = "TODO-DAVIDE"; // es. https://blog.example.com
-const LINKEDIN_URL = "TODO-DAVIDE"; // es. https://www.linkedin.com/in/…
+const BLOG_URL = "https://duckycoding.dev"; // es. https://blog.example.com
+const LINKEDIN_URL = "https://www.linkedin.com/in/davide-m-997874254/"; // es. https://www.linkedin.com/in/…
 const COFFEE_URL = "TODO-DAVIDE"; // es. https://buymeacoffee.com/…
 
 /**
@@ -40,9 +39,13 @@ export function Footer({
         <a href={LINKEDIN_URL} target="_blank" rel="noopener noreferrer">
           {t("footer.linkedin")}
         </a>
-        <a href={COFFEE_URL} target="_blank" rel="noopener noreferrer">
-          {t("footer.coffee")}
-        </a>
+        {
+          COFFEE_URL !== "TODO-DAVIDE" && (
+            <a href={COFFEE_URL} target="_blank" rel="noopener noreferrer">
+              {t("footer.coffee")}
+            </a>
+          )
+        }
       </nav>
     </footer>
   );
