@@ -146,18 +146,20 @@ footer { margin-top: 24px; color: var(--muted); font-size: 12px; border-top: 1px
 
 /* --- layout: left rail + dialog menu --- */
 .layout { display: block; padding-left: 48px; }
-.main { max-width: 1120px; margin: 0 auto; padding: 20px 18px 60px; }
+.main { max-width: 1120px; margin: 0 auto; padding: 20px 18px; }
 .rail { position: fixed; left: 0; top: 0; bottom: 0; width: 48px; z-index: 50; background: var(--card);
   border-right: 1px solid var(--border); display: flex; flex-direction: column; align-items: center; padding-top: 12px; }
 .rail-toggle { width: 36px; height: 36px; border: 1px solid var(--border); background: var(--card);
   border-radius: 9px; cursor: pointer; font-size: 18px; line-height: 1; color: var(--text); }
 .rail-toggle:hover { border-color: var(--accent); color: var(--accent); }
+.rail-logo { display: block; width: 32px; height: 32px; object-fit: contain; margin-bottom: 10px; }
 
 @media (max-width: 640px) {
   .layout { padding-left: 0; }
   .rail { position: sticky; top: 0; right: 0; bottom: auto; width: auto; height: 44px; z-index: 50;
     flex-direction: row; align-items: center; justify-content: flex-end; padding: 0 10px;
     border-right: none; border-bottom: 1px solid var(--border); }
+  .rail-logo { width: 26px; height: 26px; margin-bottom: 0; margin-right: 8px; }
 }
 
 .menu-dialog { overscroll-behavior: contain; margin: 0; border: none; padding: 0; height: 100vh; height: 100dvh; max-height: 100vh; max-height: 100dvh; min-height: 100vh; min-height: 100dvh; width: min(500px, 92vw);
@@ -229,7 +231,7 @@ footer { margin-top: 24px; color: var(--muted); font-size: 12px; border-top: 1px
   color: var(--muted); font-size: 12px; display: grid; gap: 4px; }
 .app-footer .footer-note { margin: 0; }
 .app-footer .footer-attr, .app-footer .footer-disclaimer { margin: 0; }
-.footer-links { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 6px; }
+.footer-links { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border); }
 .footer-links a, .link-button { color: var(--accent); text-decoration: none; font-size: 12px; }
 .footer-links a:hover, .link-button:hover { text-decoration: underline; }
 .link-button { background: none; border: none; padding: 0; cursor: pointer; font: inherit; }

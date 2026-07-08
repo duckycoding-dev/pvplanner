@@ -1,5 +1,7 @@
 # PvPlanner - Solar PV Analysis
 
+![PvPlanner logo](web/public/pvplanner_fullsize_logo_with_text.png)
+
 [![License: AGPL v3](https://img.shields.io/badge/License-AGPL_v3-blue.svg)](https://www.gnu.org/licenses/agpl-3.0)
 
 A browser tool to estimate the **production, self-consumption, bill savings and payback time**

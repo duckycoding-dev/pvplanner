@@ -5,10 +5,21 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Analisi Fotovoltaico</title>
+    <meta name="theme-color" content="#0b1f33" />
     <meta
       name="description"
       content="Stima produzione, autoconsumo, risparmio e tempo di rientro di un impianto fotovoltaico con o senza batteria, dai dati PVGIS. Dati solo nel browser, senza account."
     />
+    <!-- href relativi (non "/x"): il bundler HTML di Bun risolve/hasha i <link>
+         solo rispetto alla cartella di questo file, non come path assoluti da server
+         (vedi https://github.com/oven-sh/bun/issues/19249). I file restano comunque
+         raggiungibili anche ai path assoluti canonici grazie al serving statico di
+         web/public/ (serve.ts in dev, copia in dist/ in build-web.ts). -->
+    <link rel="manifest" href="./public/site.webmanifest" />
+    <link rel="icon" href="./public/favicon.ico" sizes="any" />
+    <link rel="icon" type="image/png" sizes="32x32" href="./public/favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="./public/favicon-16x16.png" />
+    <link rel="apple-touch-icon" href="./public/apple-touch-icon.png" />
 
     <!-- Open Graph (anteprima link su social/chat) -->
     <meta property="og:type" content="website" />
@@ -18,6 +29,9 @@
       content="Stima produzione, autoconsumo, risparmio e tempo di rientro di un impianto fotovoltaico con o senza batteria, dai dati PVGIS."
     />
     <meta property="og:image" content="/og.png" />
+    <meta property="og:locale" content="it_IT" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="twitter:card" content="summary_large_image" />
 
     <meta name="cf-analytics-token" content="d83e4a2badf94e05bb0f454da2e76281" />
