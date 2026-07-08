@@ -175,7 +175,7 @@ export function CashflowSection({
               x={cross}
               stroke="#7c3aed"
               strokeDasharray="3 3"
-              label={{ value: t("cashflow.crossover", { years: cross.toFixed(1) }), position: "top", fill: "#7c3aed", fontSize: 11 }}
+              label={{ value: t("cashflow.crossover", { years: cross.toFixed(1) }), position: "insideTop", fill: "#7c3aed", fontSize: 11 }}
             />
           )}
           {cross !== null && <ReferenceDot x={cross} y={crossY} r={5} fill="#7c3aed" stroke="#fff" />}

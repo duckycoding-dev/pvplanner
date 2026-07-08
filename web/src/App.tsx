@@ -359,7 +359,11 @@ export function App() {
           {tab === "glossario" && <Glossary />}
         </main>
 
-        <Footer consumptionNote={activeViz.meta.consumptionNote} onOpenAbout={() => setAboutOpen(true)} />
+        <Footer
+          consumptionNote={activeViz.meta.consumptionNote}
+          consumptionResult={dataset !== null ? dataset.consumption?.result ?? null : null}
+          onOpenAbout={() => setAboutOpen(true)}
+        />
       </div>
 
       {aboutOpen && <AboutPrivacy onClose={() => setAboutOpen(false)} />}

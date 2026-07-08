@@ -1,3 +1,5 @@
+import type { CanonicalConsumption } from "../../../src/core/consumption/canonical.ts";
+import { formatConsumptionNote } from "../lib/consumptionDisplay.ts";
 import { useT } from "../i18n/useT.tsx";
 
 // TODO-DAVIDE: sostituire questi URL segnaposto (blog, LinkedIn, donazione) prima del deploy.
@@ -6,14 +8,24 @@ const LINKEDIN_URL = "TODO-DAVIDE"; // es. https://www.linkedin.com/in/…
 const COFFEE_URL = "TODO-DAVIDE"; // es. https://buymeacoffee.com/…
 
 /**
- * Footer sempre visibile: nota consumi (baked nel dataset) + attribuzioni dati vincolanti
- * (PVGIS/OSM), disclaimer breve, link alla pagina Info & Privacy e link personali di Davide.
+ * Footer sempre visibile: nota consumi dal dataset live con fallback al testo baked
+ * + attribuzioni dati vincolanti (PVGIS/OSM), disclaimer breve, link alla pagina Info &
+ * Privacy e link personali di Davide.
  */
-export function Footer({ consumptionNote, onOpenAbout }: { consumptionNote: string; onOpenAbout: () => void }) {
+export function Footer({
+  consumptionNote,
+  consumptionResult,
+  onOpenAbout,
+}: {
+  consumptionNote: string;
+  consumptionResult: CanonicalConsumption | null;
+  onOpenAbout: () => void;
+}) {
   const { t } = useT();
+  const note = consumptionResult !== null ? formatConsumptionNote(consumptionResult, t) : consumptionNote;
   return (
     <footer className="app-footer">
-      {consumptionNote !== "" && <p className="footer-note">{consumptionNote}</p>}
+      {note !== "" && <p className="footer-note">{note}</p>}
       <p className="footer-attr">
         {t("attribution.pvgis")} · {t("attribution.osm")}
       </p>

@@ -5,6 +5,7 @@ import { type CanonicalConsumption, validateCanonical } from "../../../../src/co
 import type { ConsumptionSpec, StoredSetup } from "../../lib/setupTypes.ts";
 import { applyConsumption } from "../../lib/applyConsumption.ts";
 import { buildPendingSetup } from "../../lib/pendingConsumption.ts";
+import { formatConsumptionLabel } from "../../lib/consumptionDisplay.ts";
 import { fmt } from "../../lib/format.ts";
 import { useT } from "../../i18n/useT.tsx";
 import { ConsumptionCsv, type CsvState } from "./ConsumptionCsv.tsx";
@@ -77,7 +78,7 @@ export function ConsumptionEditor({
     <div className="consumption-editor">
       {saved !== null && (
         <p className="note consumption-current">
-          {t("consumption.editor.inUse")} <strong>{saved.result.meta.label}</strong> ·{" "}
+          {t("consumption.editor.inUse")} <strong>{formatConsumptionLabel(saved.result, t)}</strong> ·{" "}
           {fmt(saved.result.meta.annualKwh)} {t("consumption.editor.perYear")}
         </p>
       )}
