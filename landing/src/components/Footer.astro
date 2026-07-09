@@ -1,0 +1,50 @@
+---
+import type { LandingCopy } from "../i18n/types";
+
+interface Props {
+  copy: LandingCopy;
+  toolUrl: string;
+  repoUrl: string;
+}
+const { copy, toolUrl, repoUrl } = Astro.props;
+
+// Gli href __TOOL__/__REPO__ nei dizionari sono segnaposto: qui diventano URL veri.
+const resolve = (href: string): string =>
+  href === "__TOOL__" ? toolUrl : href === "__REPO__" ? repoUrl : href;
+const cols = [copy.footer.product, copy.footer.project, copy.footer.data];
+---
+
+<footer class="border-t border-slate-100 bg-slate-50">
+  <div class="mx-auto grid max-w-6xl gap-8 px-4 py-12 sm:grid-cols-3">
+    {
+      cols.map((col) => (
+        <div>
+          <div class="mb-3 text-xs font-bold tracking-widest text-slate-500 uppercase">{col.label}</div>
+          <ul class="space-y-2 text-sm">
+            {col.links.map((l) =>
+              l.href === "" ? (
+                <li class="text-slate-500">{l.text}</li>
+              ) : (
+                <li>
+                  <a href={resolve(l.href)} class="text-slate-600 hover:text-slate-900">
+                    {l.text}
+                  </a>
+                </li>
+              ),
+            )}
+          </ul>
+        </div>
+      ))
+    }
+  </div>
+  <div
+    class="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-2 border-t border-slate-200 px-4 py-5 text-xs text-slate-500"
+  >
+    <span>{copy.footer.bottom}</span>
+    <span>
+      <a href="/" class="hover:text-slate-900">IT</a>
+      <span class="mx-1">/</span>
+      <a href="/en/" class="hover:text-slate-900">EN</a>
+    </span>
+  </div>
+</footer>

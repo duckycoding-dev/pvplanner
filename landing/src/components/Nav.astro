@@ -1,0 +1,28 @@
+---
+import type { LandingCopy } from "../i18n/types";
+
+interface Props {
+  copy: LandingCopy;
+  toolUrl: string;
+}
+const { copy, toolUrl } = Astro.props;
+---
+
+<header class="sticky top-0 z-40 border-b border-slate-100 bg-white/90 backdrop-blur">
+  <nav class="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3">
+    <a href="#top" class="flex items-center gap-2">
+      <img src="/logo.png" alt="PVVerdict" width="120" height="130" class="h-9 w-auto" />
+    </a>
+    <div class="hidden items-center gap-6 text-sm text-slate-600 sm:flex">
+      <a href="#how" class="hover:text-slate-900">{copy.nav.how}</a>
+      <a href="#features" class="hover:text-slate-900">{copy.nav.features}</a>
+      <a href="#faq" class="hover:text-slate-900">{copy.nav.faq}</a>
+    </div>
+    <a
+      href={toolUrl}
+      class="rounded-lg bg-accent px-4 py-2 text-sm font-bold text-slate-900 shadow-sm transition hover:brightness-105"
+    >
+      {copy.nav.cta}
+    </a>
+  </nav>
+</header>

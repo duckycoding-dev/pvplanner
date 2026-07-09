@@ -52,6 +52,9 @@ See [`docs/09-deploy.md`](docs/09-deploy.md) for the full Cloudflare Pages deplo
 - **Web** (`web/`): a React SPA (Bun HTML bundler, Recharts) driven by a setup wizard that
   fetches PVGIS data, stores the dataset in IndexedDB, and renders the dashboards.
 - **i18n** (`web/src/i18n/`): flat IT/EN dictionaries + a `useT` hook, no i18n library.
+- **Landing** (`landing/`): static Astro site (IT at `/`, EN at `/en/`) — the SEO/marketing
+  entrypoint, deployed as a separate Cloudflare Pages project (root directory `landing/`).
+  Develop with `cd landing && bun run dev`; test with `cd landing && bun test`.
 - **Proxy** (`functions/api/pvgis.ts` / `src/server/pvgisProxy.ts`): same-origin PVGIS relay.
 - **Docs** (`docs/`): every calculation area is documented with standard frontmatter.
 

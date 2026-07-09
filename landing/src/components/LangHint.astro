@@ -1,0 +1,49 @@
+---
+import type { LandingCopy } from "../i18n/types";
+
+interface Props {
+  copy: LandingCopy;
+}
+const { copy } = Astro.props;
+const hint = copy.langHint;
+---
+
+{
+  hint && (
+    <div
+      id="langhint"
+      hidden
+      class="fixed inset-x-0 bottom-0 z-50 flex items-center justify-center gap-3 border-t border-slate-200 bg-white px-4 py-2.5 text-sm shadow-lg"
+    >
+      <span class="text-slate-600">{hint.text}</span>
+      <a href="/en/" class="font-bold text-accent2 hover:underline">
+        {hint.link}
+      </a>
+      <button
+        id="langhint-close"
+        aria-label="Dismiss"
+        class="ml-2 cursor-pointer rounded px-2 text-slate-400 hover:text-slate-700"
+      >
+        ✕
+      </button>
+    </div>
+  )
+}
+
+<script is:inline>
+  (function () {
+    try {
+      if (localStorage.getItem("pv_langhint") === "no") return;
+      if (navigator.language.toLowerCase().startsWith("it")) return;
+      var el = document.getElementById("langhint");
+      if (!el) return;
+      el.hidden = false;
+      document.getElementById("langhint-close").addEventListener("click", function () {
+        el.hidden = true;
+        try {
+          localStorage.setItem("pv_langhint", "no");
+        } catch (e) {}
+      });
+    } catch (e) {}
+  })();
+</script>

@@ -1,0 +1,42 @@
+---
+import Base from "../layouts/Base.astro";
+import Nav from "../components/Nav.astro";
+import Hero from "../components/Hero.astro";
+import Problem from "../components/Problem.astro";
+import HowItWorks from "../components/HowItWorks.astro";
+import Features from "../components/Features.astro";
+import NotModeled from "../components/NotModeled.astro";
+import Privacy from "../components/Privacy.astro";
+import Faq from "../components/Faq.astro";
+import FinalCta from "../components/FinalCta.astro";
+import LangHint from "../components/LangHint.astro";
+import Footer from "../components/Footer.astro";
+import { it } from "../i18n/it";
+import { TOOL_URL, REPO_URL } from "../config";
+
+const faqJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  mainEntity: it.faq.items.map((i) => ({
+    "@type": "Question",
+    name: i.q,
+    acceptedAnswer: { "@type": "Answer", text: i.a },
+  })),
+};
+---
+
+<Base lang="it" copy={it} jsonLd={faqJsonLd}>
+  <Nav copy={it} toolUrl={TOOL_URL} />
+  <main>
+    <Hero copy={it} lang="it" toolUrl={TOOL_URL} />
+    <Problem copy={it} />
+    <HowItWorks copy={it} lang="it" />
+    <Features copy={it} />
+    <NotModeled copy={it} />
+    <Privacy copy={it} />
+    <Faq copy={it} />
+    <FinalCta copy={it} toolUrl={TOOL_URL} />
+  </main>
+  <Footer copy={it} toolUrl={TOOL_URL} repoUrl={REPO_URL} />
+  <LangHint copy={it} />
+</Base>

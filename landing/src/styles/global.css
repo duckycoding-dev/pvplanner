@@ -1,0 +1,13 @@
+/* starwind.css è self-contained: importa già tailwindcss, tw-animate-css e i token del tema Starwind. */
+@import "./starwind.css";
+
+/* Token del tema landing (spec §2: direzione "solar editorial / data-confident"). */
+@theme {
+  --color-accent: #f59e0b; /* ambra */
+  --color-accent2: #2563eb; /* blu */
+  --font-sans: system-ui, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+html {
+  scroll-behavior: smooth;
+}

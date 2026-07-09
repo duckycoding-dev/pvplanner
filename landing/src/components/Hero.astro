@@ -1,0 +1,63 @@
+---
+import type { Lang, LandingCopy } from "../i18n/types";
+
+interface Props {
+  copy: LandingCopy;
+  lang: Lang;
+  toolUrl: string;
+}
+const { copy, lang, toolUrl } = Astro.props;
+
+// Valori del box-verdetto: demo Roma (gli stessi mostrati dal tool in modalità demo).
+const verdict = [
+  { label: copy.hero.verdictBox.payback, value: lang === "it" ? "5,0 anni" : "5.0 years" },
+  { label: copy.hero.verdictBox.battery, value: lang === "it" ? "Sì" : "Yes" },
+  { label: copy.hero.verdictBox.selfConsumption, value: "55%" },
+];
+---
+
+<section id="top" class="mx-auto grid max-w-6xl items-center gap-10 px-4 py-16 lg:grid-cols-[7fr_6fr] lg:py-24">
+  <div>
+    <h1 class="text-4xl leading-tight font-extrabold tracking-tight text-slate-900 sm:text-5xl">
+      {copy.hero.h1}
+    </h1>
+    <p class="mt-5 max-w-xl text-lg text-slate-600">{copy.hero.sub}</p>
+    <div class="mt-8">
+      <a
+        href={toolUrl}
+        class="inline-block rounded-xl bg-accent px-7 py-3.5 text-lg font-bold text-slate-900 shadow-md transition hover:brightness-105"
+      >
+        {copy.hero.cta}
+      </a>
+      <p class="mt-3 max-w-md text-sm text-slate-500">{copy.hero.micro}</p>
+    </div>
+    <p class="mt-6 text-xs font-medium tracking-wide text-slate-500">
+      {copy.hero.trust.join(" · ")}
+    </p>
+  </div>
+  <div class="relative">
+    <div class="overflow-hidden rounded-2xl border border-slate-200 shadow-lg">
+      <img
+        src={`/shots/${lang}/daily.webp`}
+        alt={copy.features.items[1].alt}
+        width="1400"
+        height="522"
+        loading="eager"
+        fetchpriority="high"
+        class="block w-full"
+      />
+    </div>
+    <div
+      class="absolute -bottom-6 left-4 flex gap-5 rounded-xl border border-slate-200 bg-white px-5 py-3 shadow-xl"
+    >
+      {
+        verdict.map((v) => (
+          <div>
+            <div class="text-[11px] font-semibold tracking-wide text-slate-500 uppercase">{v.label}</div>
+            <div class="text-lg font-extrabold text-accent2">{v.value}</div>
+          </div>
+        ))
+      }
+    </div>
+  </div>
+</section>

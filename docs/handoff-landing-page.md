@@ -107,12 +107,34 @@ meta/OG, `@astrojs/sitemap`).
    (`pvverdict.com`/`.app`), rinominare repo GitHub e progetto Cloudflare
    Pages, rigenerare il logo con testo (a carico del proprietario); le
    occorrenze nel codice sono già aggiornate (branch/commit di rename).
-3. Riprendere il brainstorming della **landing**: scrivere il **copy vero (IT)**
-   sezione per sezione, partendo da *Hero* e *Il problema*; poi versione **EN**.
-4. Chiudere il brainstorming → **spec** (`docs/superpowers/specs/…-landing-design.md`)
-   → **piano** → implementazione (nuovo progetto Astro; valutare monorepo vs repo
-   separata per la landing).
-5. Solo dopo, brainstormare il **sotto-progetto B** (modale di benvenuto).
+3. ~~Brainstorming landing → spec → piano → implementazione~~ **FATTO
+   (2026-07-10)**: copy IT+EN approvato, spec
+   (`docs/superpowers/specs/2026-07-09-landing-page-design.md`), piano
+   (`docs/superpowers/plans/2026-07-09-landing-page.md`), sito Astro
+   implementato in `landing/`. Lighthouse: 94/100/100/100. Resta: deploy
+   Cloudflare Pages (progetto dedicato, root `landing/`), acquisto domini,
+   verifica no-log del proxy PVGIS.
+4. Solo dopo, brainstormare il **sotto-progetto B** (modale di benvenuto).
+
+## Migliorie note della landing (non bloccanti)
+
+Rilevate durante l'implementazione (2026-07-10), da riprendere con calma:
+
+- **`shots/*/wizard-2.webp` fuorviante:** è il pannello Consumi del menu in
+  stato demo ("Esegui prima il setup della tua località"), non la vera UI di
+  caricamento consumi. Rifarlo a mano dopo un setup completo, o adattare
+  `landing/scripts/screenshots.ts` per attraversare il wizard fino allo step
+  Consumi.
+- **OG image unica in italiano:** `landing/public/og.png` ha il claim IT anche
+  per la pagina `/en/`. Generare una `og-en.png` e differenziare il meta
+  `og:image` per lingua in `Base.astro`.
+- **Performance 94 (target 95):** il residuo è il peso dell'immagine hero su
+  4G simulato; eventuale `srcset` responsive (versione ~700px per mobile) la
+  porta sopra soglia. Su CDN reale probabilmente già ok: rimisurare dopo il
+  deploy.
+- **Logo con tagline legacy:** il logo attuale porta ancora "PLAN · ANALYZE ·
+  OPTIMIZE" (era di PvPlanner); valutare una tagline coerente col verdetto
+  (es. "ANALYZE · COMPARE · DECIDE") quando si rimette mano alla grafica.
 
 ## Stato repo
 

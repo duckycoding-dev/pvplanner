@@ -1,0 +1,40 @@
+---
+import { SITE } from "../config";
+import type { Lang, LandingCopy } from "../i18n/types";
+import "../styles/global.css";
+
+interface Props {
+  lang: Lang;
+  copy: LandingCopy;
+  jsonLd?: object | null;
+}
+const { lang, copy, jsonLd = null } = Astro.props;
+const path = lang === "it" ? "/" : "/en/";
+const canonical = new URL(path, SITE).href;
+---
+
+<!doctype html>
+<html lang={lang}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{copy.meta.title}</title>
+    <meta name="description" content={copy.meta.description} />
+    <link rel="canonical" href={canonical} />
+    <link rel="alternate" hreflang="it" href={new URL("/", SITE).href} />
+    <link rel="alternate" hreflang="en" href={new URL("/en/", SITE).href} />
+    <link rel="alternate" hreflang="x-default" href={new URL("/", SITE).href} />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" href="/favicon.ico" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={copy.meta.title} />
+    <meta property="og:description" content={copy.meta.description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={new URL("/og.png", SITE).href} />
+    <meta name="twitter:card" content="summary_large_image" />
+    {jsonLd && <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />}
+  </head>
+  <body class="bg-white text-slate-900 antialiased">
+    <slot />
+  </body>
+</html>
