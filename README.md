@@ -1,6 +1,6 @@
-# PvPlanner - Solar PV Analysis
+# PVVerdict - Solar PV Analysis
 
-![PvPlanner logo](web/public/pvplanner_fullsize_logo_with_text.png)
+![PVVerdict logo](web/public/pvverdict_fullsize_logo_with_text.png)
 
 [![License: AGPL v3](https://img.shields.io/badge/License-AGPL_v3-blue.svg)](https://www.gnu.org/licenses/agpl-3.0)
 
@@ -26,7 +26,7 @@ All models are **deterministic** — no AI at runtime.
 
 ### Online demo
 
-Live instance: [pvplanner.pages.dev](pvplanner.pages.dev)
+Live instance: [pvverdict.pages.dev](pvverdict.pages.dev)
 
 ### Local development
 

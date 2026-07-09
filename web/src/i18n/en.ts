@@ -4,7 +4,7 @@ import type { Dict } from "./types.ts";
 export const en: Dict = {
   // --- app / common ---
   "format.months": "Jan,Feb,Mar,Apr,May,Jun,Jul,Aug,Sep,Oct,Nov,Dec",
-  "app.title": "PvPlanner - Solar PV Analysis",
+  "app.title": "PVVerdict - Solar PV Analysis",
   "app.loading": "Loading…",
   "lang.it": "IT",
   "lang.en": "EN",

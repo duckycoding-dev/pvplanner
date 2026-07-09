@@ -1,6 +1,6 @@
 ---
-title: Handoff — landing page PvPlanner + modale di benvenuto (pre-lancio)
-last_updated: 2026-07-08
+title: Handoff — landing page PVVerdict + modale di benvenuto (pre-lancio)
+last_updated: 2026-07-09
 summary: >
   Stato del brainstorming pre-pubblicazione su due sotto-progetti indipendenti:
   (A) una landing page separata come entrypoint SEO verso il tool, (B) una
@@ -20,7 +20,7 @@ related:
 
 ## Contesto
 
-Prima di pubblicizzare il tool (**PvPlanner**, la SPA React di analisi FV in
+Prima di pubblicizzare il tool (**PVVerdict**, la SPA React di analisi FV in
 questa repo, oggi su Cloudflare Pages) sono emerse due idee, trattate come
 **sotto-progetti indipendenti**:
 
@@ -36,16 +36,21 @@ Le decisioni di dettaglio già cristallizzate sono nella memoria persistente:
 
 ## Decisioni prese (sotto-progetto A — landing)
 
-- **Nome pubblico:** PvPlanner (già in `web/src/i18n/*` come `app.title`).
-- **Dominio:** orientamento `pvplanner.app` (~15$/anno, disponibile).
-  `pvplanner.com` **scartato** (aftermarket a **6.000$**). Alternative se si
-  volesse `.com`: `getpvplanner.com`, `pvplanner.io`. Il blog personale del
-  proprietario è su `duckycoding.dev` (Astro+markdown) e **non** va usato per
-  app/landing.
-- **Architettura URL:** landing su apex (`pvplanner.app`), tool su sottodominio
-  (`app.pvplanner.app`) → due progetti Cloudflare Pages indipendenti, deploy
-  separati. Scartato il path `/app` (routing più fragile, beneficio SEO nullo
-  perché la SPA non è la superficie indicizzata).
+- **Nome pubblico: PVVerdict** (deciso 2026-07-09; sostituisce PvPlanner,
+  scartato perché lo spazio nomi "PV Planner" è affollato — Solargis pvPlanner,
+  ETU PV Planner, ValkPVplannerPro, app iOS omonima — quindi SEO branded
+  impossibile). Criterio scelta: "verdetto/decisione + solare"; "verdict" è
+  parola-ponte IT/EN ed è coerente col box-verdetto eroe della landing.
+  Scartati nella rosa: PVOptimizer (nome-categoria hardware), PVInfo (collide
+  con PV InfoLink), PVArchitect (promette design pro).
+- **Dominio:** `pvverdict.com` e `pvverdict.app` **entrambi liberi** al
+  2026-07-09 (verifica whois/RDAP) — acquisto a carico del proprietario,
+  possibile prenderli entrambi con redirect. Il blog personale del proprietario
+  è su `duckycoding.dev` (Astro+markdown) e **non** va usato per app/landing.
+- **Architettura URL:** landing su apex (es. `pvverdict.com`), tool su
+  sottodominio (`app.pvverdict.com`) → due progetti Cloudflare Pages
+  indipendenti, deploy separati. Scartato il path `/app` (routing più fragile,
+  beneficio SEO nullo perché la SPA non è la superficie indicizzata).
 - **Stack:** **Astro + Tailwind v4 + Starwind UI** (componenti shadcn-like per
   Astro, vanilla JS, "own the code", ha anche un MCP server per uso via AI).
   Zero-JS quasi ovunque; design **custom** sopra (niente template, per non
@@ -98,8 +103,10 @@ meta/OG, `@astrojs/sitemap`).
 ## Prossimi passi (per la chat nuova)
 
 1. Rileggere `memory/webapp-landing-e-dominio.md` e questo handoff.
-2. Confermare dominio (`pvplanner.app` vs variante `.com`) — decisione del
-   proprietario.
+2. Completare il **rename PvPlanner → PVVerdict**: comprare dominio/i
+   (`pvverdict.com`/`.app`), rinominare repo GitHub e progetto Cloudflare
+   Pages, rigenerare il logo con testo (a carico del proprietario); le
+   occorrenze nel codice sono già aggiornate (branch/commit di rename).
 3. Riprendere il brainstorming della **landing**: scrivere il **copy vero (IT)**
    sezione per sezione, partendo da *Hero* e *Il problema*; poi versione **EN**.
 4. Chiudere il brainstorming → **spec** (`docs/superpowers/specs/…-landing-design.md`)

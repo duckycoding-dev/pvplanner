@@ -113,7 +113,7 @@ export function Sidebar({
     <>
       <div className="rail">
         <div className="rail-main">
-          <img src="/pvplanner_fullsize_logo.png" alt="" className="rail-logo" />
+          <img src="/pvverdict_fullsize_logo.png" alt="" className="rail-logo" />
           <button className="rail-toggle" onClick={() => setOpen(true)} title={t("menu.openTitle")} aria-label={t("menu.open")}>
             ☰
           </button>

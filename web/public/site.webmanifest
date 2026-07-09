@@ -1,6 +1,6 @@
 {
-	"name": "PvPlanner - Solar PV Analysis",
-	"short_name": "PvPlanner",
+	"name": "PVVerdict - Solar PV Analysis",
+	"short_name": "PVVerdict",
 	"description": "Browser tool to estimate solar PV production, self-consumption, savings and payback time from PVGIS data.",
 	"icons": [
 		{

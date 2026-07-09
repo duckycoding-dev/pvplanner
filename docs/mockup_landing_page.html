@@ -1,0 +1,286 @@
+<html><head><!-- frame-runtime --><base href="/_f/1783520525-883c/"><script>window.__FRAME_PREAMBLE={"capabilities":{"mcp":"mcp.BQqQVVN_.js"},"transforms":"_transforms.DYk1Ltlh.js"}</script><script>(function(){"use strict";const X="modulepreload",Y=function(e){return"/"+e},Z={},U=function(t,n,u){let o=Promise.resolve();function i(f){const a=new Event("vite:preloadError",{cancelable:!0});if(a.payload=f,window.dispatchEvent(a),!a.defaultPrevented)throw f}return o.then(f=>{for(const a of f||[])a.status==="rejected"&&i(a.reason);return t().catch(i)})},D=["light","dark","system"];function $(e){if(e==null||typeof e!="object")return!1;const t=e.__frame_init;return t!=null&&typeof t=="object"}function q(e){if(e==null||typeof e!="object")return!1;const t=e.__frame_theme;if(t==null||typeof t!="object")return!1;const n=t.theme;return typeof n=="string"&&D.includes(n)}function M(e){if(window===top||e.type==="auxclick"&&e.button!==1)return;const t=e.composedPath?e.composedPath():[e.target];let n=null;for(let f=0;f<t.length;f++){const a=t[f];if(a&&a.matches&&a.matches("a[href],area[href]")){n=a;break}}if(!n&&e.target&&e.target.closest&&(n=e.target.closest("a[href],area[href]")),!n)return;const u=n.getAttribute("href");if(!u)return;let o,i;try{o=new URL(u,document.baseURI),i=new URL(document.baseURI).origin}catch{return}(o.protocol==="http:"||o.protocol==="https:")&&o.origin!==i&&(e.preventDefault(),parent.postMessage({__frame_nav:!0,url:o.href},"*"))}const L={};function y(e){if(window===top)return;const t=Date.now();t-(L[e]||0)<500||(L[e]=t,parent.postMessage({__frame_engaged:!0,kind:e},"*"))}const F=2e3,T=["wheel","touchstart","touchmove","keydown","pointerdown"];let k=0;function B(e){e.isTrusted&&(k=Date.now())}function z(){addEventListener("click",M,!0),addEventListener("auxclick",M,!0)}function W(){for(let e=0;e<T.length;e++)addEventListener(T[e],B,{capture:!0,passive:!0});addEventListener("scroll",e=>{e.isTrusted&&Date.now()-k<F&&y("scroll")},{capture:!0,passive:!0}),addEventListener("pointermove",e=>{e.isTrusted&&y("pointer")},{capture:!0,passive:!0}),addEventListener("click",e=>{e.isTrusted&&y("click")},{capture:!0,passive:!0})}function x(e,t,n){const u=[...t.values()].filter(o=>o.targets.some(i=>i.startsWith(e+".")));return{wrap(o,i){const f=`${e}.${o}`,a=u.filter(s=>s.targets.includes(f));return a.length===0?(...s)=>{try{return i(...s)}catch(d){return Promise.reject(d)}}:(...s)=>{let d=s;for(const c of a){const l=c.module.parameters;if(l)try{d=l(d)}catch{return Promise.reject({code:"transform_error",id:c.id,scope:e,message:"parameters transform failed"})}}let m;try{m=i(...d)}catch(c){m=Promise.reject(c)}return m.then(c=>{for(let l=a.length-1;l>=0;l--){const h=a[l],p=h.module.returns;if(p)try{c=p(c)}catch{return n({id:h.id,scope:e,leg:"returns"}),c}}return c},c=>{for(let l=a.length-1;l>=0;l--){const h=a[l],p=h.module.throws;if(p)try{c=p(c)}catch{return n({id:h.id,scope:e,leg:"throws"}),Promise.reject(c)}}return Promise.reject(c)})}}}}function H(e,t,n,u=()=>{}){const o=new Set(e.changes??[]),i=new Map;for(const f of o){const a=t[f];a&&i.set(f,a)}return{contract:e.contract,changes:o,flags:new Set(e.flags??[]),capabilities:e.capabilities??{},transforms:i,shellOrigin:n.shellOrigin,mount:n.mount,pipe:f=>x(f,i,u)}}(function(){const e=Object.defineProperty,t=globalThis,n=["RTCPeerConnection","webkitRTCPeerConnection","RTCDataChannel","RTCIceCandidate","RTCSessionDescription","RTCRtpSender","RTCRtpReceiver"];let u=0;for(let o=0;o<n.length;o++){const i=n[o];try{e(t,i,{value:void 0,writable:!1,configurable:!1})}catch{try{delete t[i]}catch{}try{e(t,i,{value:void 0,writable:!1,configurable:!0})}catch{}}typeof t[i]=="function"&&u++}if(u&&window!==top)try{parent.postMessage({__frame_rtc_lockdown_failed:u},"*")}catch{}})();const K=1e4,G=Object.freeze([...window.__FRAME_PREAMBLE?.origins??["https://claude.ai","https://preview.claude.ai"]]);function J(e){for(const t of G)if(t.endsWith(":*"))try{const n=new URL(e);if(`${n.protocol}//${n.hostname}:*`===t)return!0}catch{}else if(e===t)return!0;return!1}const w=Object.freeze({...window.__FRAME_PREAMBLE?.capabilities??{}}),E=window.__FRAME_PREAMBLE?.transforms,C=/^[\w.-]+\.js$/,V=/^[a-z][a-z0-9_-]{0,63}$/;let A=null,g=null;function P(e,t,n){try{Object.defineProperty(e,t,{value:n,writable:!1,configurable:!1,enumerable:!0})}catch{try{Object.defineProperty(e,t,{value:n,writable:!1,configurable:!0,enumerable:!0})}catch{}}}let R=!1;function N(e){const t=document.documentElement;e==="light"||e==="dark"?(t.dataset.theme=e,t.style.colorScheme=e,R=!0):R&&(delete t.dataset.theme,t.style.colorScheme="",R=!1)}const _=new Map;function Q(e,t){const n=_.get(e);if(!n)return;Object.assign(n.impl,t),n.impl.__settled=()=>Promise.reject({code:"capability_removed",message:`${e}: method not in this runtime`});const u=n.queue;n.queue=[];for(const o of u){const i=t[o.method];i?i(...o.args).then(o.resolve,o.reject):o.reject({code:"capability_removed",message:`${e}.${o.method} is not in this runtime`})}}function O(e,t){const n=_.get(e);if(!n)return;n.impl.__settled=()=>Promise.reject(t);const u=n.queue;n.queue=[];for(const o of u)o.reject(t)}const j=Object.getOwnPropertyDescriptor(window,"claude");if(window!==top&&!(j&&j.writable===!1)){z(),W();const e=j?.value??{};P(window,"claude",e);const t=s=>{const d={impl:Object.create(null),queue:[]};_.set(s,d);const m=new Proxy(d.impl,{get:(c,l)=>{if(typeof l=="string"&&!(l==="then"||l==="toJSON"||l==="valueOf"))return l==="toString"?Object.prototype.toString:(...h)=>{const p=c[l]??c.__settled;return p?p(...h):new Promise((b,S)=>{d.queue.push({method:l,args:h,resolve:b,reject:S})})}},set:()=>!1});P(e,s,m)};for(const s of Object.keys(w)){if(e[s]!==void 0){P(e,s,e[s]);continue}t(s)}let n=null,u=null,o=0;const i=s=>{s.source!==parent||!J(s.origin)||$(s.data)&&(n=s.data.__frame_init,g=s.origin,removeEventListener("message",i),clearTimeout(o),u?.())};addEventListener("message",i),parent.postMessage({__frame_connect:!0},"*");const f=new Promise(s=>{u=s,o=setTimeout(()=>{removeEventListener("message",i),s()},K)}),a=document.readyState==="loading"?new Promise(s=>document.addEventListener("DOMContentLoaded",()=>s(),{once:!0})):Promise.resolve();f.then(async()=>{if(!n||!g){for(const r of _.keys())O(r,{code:"not_granted",message:"frame initialization did not arrive - capability unavailable"});return}N(n.theme);const s=g;addEventListener("message",r=>{r.source!==parent||r.origin!==s||q(r.data)&&N(r.data.__frame_theme.theme)});const d=r=>U(()=>import("/_runtime/"+r),void 0),m=Object.keys(n.capabilities??{});for(const r of m)Object.hasOwn(w,r)||V.test(r)&&e[r]===void 0&&(t(r),O(r,{code:"capability_disabled",message:"capability not in this runtime generation"}));const c=m.filter(r=>Object.hasOwn(w,r)).map(r=>[r,w[r]]).filter(r=>typeof r[1]=="string"&&C.test(r[1])),[l,...h]=await Promise.allSettled([E&&C.test(E)?d(E):Promise.resolve({}),...c.map(([,r])=>d(r))]),p=g;A=H(n,l.status==="fulfilled"&&l.value?.TRANSFORMS||{},{shellOrigin:p,mount:Q},r=>parent.postMessage({__frame_cap_telemetry:r},p));const b=r=>parent.postMessage({__frame_cap_telemetry:{kind:"cap-load-error",cap:r}},p),S=A;h.forEach((r,v)=>{const I=c[v][0];if(r.status!=="fulfilled"){b(I);return}try{r.value?.install?.(S)}catch{b(I)}});for(const[r,v]of _)v.queue.length===0&&Object.keys(v.impl).length>0||O(r,{code:m.includes(r)?"capability_disabled":"not_granted",message:"capability not available in this session"});await a,parent.postMessage({__frame_ready:!0},g)})}})();</script><!-- /frame-runtime --><meta charset="utf8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>:root{color-scheme:light}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}</style></head><body>
+<title>PVVerdict — direzioni visive landing</title>
+
+<style>
+  :root { color-scheme: light; }
+  * { box-sizing: border-box; }
+
+  .stage {
+    max-width: 1080px;
+    margin: 0 auto;
+    padding: 32px 20px 80px;
+    font: 15px/1.55 system-ui, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    color: #1a1c20;
+  }
+  .stage-head { margin: 0 0 28px; }
+  .stage-head h1 { font-size: 20px; margin: 0 0 4px; letter-spacing: -0.01em; }
+  .stage-head p { margin: 0; color: #6b7280; font-size: 14px; }
+
+  .label-strip {
+    display: flex; align-items: center; gap: 10px;
+    margin: 40px 0 12px;
+    font-size: 12px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase;
+    color: #6b7280;
+  }
+  .label-strip::after { content: ""; flex: 1; height: 1px; background: #e3e3e0; }
+  .label-strip .tag { color: #111; }
+
+  /* faux browser chrome */
+  .frame { border: 1px solid #e0e0dd; border-radius: 14px; overflow: hidden; box-shadow: 0 20px 50px -30px rgba(0,0,0,.35); }
+  .chrome { display: flex; align-items: center; gap: 10px; padding: 10px 14px; background: #f1f1ee; border-bottom: 1px solid #e4e4e0; }
+  .dots { display: flex; gap: 6px; }
+  .dots i { width: 11px; height: 11px; border-radius: 50%; display: block; }
+  .dots i:nth-child(1){ background:#ff5f57; } .dots i:nth-child(2){ background:#febc2e; } .dots i:nth-child(3){ background:#28c840; }
+  .addr { flex: 1; text-align: center; font-size: 12px; color: #8a8a86; background: #fff; border: 1px solid #e4e4e0; border-radius: 7px; padding: 4px 10px; }
+
+  /* ============ MOCKUP 1 — SOLAR EDITORIAL / DATA-CONFIDENT ============ */
+  .m1 {
+    --paper: #fcfcfa;
+    --panel: #ffffff;
+    --ink: #14181f;
+    --muted: #5c6672;
+    --line: #e7e6e1;
+    --amber: #f59e0b;
+    --amber-deep: #b45309;
+    --blue: #2563eb;
+    --blue-soft: #dbe6ff;
+    --good: #15803d;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: system-ui, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+  .m1 .wrap { padding: 0 40px; }
+  .m1 .nav { display: flex; align-items: center; justify-content: space-between; padding: 22px 40px; border-bottom: 1px solid var(--line); }
+  .m1 .brand { font-weight: 800; letter-spacing: -0.02em; font-size: 18px; }
+  .m1 .brand b { color: var(--amber); }
+  .m1 .nav .links { display: flex; gap: 22px; font-size: 14px; color: var(--muted); }
+  .m1 .btn { border: none; cursor: pointer; font: inherit; font-weight: 700; border-radius: 9px; padding: 11px 18px; }
+  .m1 .btn-amber { background: var(--amber); color: #241a05; }
+  .m1 .btn-ghost { background: transparent; color: var(--ink); border: 1px solid var(--line); }
+
+  .m1 .hero { display: grid; grid-template-columns: 1.05fr 1fr; gap: 44px; align-items: center; padding: 58px 40px 46px; }
+  .m1 .eyebrow { font-size: 12px; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: var(--amber-deep); margin: 0 0 16px; }
+  .m1 h2 { font-size: 46px; line-height: 1.04; letter-spacing: -0.03em; margin: 0 0 18px; text-wrap: balance; font-weight: 800; }
+  .m1 h2 em { font-style: normal; color: var(--amber); }
+  .m1 .lede { font-size: 17px; color: var(--muted); margin: 0 0 26px; max-width: 46ch; }
+  .m1 .cta-row { display: flex; gap: 12px; margin-bottom: 22px; }
+  .m1 .trust { display: flex; flex-wrap: wrap; gap: 8px 18px; font-size: 12.5px; color: var(--muted); }
+  .m1 .trust span { display: inline-flex; align-items: center; gap: 6px; }
+  .m1 .trust span::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--good); }
+
+  .m1 .viz-card { background: var(--panel); border: 1px solid var(--line); border-radius: 16px; padding: 18px 18px 14px; box-shadow: 0 30px 60px -40px rgba(20,24,31,.45); }
+  .m1 .viz-top { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 6px; }
+  .m1 .viz-top h3 { margin: 0; font-size: 13px; color: var(--muted); font-weight: 600; }
+  .m1 .viz-legend { display: flex; gap: 12px; font-size: 11px; color: var(--muted); }
+  .m1 .viz-legend i { display: inline-block; width: 18px; height: 3px; border-radius: 2px; vertical-align: middle; margin-right: 5px; }
+  .m1 svg { display: block; width: 100%; height: auto; }
+  .m1 .verdict { display: flex; gap: 26px; margin-top: 12px; padding-top: 14px; border-top: 1px solid var(--line); }
+  .m1 .verdict .v { display: flex; flex-direction: column; }
+  .m1 .verdict .k { font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
+  .m1 .verdict .n { font-size: 28px; font-weight: 800; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
+  .m1 .verdict .n.yes { color: var(--good); }
+
+  .m1 .feats { display: grid; grid-template-columns: repeat(3,1fr); gap: 16px; padding: 30px 40px 10px; }
+  .m1 .feat { border-top: 2px solid var(--amber); padding-top: 14px; }
+  .m1 .feat h4 { margin: 0 0 6px; font-size: 15.5px; letter-spacing: -0.01em; }
+  .m1 .feat p { margin: 0; font-size: 13.5px; color: var(--muted); }
+  .m1 .feat .num { font-size: 12px; font-weight: 700; color: var(--amber-deep); letter-spacing: 0.1em; }
+
+  .m1 .faq { padding: 30px 40px 44px; }
+  .m1 .faq h3 { font-size: 22px; letter-spacing: -0.02em; margin: 0 0 14px; }
+  .m1 details { border-bottom: 1px solid var(--line); padding: 13px 0; }
+  .m1 summary { cursor: pointer; font-weight: 650; list-style: none; display: flex; justify-content: space-between; }
+  .m1 summary::-webkit-details-marker { display: none; }
+  .m1 summary::after { content: "+"; color: var(--amber); font-weight: 800; }
+  .m1 details[open] summary::after { content: "–"; }
+  .m1 details p { margin: 10px 0 2px; color: var(--muted); font-size: 14px; }
+
+  /* ============ MOCKUP 3 — WARM APPROACHABLE / CONSUMER TRUST ============ */
+  .m3 {
+    --cream: #fff6e9;
+    --card: #ffffff;
+    --ink: #33291f;
+    --muted: #8a7a68;
+    --sun: #f9ab30;
+    --sun-deep: #e07b0b;
+    --teal: #0f9d94;
+    --teal-soft: #d3f1ee;
+    --line: #f0e4d2;
+    background: radial-gradient(120% 80% at 80% -10%, #ffe9c7 0%, var(--cream) 55%);
+    color: var(--ink);
+    font-family: ui-rounded, "SF Pro Rounded", "Segoe UI", system-ui, sans-serif;
+  }
+  .m3 .nav { display: flex; align-items: center; justify-content: space-between; padding: 20px 40px; }
+  .m3 .brand { font-weight: 800; font-size: 18px; display: flex; align-items: center; gap: 8px; }
+  .m3 .brand .mark { width: 26px; height: 26px; border-radius: 9px; background: linear-gradient(135deg, var(--sun), var(--sun-deep)); display: grid; place-items: center; color: #fff; font-size: 15px; }
+  .m3 .links { display: flex; gap: 20px; font-size: 14px; color: var(--muted); }
+  .m3 .btn { border: none; cursor: pointer; font: inherit; font-weight: 700; border-radius: 999px; padding: 12px 22px; }
+  .m3 .btn-sun { background: var(--sun); color: #3a2400; box-shadow: 0 10px 20px -8px rgba(224,123,11,.6); }
+  .m3 .btn-ghost { background: #fff; color: var(--ink); border: 1px solid var(--line); border-radius: 999px; }
+
+  .m3 .hero { text-align: center; padding: 46px 40px 34px; }
+  .m3 .pill { display: inline-flex; align-items: center; gap: 8px; background: var(--teal-soft); color: #0b6a63; font-size: 12.5px; font-weight: 700; padding: 6px 14px; border-radius: 999px; margin-bottom: 20px; }
+  .m3 h2 { font-size: 44px; line-height: 1.06; letter-spacing: -0.02em; margin: 0 auto 16px; max-width: 16ch; text-wrap: balance; font-weight: 800; }
+  .m3 h2 em { font-style: normal; color: var(--sun-deep); }
+  .m3 .lede { font-size: 17px; color: var(--muted); margin: 0 auto 26px; max-width: 52ch; }
+  .m3 .cta-row { display: flex; gap: 12px; justify-content: center; margin-bottom: 12px; }
+  .m3 .trust { font-size: 12.5px; color: var(--muted); }
+
+  .m3 .cards { display: grid; grid-template-columns: 1.3fr 1fr 1fr; gap: 16px; padding: 20px 40px 8px; }
+  .m3 .card { background: var(--card); border: 1px solid var(--line); border-radius: 20px; padding: 20px; box-shadow: 0 18px 40px -30px rgba(224,123,11,.6); }
+  .m3 .card.big { display: flex; flex-direction: column; gap: 12px; }
+  .m3 .card .k { font-size: 12px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; color: var(--muted); }
+  .m3 .card .save { font-size: 40px; font-weight: 800; color: var(--teal); letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
+  .m3 .bars { display: flex; align-items: flex-end; gap: 10px; height: 84px; margin-top: 4px; }
+  .m3 .bars span { flex: 1; border-radius: 8px 8px 0 0; background: linear-gradient(180deg, var(--sun), var(--sun-deep)); }
+  .m3 .bars span.alt { background: linear-gradient(180deg, var(--teal), #0b7a72); }
+  .m3 .card .icon { width: 40px; height: 40px; border-radius: 12px; background: var(--teal-soft); color: #0b6a63; display: grid; place-items: center; font-size: 20px; margin-bottom: 10px; }
+  .m3 .card h4 { margin: 0 0 6px; font-size: 16px; }
+  .m3 .card p { margin: 0; font-size: 13.5px; color: var(--muted); }
+  .m3 .card .icon.sun { background: #ffe6bf; color: var(--sun-deep); }
+
+  .m3 .faq { padding: 26px 40px 46px; max-width: 760px; margin: 0 auto; }
+  .m3 .faq h3 { text-align: center; font-size: 24px; margin: 0 0 16px; letter-spacing: -0.01em; }
+  .m3 details { background: #fff; border: 1px solid var(--line); border-radius: 16px; padding: 14px 18px; margin-bottom: 10px; }
+  .m3 summary { cursor: pointer; font-weight: 700; list-style: none; display: flex; justify-content: space-between; }
+  .m3 summary::-webkit-details-marker { display: none; }
+  .m3 summary::after { content: "▾"; color: var(--sun-deep); }
+  .m3 details[open] summary::after { content: "▴"; }
+  .m3 details p { margin: 10px 0 0; color: var(--muted); font-size: 14px; }
+
+  @media (max-width: 780px) {
+    .m1 .hero, .m3 .cards { grid-template-columns: 1fr; }
+    .m1 .feats { grid-template-columns: 1fr; }
+    .m1 .nav .links, .m3 .links { display: none; }
+    .m1 h2, .m3 h2 { font-size: 34px; }
+  }
+</style>
+
+<div class="stage">
+  <div class="stage-head">
+    <h1>PVVerdict — due direzioni visive per la landing</h1>
+    <p>Stessi contenuti, due mondi visivi a confronto. Mockup indicativi (font di sistema, dati d'esempio).</p>
+  </div>
+
+  <!-- ================= DIREZIONE 1 ================= -->
+  <div class="label-strip"><span class="tag">Direzione 1</span> · Solar editorial / data-confident</div>
+  <div class="frame">
+    <div class="chrome"><div class="dots"><i></i><i></i><i></i></div><div class="addr">pvverdict.app</div></div>
+    <div class="m1">
+      <div class="nav">
+        <div class="brand">Pv<b>Planner</b></div>
+        <nav class="links"><span>Come funziona</span><span>FAQ</span><span>Open source</span></nav>
+        <button class="btn btn-amber">Prova il tool</button>
+      </div>
+
+      <section class="hero">
+        <div>
+          <p class="eyebrow">Fotovoltaico + batteria</p>
+          <h2>Conviene davvero? Te lo dicono <em>i tuoi numeri</em>, ora per ora.</h2>
+          <p class="lede">Produzione, autoconsumo, risparmio e anni di rientro del <b>tuo</b> impianto — dai dati satellitari PVGIS della tua località. Tutto nel browser, senza account.</p>
+          <div class="cta-row">
+            <button class="btn btn-amber">Prova il tool — è gratis</button>
+            <button class="btn btn-ghost">Guarda com'è fatto</button>
+          </div>
+          <div class="trust">
+            <span>Open source</span><span>Nessun dato lascia il browser</span><span>Dati ufficiali PVGIS (UE)</span>
+          </div>
+        </div>
+
+        <div class="viz-card">
+          <div class="viz-top">
+            <h3>Un giorno d'inverno · produzione, consumi e temperatura</h3>
+          </div>
+          <div class="viz-legend">
+            <span><i style="background:#2563eb"></i>Produzione</span>
+            <span><i style="background:#dc2626"></i>Consumi</span>
+            <span><i style="background:#f59e0b"></i>Temperatura</span>
+          </div>
+          <svg viewBox="0 0 420 180" role="img" aria-label="Grafico produzione, consumi e temperatura orari">
+            <!-- grid -->
+            <g stroke="#eeede8" stroke-width="1">
+              <line x1="0" y1="45" x2="420" y2="45"></line><line x1="0" y1="90" x2="420" y2="90"></line><line x1="0" y1="135" x2="420" y2="135"></line>
+            </g>
+            <!-- production area (blue) -->
+            <path d="M0,160 L60,158 L120,120 L180,70 L240,64 L300,104 L360,150 L420,160 L420,180 L0,180 Z" fill="#dbe6ff"></path>
+            <path d="M0,160 L60,158 L120,120 L180,70 L240,64 L300,104 L360,150 L420,160" fill="none" stroke="#2563eb" stroke-width="2.5"></path>
+            <!-- consumption (red) -->
+            <path d="M0,120 L60,110 L120,128 L180,132 L240,130 L300,96 L360,72 L420,80" fill="none" stroke="#dc2626" stroke-width="2.5"></path>
+            <!-- temperature (orange) -->
+            <path d="M0,150 L60,152 L120,120 L180,92 L240,88 L300,100 L360,124 L420,138" fill="none" stroke="#f59e0b" stroke-width="2.5" stroke-dasharray="0"></path>
+          </svg>
+          <div class="verdict">
+            <div class="v"><span class="k">Rientro stimato</span><span class="n">7,3 anni</span></div>
+            <div class="v"><span class="k">La batteria si ripaga?</span><span class="n yes">Sì</span></div>
+            <div class="v"><span class="k">Autoconsumo</span><span class="n">68%</span></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="feats">
+        <div class="feat"><div class="num">01</div><h4>Dati ora per ora</h4><p>8.760 ore l'anno da PVGIS per la tua falda: azimut e inclinazione reali, non medie mensili.</p></div>
+        <div class="feat"><div class="num">02</div><h4>I tuoi consumi veri</h4><p>Carica il CSV di e-distribuzione o stima il profilo: pompa di calore, fasce F1/F2/F3.</p></div>
+        <div class="feat"><div class="num">03</div><h4>Con o senza batteria</h4><p>Due sistemi a confronto, dispatch orario, clipping dell'inverter e curva di rientro.</p></div>
+      </section>
+
+      <section class="faq">
+        <h3>Domande frequenti</h3>
+        <details open=""><summary>I miei dati vengono salvati da qualche parte?</summary><p>No. Tutto gira nel tuo browser: nessun account, nessun server, nessun tracciamento dei tuoi consumi.</p></details>
+        <details><summary>Da dove arrivano i dati di produzione?</summary><p>Da PVGIS, il servizio ufficiale della Commissione Europea, ora per ora sulla tua località.</p></details>
+        <details><summary>Serve pagare o registrarsi?</summary><p>No, è gratuito e open source. Apri il link e inizi.</p></details>
+      </section>
+    </div>
+  </div>
+
+  <!-- ================= DIREZIONE 3 ================= -->
+  <div class="label-strip"><span class="tag">Direzione 3</span> · Warm approachable / consumer trust</div>
+  <div class="frame">
+    <div class="chrome"><div class="dots"><i></i><i></i><i></i></div><div class="addr">pvverdict.app</div></div>
+    <div class="m3">
+      <div class="nav">
+        <div class="brand"><span class="mark">☀</span>PVVerdict</div>
+        <nav class="links"><span>Come funziona</span><span>FAQ</span><span>Open source</span></nav>
+        <button class="btn btn-sun">Prova il tool</button>
+      </div>
+
+      <section class="hero">
+        <span class="pill">☀ Fotovoltaico + batteria, senza sorprese</span>
+        <h2>Scopri se il fotovoltaico <em>conviene a te</em>.</h2>
+        <p class="lede">Rispondi a poche domande sulla tua casa e ottieni risparmio, autoconsumo e anni di rientro con i dati solari reali della tua zona. Gratis, nel browser, senza account.</p>
+        <div class="cta-row">
+          <button class="btn btn-sun">Prova il tool — è gratis</button>
+          <button class="btn btn-ghost">Come funziona</button>
+        </div>
+        <p class="trust">Open source · I tuoi dati restano sul tuo dispositivo · Dati ufficiali PVGIS (UE)</p>
+      </section>
+
+      <section class="cards">
+        <div class="card big">
+          <span class="k">Risparmio stimato in bolletta</span>
+          <span class="save">1.240 €/anno</span>
+          <div class="bars"><span style="height:38%"></span><span style="height:52%"></span><span style="height:70%"></span><span class="alt" style="height:88%"></span><span class="alt" style="height:100%"></span></div>
+          <p style="margin:0;color:var(--muted);font-size:12.5px">Rientro in <b>7,3 anni</b> · autoconsumo 68%</p>
+        </div>
+        <div class="card">
+          <div class="icon sun">⚡</div>
+          <h4>I tuoi numeri</h4>
+          <p>Consumi reali dal CSV del distributore o stima guidata. Fasce F1/F2/F3 incluse.</p>
+        </div>
+        <div class="card">
+          <div class="icon">🔋</div>
+          <h4>La batteria conviene?</h4>
+          <p>Confronto con e senza accumulo, simulato ora per ora. Verdetto chiaro.</p>
+        </div>
+      </section>
+
+      <section class="faq">
+        <h3>Domande frequenti</h3>
+        <details open=""><summary>I miei dati vengono salvati?</summary><p>No: tutto resta nel tuo browser. Niente account, niente server, niente tracciamento.</p></details>
+        <details><summary>Da dove arrivano i dati?</summary><p>Da PVGIS, il servizio ufficiale della Commissione Europea, ora per ora sulla tua località.</p></details>
+        <details><summary>Devo pagare?</summary><p>No, è gratuito e open source.</p></details>
+      </section>
+    </div>
+  </div>
+</div>
+
+</body></html>
