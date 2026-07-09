@@ -111,9 +111,13 @@ meta/OG, `@astrojs/sitemap`).
    (2026-07-10)**: copy IT+EN approvato, spec
    (`docs/superpowers/specs/2026-07-09-landing-page-design.md`), piano
    (`docs/superpowers/plans/2026-07-09-landing-page.md`), sito Astro
-   implementato in `landing/`. Lighthouse: 94/100/100/100. Resta: deploy
-   Cloudflare Pages (progetto dedicato, root `landing/`), acquisto domini,
-   verifica no-log del proxy PVGIS.
+   implementato in `landing/`. **Deploy fatto (2026-07-10):**
+   `https://pvverdict-landing.pages.dev/` (progetto `pvverdict-landing`, root
+   `landing/`, tool su `pvverdict.pages.dev`). Lighthouse su CDN:
+   **97/100/100/100** (SEO 100 dopo fix robots.txt). Resta: acquisto domini
+   (all'acquisto aggiornare `landing/src/config.ts`, `astro.config.mjs` e
+   l'URL Sitemap in `landing/public/robots.txt`), verifica no-log del proxy
+   PVGIS prima del lancio pubblico.
 4. Solo dopo, brainstormare il **sotto-progetto B** (modale di benvenuto).
 
 ## Migliorie note della landing (non bloccanti)
